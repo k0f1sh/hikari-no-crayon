@@ -48,6 +48,7 @@ function init() {
         'yami_pen' : new YamiPen(),
         'nami_pen' : new NamiPen(),
         'spray_pen' : new SprayPen(),
+        'bubble_pen' : new BubblePen(),
     };
 
     pen_tool = pen_tools['normal_pen'];
@@ -373,9 +374,20 @@ SprayPen.prototype = {
         _(pen_size * 20).times(function (n) {
             var rx = normalRand(x, pen_size / 2);
             var ry = normalRand(y, pen_size / 2);
-            drawPoint(rx, ry, pen_color, 0.3);
+            drawPoint(rx, ry, pen_color, 0.6);
         }, this)
-        
+	},
+}
+
+// BubblePen
+var BubblePen = function () {};
+BubblePen.prototype = {
+	draw : function (x, y) {
+        _(pen_size * 1).times(function (n) {
+            var rx = normalRand(x, pen_size / 2);
+            var ry = normalRand(y, pen_size / 2);
+            drawCircle(rx, ry, Math.random() * (pen_size / 10), pen_color, 1, 0.1);
+        }, this)
 	},
 }
 
