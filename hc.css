@@ -1,0 +1,76 @@
+body {
+    padding: 0px;
+    margin: 0px;
+    background-color: #0A122A;
+}
+
+#wrapper {
+    margin: 0px;
+    display: inline;
+}
+
+#wrapper div {
+}
+
+#contentWrapper div {
+}
+
+#canvasField div {
+    margin: 0px auto;
+}
+
+#menu {
+    position: absolute;
+    z-index: 1;
+    top:0;
+    right:0;
+    
+    float: none;
+    width: 300px;
+    color: #ffffff;
+    text-shadow: 0px 0px 10px #ffffff;
+    background-color: #0A122A;
+}
+
+#title div {
+    display: block;
+    width: 300px;
+    hight: 200px;
+}
+
+#pre canvas {
+    display: block;
+}
+
+#menu h1 {
+    display: block;
+    font-size: 18px;
+    margin: 0px;
+    padding: 0px;
+    background: -moz-linear-gradient(top, #2e2e2e, #0A122A);
+    background: -webkit-gradient(linear, left top, left bottom, from(#2e2e2e), to(#0A122A));
+    text-align: center;
+}
+
+.slider_wrap {
+    padding: 10px 50px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+.pen_list label input {
+    display:none;
+
+}
+.pen_list label {
+    font-size: 10px;
+}
+.pen_list label.selected {
+    background-color: #2e2e2e;
+    font-size: 20px;
+}
+

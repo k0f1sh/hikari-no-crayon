@@ -10,27 +10,48 @@ var is_fade_mode = false;
 var is_auto_mode = false;
 
 var MARGIN = 40;
-var TOOLBOX_HEIGHT = 180;
+var TOOLBOX_WIDTH = 300;
 
 var pen_tools, pen_tool;
 var pen_size = 30;
 var pen_color = HSVtoRGB(200, 200, 200);
 
 onload = function() {
+
+    // from http://blog.mach3.jp/2012/07/31/graphical-togglebutton-by-radio-input.html
+    $.fn.extend({
+        toggleButtons : function(callback){
+            var radios = this;
+            radios.on("change", function(e){
+                radios.closest("label").removeClass("selected");
+                $(e.target).closest("label").addClass("selected");
+                callback.call(this, e);
+            });
+            radios.closest("label").on("click", function(e){
+                var input = $(this).find("input");
+                if(! input.prop("checked")){
+                    input.prop("checked", true).trigger("change");
+                }
+            });
+            radios.filter(":checked").trigger("change");
+        }
+    });
+
+    
     init();
     mainLoop();
 };
 
 function init() {
-    width = window.innerWidth;
-    height = window.innerHeight - TOOLBOX_HEIGHT;
+    width = window.innerWidth - TOOLBOX_WIDTH;
+    height = window.innerHeight;
     canvas = document.getElementById('canvas');
     canvas.width = width;
     canvas.height = height;
     c = canvas.getContext('2d');
 
     pre_canvas = document.getElementById('pre');
-    pre_canvas.width = 100;
+    pre_canvas.width = 300;
     pre_canvas.height = 100;
     pre_c = pre_canvas.getContext('2d');
 
@@ -53,6 +74,13 @@ function init() {
 
     pen_tool = pen_tools['normal_pen'];
 
+
+    // pen select
+    $("input[name=pen]").toggleButtons(function(e){
+        pen_tool = pen_tools[e.target.value];
+
+    });
+
     // slider
     $('#size_slider').slider({min:4, max:200, value:30});
     $('#size_slider').on("slide", function (e) {
@@ -67,10 +95,7 @@ function init() {
     });
 
     // events
-    $('#pen').on("change", function () {
-        pen_tool = pen_tools[$(this).val()];
-    });
-    
+
     $('#rainbow_mode').on("change", function () {
         is_rainbow_mode = $(this).prop('checked');
     });
@@ -117,7 +142,7 @@ function init() {
 
 function updatePreCanvas() {
     clear(pre_c);
-    drawPreCircle(50, 50, pen_size, pen_color);
+    drawPreCircle(150, 50, pen_size, pen_color);
 }
 
 function mainLoop() {

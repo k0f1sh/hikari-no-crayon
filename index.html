@@ -8,38 +8,56 @@
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="lib/slider/css/slider.css" rel="stylesheet">
     <script type="text/javascript" src="lib/slider/js/bootstrap-slider.js"></script>
-    <style type="text/css">
-      body{ padding:0px; margin:0px; }
-    </style>
+    <link href="hc.css" rel="stylesheet" type="text/css">
    </head>
   <body>
-    <canvas id="canvas"></canvas>
-    <div id="toolbox">
-      <div>
-        <canvas id="pre"></canvas>
-        おおきさ<div id="size_slider"></div>
-        いろ<div id="color_slider"></div>
-        種類
-        <select id="pen" class="selectpicker" name="pen">
-          <option value="normal_pen">ひかりのくれよん</option>
-          <option value="blood_pen">けっかんぺんしる</option>
-          <option value="fur_pen">ふぁーえんぴつ</option>
-          <option value="snow_pen">ゆきぱすてる</option>
-          <option value="collatz_pen">こらっつすたんぷ</option>
-          <option value="hoshi_pen">ほしわいやー</option>
-          <option value="hane_pen">はねぺん</option>
-          <option value="nami_pen">なみふで</option>
-          <option value="spray_pen">すぷれーかん</option>
-          <option value="bubble_pen">あわすぷれー</option>
-          <option value="yami_pen">やみのくれよん</option>
-        </select>
-      </div>
-      <div>
-        <input id="rainbow_mode" type="checkbox" value="true">れいんぼーもーど
-        <input id="fade_mode" type="checkbox" value="true">ふぇーどもーど
-        <input id="auto_mode" type="checkbox" value="true">おーともーど
-        <a class="btn btn-primary btn-large" id="clear_button">けす！</a>
+    <div id="wrapper">
+      <div id="contentWrapper">
+        <div id="canvasField">
+          <canvas id="canvas"></canvas>
+        </div>
+        
+        <div id="menu">
+          <div id="title">ひかりのくれよん</div>
+          <canvas id="pre"></canvas>
+          <h1>ぺんのおおきさ</h1>
+          <div class="slider_wrap">
+            <input type="text" id="size_slider">
+          </div>
+
+          <h1>ぺんのいろ</h1>
+          <div class="slider_wrap">
+            <input type="text" id="color_slider">
+          </div>
+          
+          <h1>ぺんのしゅるい</h1>
+          <ul class="pen_list">
+            <li><label><input type="radio" name="pen" value="normal_pen" checked />ひかりのくれよん</label></li>
+            <li><label><input type="radio" name="pen" value="blood_pen" />けっかんぺんしる</label></li>
+            <li><label><input type="radio" name="pen" value="fur_pen" />ふぁーえんぴつ</label></li>
+            <li><label><input type="radio" name="pen" value="snow_pen" />ゆきぱすてる</label></li>
+            <li><label><input type="radio" name="pen" value="collatz_pen" />こらっつすたんぷ</label></li>
+            <li><label><input type="radio" name="pen" value="hoshi_pen" />ほしわいやー</label></li>
+            <li><label><input type="radio" name="pen" value="hane_pen" />はねぺん</label></li>
+            <li><label><input type="radio" name="pen" value="nami_pen" />なみふで</label></li>
+            <li><label><input type="radio" name="pen" value="spray_pen" />すぷれーかん</label></li>
+            <li><label><input type="radio" name="pen" value="bubble_pen" />あわすぷれー</label></li>
+            <li><label><input type="radio" name="pen" value="yami_pen" />やみのくれよん</label></li>
+          </ul>
+
+          <div>
+            <input id="rainbow_mode" type="checkbox" value="true">れいんぼーもーど
+            <input id="fade_mode" type="checkbox" value="true">ふぇーどもーど
+            <input id="auto_mode" type="checkbox" value="true">おーともーど
+            <a class="btn btn-primary btn-large" id="clear_button">けす！</a>
+          </div>
+
+        </div>
       </div>
     </div>
+
+
+
+      
   </body>
 </html>
