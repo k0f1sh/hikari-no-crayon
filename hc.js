@@ -70,6 +70,7 @@ function init() {
         'nami_pen' : new NamiPen(),
         'spray_pen' : new SprayPen(),
         'bubble_pen' : new BubblePen(),
+        'degi_pen' : new DegiPen(),
     };
 
     pen_tool = pen_tools['normal_pen'];
@@ -416,6 +417,14 @@ BubblePen.prototype = {
 	},
 }
 
+// DegiPen
+var DegiPen = function () {};
+DegiPen.prototype = {
+	draw : function (x, y) {
+        effects.push(new DegiObj(x, y, pen_color));
+	},
+}
+
 
 // support
 function collatz (n) {
@@ -710,3 +719,63 @@ CollatzObj.prototype = {
 	},
 }
 
+var DegiObj = function (x, y, color) {
+	this.pos = {x:x,y:y};
+    this.spd = pen_size / 10;
+	this.d = _.first(_.shuffle([0, 90, 180, 270]));;
+	this.size = 1;
+	this.rotate_count = 2 + Math.floor(Math.random() * 5);
+	this.alpha = 0.3;
+	this.del_flg = false;
+	this.ppos = {x:0, y:0};
+    this.color = color;
+    this.pos_history = [];
+    this.dec_alpha_p = 0.001;
+    this.history_num = 3;
+};
+DegiObj.prototype = {
+	move : function () {
+        this.dec_alpha_p += 0.0004;
+        this.alpha = Math.max(0, this.alpha - this.dec_alpha_p);
+        
+        this.pos_history.push(this.pos);
+        if (this.history_num <= this.pos_history.length) {
+            this.pos_history = _.last(this.pos_history, this.history_num);
+        }
+
+        if (0 == Math.floor(Math.random() * 20)) {
+            var eo = new DegiObj(this.pos.x, this.pos.y, pen_color);
+            eo.alpha = this.alpha;
+            eo.d = _.first(_.shuffle([0, 90, 180, 270]));
+            effects.push(eo);
+        }
+        
+		this.pos = movePos(this.pos, this.spd, this.d);
+		this.rotate_count -= 1;
+
+		if (this.rotate_count <= 0) {
+			this.rotate_count = 2 + Math.floor(Math.random() * 2);
+
+            var a = Math.floor(Math.random() * 80) - 40;
+            a = _.first(_.shuffle([0, 90, 180, 270]));
+			this.d += a;
+            
+		}
+
+		if (this.pos.x < 0 - MARGIN ||
+            this.pos.y < 0 - MARGIN ||
+            this.pos.x > width + MARGIN ||
+            this.pos.y > height + MARGIN ||
+            this.alpha <= 0) {
+			this.delete();
+		}
+	},
+	
+	render : function () {
+        drawLines(this.pos_history, this.color, this.alpha, 1);
+	},
+
+	delete : function () {
+		this.del_flg = true;
+	},
+}
