@@ -482,11 +482,11 @@ var BloodObj = function (x, y, color) {
     this.color = color;
     this.pos_history = [];
     this.dec_alpha_p = 0.001;
-    this.history_num = 5;
+    this.history_num = 3;
 };
 BloodObj.prototype = {
 	move : function () {
-        this.dec_alpha_p += 0.001;
+        this.dec_alpha_p += 0.0004;
         this.alpha = Math.max(0, this.alpha - this.dec_alpha_p);
         
         this.pos_history.push(this.pos);
@@ -522,7 +522,7 @@ BloodObj.prototype = {
 	},
 	
 	render : function () {
-        drawLines(this.pos_history, this.color, this.alpha, this.alpha * 5);
+        drawLines(this.pos_history, this.color, this.alpha, this.alpha * 8);
 	},
 
 	delete : function () {
