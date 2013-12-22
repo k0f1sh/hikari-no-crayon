@@ -43,6 +43,9 @@ onload = function() {
 };
 
 function init() {
+
+
+
     width = window.innerWidth - TOOLBOX_WIDTH;
     height = window.innerHeight;
     canvas = document.getElementById('canvas');
@@ -114,7 +117,7 @@ function init() {
         effects = [];
     });
 
-    $('#canvas').on("mousemove", function (e) {
+     $('#canvas').on("mousemove", function (e) {
         getMousePos(e);
         c.globalCompositeOperation = "lighter";
 
@@ -125,10 +128,22 @@ function init() {
     });
 
     $('#canvas').on("touchmove", function (e) {
-        getMousePos(e);
-        c.globalCompositeOperation = "lighter";
+        e.preventDefault();
+        getTouchPos(e);
         
         pen_tool.draw(mouse.x, mouse.y);
+    });
+
+    $('#canvas').on("touchstart", function (e) {
+        is_down = true;
+        getTouchPos(e);
+        pen_tool.draw(mouse.x, mouse.y);
+
+    });
+
+    $('#canvas').on("touchend", function (e) {
+        is_down = false;
+        
     });
     
     $('#canvas').on("mouseout", function (e) {
@@ -187,6 +202,13 @@ function mainLoop() {
 function getMousePos(e) {
     mouse.x = e.pageX;
     mouse.y = e.pageY;
+    return mouse;
+};
+
+function getTouchPos(e) {
+    var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+    mouse.x = touch.pageX;
+    mouse.y = touch.pageY;
     return mouse;
 };
 
