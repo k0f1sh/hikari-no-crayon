@@ -10,7 +10,7 @@ var is_fade_mode = false;
 var is_auto_mode = false;
 
 var MARGIN = 40;
-var TOOLBOX_WIDTH = 300;
+var TOOLBOX_WIDTH = 200;
 
 var pen_tools, pen_tool;
 var pen_size = 30;
@@ -37,7 +37,6 @@ onload = function() {
         }
     });
 
-    
     init();
     mainLoop();
 };
@@ -54,7 +53,7 @@ function init() {
     c = canvas.getContext('2d');
 
     pre_canvas = document.getElementById('pre');
-    pre_canvas.width = 300;
+    pre_canvas.width = TOOLBOX_WIDTH;
     pre_canvas.height = 50;
     pre_c = pre_canvas.getContext('2d');
 
@@ -78,6 +77,21 @@ function init() {
 
     pen_tool = pen_tools['normal_pen'];
 
+    $("#slh").on("click", function(e){
+        $("#sl").toggle(500);
+    });
+    
+    $("#plh").on("click", function(e){
+        $("#pl").toggle(500);
+    });
+
+    $("#clh").on("click", function(e){
+        $("#cl").toggle(500);
+    });
+    
+    $("#mlh").on("click", function(e){
+        $("#ml").toggle(500);
+    });
 
     // pen select
     $("input[name=pen]").toggleButtons(function(e){
@@ -85,17 +99,15 @@ function init() {
 
     });
 
-    // slider
-    $('#size_slider').slider({min:4, max:200, value:30});
-    $('#size_slider').on("slide", function (e) {
-        pen_size = $('#size_slider').val();
-        updatePreCanvas();
+    // size select
+    $("input[name=size]").toggleButtons(function(e){
+        pen_size = e.target.value;
+        
     });
 
-    $('#color_slider').slider({min:0, max:359, value:200});
-    $('#color_slider').on("slide", function (e) {
-        pen_color = HSVtoRGB($('#color_slider').val(), 200, 200);
-        updatePreCanvas()
+    // color select
+    $("input[name=color]").toggleButtons(function(e){
+        pen_color = HSVtoRGB(e.target.value, 200, 200);
     });
 
     // events
@@ -130,8 +142,12 @@ function init() {
     $('#canvas').on("touchmove", function (e) {
         e.preventDefault();
         getTouchPos(e);
-        
-        pen_tool.draw(mouse.x, mouse.y);
+
+        for (var i=0; i < e.originalEvent.touches.length; i++) {
+            var touch = e.originalEvent.touches[i] || e.originalEvent.changedTouches[i];
+            pen_tool.draw(touch.pageX, touch.pageY);
+        }
+
     });
 
     $('#canvas').on("touchstart", function (e) {
@@ -166,7 +182,7 @@ function init() {
 
 function updatePreCanvas() {
     clear(pre_c);
-    drawPreCircle(150, 25, pen_size, pen_color);
+    drawPreCircle(100, 25, pen_size, pen_color);
 }
 
 function mainLoop() {

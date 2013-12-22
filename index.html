@@ -20,18 +20,37 @@
         
         <div id="menu">
           <canvas id="pre"></canvas>
-          <h1>ぺんのおおきさ</h1>
-          <div class="slider_wrap">
-            <input type="text" id="size_slider">
-          </div>
+          <h1 id="slh">ぺんのおおきさ</h1>
+          <ul id="sl" class="size_list">
+            <li><label><input type="radio" name="size" value="5" />5</label></li>
+            <li><label><input type="radio" name="size" value="10" />10</label></li>
+            <li><label><input type="radio" name="size" value="20" />20</label></li>
+            <li><label><input type="radio" name="size" value="40" checked />40</label></li>
+            <li><label><input type="radio" name="size" value="60" />60</label></li>
+            <li><label><input type="radio" name="size" value="80" />80</label></li>
+            <li><label><input type="radio" name="size" value="100" />100</label></li>
+            <li><label><input type="radio" name="size" value="120" />120</label></li>
+            <li><label><input type="radio" name="size" value="140" />140</label></li>
+            <li><label><input type="radio" name="size" value="160" />160</label></li>
+            <li><label><input type="radio" name="size" value="180" />180</label></li>
+            <li><label><input type="radio" name="size" value="200" />200</label></li>
+          </ul>
 
-          <h1>ぺんのいろ</h1>
-          <div class="slider_wrap">
-            <input type="text" id="color_slider">
-          </div>
-          
-          <h1>ぺんのしゅるい</h1>
-          <ul class="pen_list">
+          <h1 id="clh">ぺんのいろ</h1>
+          <ul id="cl" class="color_list">
+            <li><label><input type="radio" name="color" value="0" />0</label></li>
+            <li><label><input type="radio" name="color" value="40" />40</label></li>
+            <li><label><input type="radio" name="color" value="80" />80</label></li>
+            <li><label><input type="radio" name="color" value="120" checked />120</label></li>
+            <li><label><input type="radio" name="color" value="160" />160</label></li>
+            <li><label><input type="radio" name="color" value="200" />200</label></li>
+            <li><label><input type="radio" name="color" value="240" />240</label></li>
+            <li><label><input type="radio" name="color" value="280" />280</label></li>
+            <li><label><input type="radio" name="color" value="320" />320</label></li>
+          </ul>
+
+          <h1 id="plh">ぺんのしゅるい</h1>
+          <ul id="pl" class="pen_list">
             <li><label><input type="radio" name="pen" value="normal_pen" checked />ひかりのくれよん</label></li>
             <li><label><input type="radio" name="pen" value="blood_pen" />けっかんぺんしる</label></li>
             <li><label><input type="radio" name="pen" value="fur_pen" />ふぁーえんぴつ</label></li>
@@ -46,8 +65,8 @@
             <li><label><input type="radio" name="pen" value="yami_pen" />やみのくれよん</label></li>
           </ul>
           
-          <h1>もーど</h1>
-          <div>
+          <h1 id="mlh">もーど</h1>
+          <div id="ml">
             <label class="mode_button">
               <input type="checkbox" id="rainbow_mode" value="true">
               <span>れいんぼーもーど</span>

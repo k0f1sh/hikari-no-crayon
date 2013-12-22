@@ -15,7 +15,6 @@ body {
 }
 
 #canvasField div {
-    margin: 0px auto;
 }
 
 #menu {
@@ -25,7 +24,7 @@ body {
     right:0;
     
     float: none;
-    width: 300px;
+    width: 200px;
     color: #ffffff;
     text-shadow: 0px 0px 10px #000000;
     /* background-color: #0A122A; */
@@ -56,13 +55,77 @@ body {
 }
 
 
-.slider_wrap {
-    padding: 10px 50px;
+.size_list ul {
 }
 
-ul {
+.size_list li {
+    display: inline;
     list-style-type: none;
+    margin: 4px;
+}
+
+.size_list label {
+    display: inline;
+    font-size: 10px;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+.size_list label:hover{
+    text-shadow: 0px 0px 10px #ffffff;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.size_list label.selected {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.size_list label input {
+    display:none;
+
+}
+
+
+.color_list ul {
+}
+
+.color_list li {
+    display: inline;
+    list-style-type: none;
+    margin: 4px;
+}
+
+.color_list label {
+    display: inline;
+    font-size: 10px;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+.color_list label:hover{
+    text-shadow: 0px 0px 10px #ffffff;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.color_list label.selected {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.color_list label input {
+    display:none;
+
+}
+
+.pen_list ul {
     margin-left: 20px;
+}
+
+.pen_list li {
+    list-style-type: none;
 }
 
 .pen_list label input {
@@ -107,8 +170,4 @@ ul {
     text-shadow: none;
     color: #fefefe;
     font-size: 10px;
-}
-
-a {
-    margin-left: 200px;
 }
