@@ -52,7 +52,7 @@ function init() {
 
     pre_canvas = document.getElementById('pre');
     pre_canvas.width = 300;
-    pre_canvas.height = 100;
+    pre_canvas.height = 50;
     pre_c = pre_canvas.getContext('2d');
 
     clear(c);
@@ -123,6 +123,14 @@ function init() {
         }
 
     });
+
+    $('#canvas').on("touchmove", function (e) {
+        getMousePos(e);
+        c.globalCompositeOperation = "lighter";
+        
+        pen_tool.draw(mouse.x, mouse.y);
+    });
+    
     $('#canvas').on("mouseout", function (e) {
         mouse.x = "none";
         mouse.y = "none";
@@ -143,7 +151,7 @@ function init() {
 
 function updatePreCanvas() {
     clear(pre_c);
-    drawPreCircle(150, 50, pen_size, pen_color);
+    drawPreCircle(150, 25, pen_size, pen_color);
 }
 
 function mainLoop() {
