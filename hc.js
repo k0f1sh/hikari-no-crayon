@@ -45,7 +45,7 @@ function init() {
 
 
 
-    width = window.innerWidth - TOOLBOX_WIDTH;
+    width = window.innerWidth;
     height = window.innerHeight;
     canvas = document.getElementById('canvas');
     canvas.width = width;
@@ -76,6 +76,19 @@ function init() {
     };
 
     pen_tool = pen_tools['normal_pen'];
+
+    var show_menu = true;
+    $("#switch").on("click", function(e){
+        if (show_menu) {
+            show_menu = false;
+            $("#menu").hide();
+            $("#switch").html("show");
+        } else {
+            show_menu = true;
+            $("#menu").show();
+            $("#switch").html("hide");
+        }
+    });
 
     $("#slh").on("click", function(e){
         $("#sl").toggle(500);
