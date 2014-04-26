@@ -93,7 +93,7 @@ function init() {
     $("#slh").on("click", function(e){
         $("#sl").toggle(500);
     });
-    
+
     $("#plh").on("click", function(e){
         $("#pl").toggle(500);
     });
@@ -101,7 +101,7 @@ function init() {
     $("#clh").on("click", function(e){
         $("#cl").toggle(500);
     });
-    
+
     $("#mlh").on("click", function(e){
         $("#ml").toggle(500);
     });
@@ -115,7 +115,7 @@ function init() {
     // size select
     $("input[name=size]").toggleButtons(function(e){
         pen_size = e.target.value;
-        
+
     });
 
     // color select
@@ -142,7 +142,11 @@ function init() {
         effects = [];
     });
 
-     $('#canvas').on("mousemove", function (e) {
+    $('#reverse_button').on("click", function () {
+        reverseImg(c);
+    });
+
+    $('#canvas').on("mousemove", function (e) {
         getMousePos(e);
         c.globalCompositeOperation = "lighter";
 
@@ -172,9 +176,9 @@ function init() {
 
     $('#canvas').on("touchend", function (e) {
         is_down = false;
-        
+
     });
-    
+
     $('#canvas').on("mouseout", function (e) {
         mouse.x = "none";
         mouse.y = "none";
@@ -187,7 +191,7 @@ function init() {
     });
     $('#canvas').on("mouseup", function (e) {
         is_down = false;
-        
+
     });
 
     c.globalCompositeOperation = "lighter";
@@ -219,7 +223,7 @@ function mainLoop() {
 		e.move();
 		e.render();
 	}, this);
-    
+
 	effects = _.filter(effects, function (e) {return e.del_flg == false;});
 
     updatePreCanvas();
@@ -324,6 +328,17 @@ function HSVtoRGB(h, s, v) {
     return {'r': Math.round(r), 'g': Math.round(g), 'b': Math.round(b)};
 }
 
+function reverseImg(c) {
+    var img = c.getImageData(0, 0, width, height);
+    var pixels = img.data;
+    var len = width * height;
+    for (var i = 0; i < len; i++) {
+        pixels[i * 4] = 255 - pixels[i * 4];
+        pixels[i * 4 + 1] = 255 - pixels[i * 4 + 1];
+        pixels[i * 4 + 2] = 255 - pixels[i * 4 + 2];
+    }
+    c.putImageData(img, 0, 0);
+}
 
 // util
 
@@ -556,7 +571,7 @@ BloodObj.prototype = {
 	move : function () {
         this.dec_alpha_p += 0.0004;
         this.alpha = Math.max(0, this.alpha - this.dec_alpha_p);
-        
+
         this.pos_history.push(this.pos);
         if (this.history_num <= this.pos_history.length) {
             this.pos_history = _.last(this.pos_history, this.history_num);
@@ -568,7 +583,7 @@ BloodObj.prototype = {
             eo.d = this.d + (Math.floor(Math.random() * 120) - 60)
             effects.push(eo);
         }
-        
+
 		this.pos = movePos(this.pos, this.spd, this.d);
 		this.rotate_count -= 1;
 
@@ -577,7 +592,7 @@ BloodObj.prototype = {
 
             var a = Math.floor(Math.random() * 80) - 40;
 			this.d += a;
-            
+
 		}
 
 		if (this.pos.x < 0 - MARGIN ||
@@ -588,7 +603,7 @@ BloodObj.prototype = {
 			this.delete();
 		}
 	},
-	
+
 	render : function () {
         drawLines(this.pos_history, this.color, this.alpha, this.alpha * 8);
 	},
@@ -620,7 +635,7 @@ SnowObj.prototype = {
 			this.delete();
 		}
 	},
-	
+
 	render : function () {
         var x = this.pos.x;
         var y = this.pos.y;
@@ -651,7 +666,7 @@ HoshiObj.prototype = {
             this.delete();
         }
 	},
-	
+
 	render : function () {
         var pos1 = {x:this.pos.x + this.naruto_list[0].x,
                     y:this.pos.y + this.naruto_list[0].y,
@@ -683,7 +698,7 @@ NamiObj.prototype = {
         this.alpha -= 0.01;
         this.d = (Math.sin(d2r(count % 60 * 6)) * 93) + this.od;
         this.pos = movePos(this.pos, pen_size / 10, this.d);
-        
+
 		if (this.pos.x < 0 - MARGIN ||
             this.pos.y < 0 - MARGIN ||
             this.pos.x > width + MARGIN ||
@@ -693,13 +708,13 @@ NamiObj.prototype = {
 			this.delete();
 		}
 	},
-	
+
 	render : function () {
         var pos1 = this.pos;
     	var pos2 = movePos(this.pos, this.size / 2, (this.d + 180) % 360);
     	var pos3 = movePos(this.pos, this.size, (this.d + 180) % 360 - Math.floor(Math.random() * 20));
     	var pos4 = movePos(this.pos, this.size, (this.d + 180) % 360 + Math.floor(Math.random() * 20));
-        
+
         drawLineColor(pos1, pos2, pen_color, this.alpha, 0.2);
         drawLineColor(pos1, pos3, pen_color, this.alpha, 0.2);
         drawLineColor(pos1, pos4, pen_color, this.alpha, 0.2);
@@ -725,7 +740,7 @@ HaneObj.prototype = {
             this.delete();
         }
 	},
-	
+
 	render : function () {
         var pos1 = {x:this.pos.x + this.naruto_list[0].x,
                     y:this.pos.y + this.naruto_list[0].y,
@@ -759,16 +774,16 @@ CollatzObj.prototype = {
         if (1 == this.collatz_list.length) {
             this.delete();
         }
-        
+
         var move_size = this.n / 2;
         var d = Math.floor(Math.random() * 360);
-        
+
         this.pos = {
             x: this.pos.x + Math.cos(d2r(d)) * move_size,
             y: this.pos.y + Math.sin(d2r(d)) * move_size,
         };
 	},
-	
+
 	render : function () {
         drawCircle(this.pos.x, this.pos.y, this.n, this.color, this.alpha, 0.8, 0.9);
 	},
@@ -796,7 +811,7 @@ DegiObj.prototype = {
 	move : function () {
         this.dec_alpha_p += 0.0004;
         this.alpha = Math.max(0, this.alpha - this.dec_alpha_p);
-        
+
         this.pos_history.push(this.pos);
         if (this.history_num <= this.pos_history.length) {
             this.pos_history = _.last(this.pos_history, this.history_num);
@@ -808,7 +823,7 @@ DegiObj.prototype = {
             eo.d = _.first(_.shuffle([0, 90, 180, 270]));
             effects.push(eo);
         }
-        
+
 		this.pos = movePos(this.pos, this.spd, this.d);
 		this.rotate_count -= 1;
 
@@ -818,7 +833,7 @@ DegiObj.prototype = {
             var a = Math.floor(Math.random() * 80) - 40;
             a = _.first(_.shuffle([0, 90, 180, 270]));
 			this.d += a;
-            
+
 		}
 
 		if (this.pos.x < 0 - MARGIN ||
@@ -829,7 +844,7 @@ DegiObj.prototype = {
 			this.delete();
 		}
 	},
-	
+
 	render : function () {
         drawLines(this.pos_history, this.color, this.alpha, 1);
 	},
