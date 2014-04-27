@@ -185,3 +185,8 @@ body {
     color: #fefefe;
     font-size: 10px;
 }
+
+#etc li {
+    list-style-type: none;
+    margin-top: 5px;
+}

@@ -106,6 +106,16 @@ function init() {
         $("#ml").toggle(500);
     });
 
+    $("#etch").on("click", function(e){
+        $("#etc").toggle(500);
+    });
+
+    $("#sl").hide();
+    $("#pl").hide();
+    $("#cl").hide();
+    $("#ml").hide();
+    $("#etc").hide();
+
     // pen select
     $("input[name=pen]").toggleButtons(function(e){
         pen_tool = pen_tools[e.target.value];
@@ -144,6 +154,11 @@ function init() {
 
     $('#reverse_button').on("click", function () {
         reverseImg(c);
+    });
+
+    $('#save_button').on("click", function () {
+        var url = canvas.toDataURL();
+        window.open(url);
     });
 
     $('#canvas').on("mousemove", function (e) {
