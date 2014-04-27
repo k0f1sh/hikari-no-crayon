@@ -11,6 +11,7 @@ var is_auto_mode = false;
 
 var MARGIN = 40;
 var TOOLBOX_WIDTH = 200;
+var BLUR_RADIUS = 15;
 
 var pen_tools, pen_tool;
 var pen_size = 30;
@@ -154,6 +155,10 @@ function init() {
 
     $('#reverse_button').on("click", function () {
         reverseImg(c);
+    });
+    
+    $('#blur_button').on("click", function () {
+        blurImg(canvas);
     });
 
     $('#save_button').on("click", function () {
@@ -353,6 +358,10 @@ function reverseImg(c) {
         pixels[i * 4 + 2] = 255 - pixels[i * 4 + 2];
     }
     c.putImageData(img, 0, 0);
+}
+
+function blurImg(canvas) {
+    stackBlurCanvasRGB("canvas", 0, 0, width, height, BLUR_RADIUS);
 }
 
 // util
