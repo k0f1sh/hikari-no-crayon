@@ -1,7 +1,7 @@
 # Hikari-no-Crayon
 
-A easy additive blending paint software
+An easy additive blending painter
 
-demo: [http://mrkuc.github.io/Hikari-no-Crayon/](http://mrkuc.github.io/Hikari-no-Crayon/)
+[demo](https://mrkuc.github.io/hikari-no-crayon/index.html)
 
 ![image](demo.png)
