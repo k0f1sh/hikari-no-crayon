@@ -219,6 +219,11 @@ body {
   gap: 8px;
 }
 
+#sy {
+  display: grid;
+  gap: 8px;
+}
+
 .mode_button {
   display: flex;
   align-items: center;
@@ -237,6 +242,11 @@ body {
 
 .mode_button input {
   accent-color: #5fd8ff;
+}
+
+.mode_button.is-disabled,
+.export_label.is-disabled {
+  opacity: 0.45;
 }
 
 .compact_mode_button {
@@ -303,6 +313,13 @@ body {
   background: linear-gradient(135deg, rgba(16, 25, 49, 0.9), rgba(8, 14, 28, 0.88));
   color: var(--text);
   padding: 6px 8px;
+}
+
+#export_scale:disabled,
+#symmetry_type:disabled,
+#symmetry_count:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .btn {

@@ -169,6 +169,18 @@ export function bindUiEvents(): void {
     redoButton.setAttribute("aria-disabled", String(!redoEnabled));
   };
 
+  const updateSymmetryControlsState = () => {
+    const disabled = !app.isSymmetryMode;
+
+    symmetryHud.disabled = disabled;
+    symmetryType.disabled = disabled;
+    symmetryCount.disabled = disabled;
+
+    symmetryHud.closest("label")?.classList.toggle("is-disabled", disabled);
+    symmetryType.closest("label")?.classList.toggle("is-disabled", disabled);
+    symmetryCount.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
   const commitHistory = () => {
     captureHistorySnapshot();
     refreshUndoRedoButtons();
@@ -221,6 +233,7 @@ export function bindUiEvents(): void {
 
   symmetryMode.addEventListener("change", (event) => {
     app.isSymmetryMode = (event.currentTarget as HTMLInputElement).checked;
+    updateSymmetryControlsState();
     persist();
   });
 
@@ -383,5 +396,6 @@ export function bindUiEvents(): void {
   exportScale.value = String(safeSettings.exportScale);
   exportTransparent.checked = safeSettings.exportTransparent;
 
+  updateSymmetryControlsState();
   refreshUndoRedoButtons();
 }
