@@ -1,5 +1,5 @@
 import { app, requireCanvas } from "../core/state";
-import { applyDrawCompositeOperation, clear, blurImage, reverseImage } from "../core/draw";
+import { applyDrawCompositeOperation, clear, reverseImage } from "../core/draw";
 import { rgbToHex } from "../core/color";
 import {
   canRedo,
@@ -102,7 +102,6 @@ export function bindUiEvents(): void {
   const sizeValue = byId<HTMLElement>("size_value");
   const colorPicker = byId<HTMLInputElement>("color_picker");
   const exportScale = byId<HTMLSelectElement>("export_scale");
-  const exportTransparent = byId<HTMLInputElement>("export_transparent");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
   const symmetryMode = byId<HTMLInputElement>("symmetry_mode");
@@ -136,7 +135,6 @@ export function bindUiEvents(): void {
       symmetryOriginX: Math.round(app.symmetryOriginX * 100),
       symmetryOriginY: Math.round(app.symmetryOriginY * 100),
       exportScale: Number(exportScale.value),
-      exportTransparent: exportTransparent.checked,
     };
     saveSettings(settings);
   };
@@ -337,7 +335,6 @@ export function bindUiEvents(): void {
   });
 
   exportScale.addEventListener("change", persist);
-  exportTransparent.addEventListener("change", persist);
 
   byId<HTMLElement>("clear_button").addEventListener("click", () => {
     clear(app.c!);
@@ -350,15 +347,9 @@ export function bindUiEvents(): void {
     commitHistory();
   });
 
-  byId<HTMLElement>("blur_button").addEventListener("click", () => {
-    blurImage();
-    commitHistory();
-  });
-
   byId<HTMLElement>("save_button").addEventListener("click", () => {
     exportPng({
       scale: Number(exportScale.value),
-      transparent: exportTransparent.checked,
     });
   });
 
@@ -478,7 +469,6 @@ export function bindUiEvents(): void {
   applySymmetryOriginY(safeSettings.symmetryOriginY);
 
   exportScale.value = String(safeSettings.exportScale);
-  exportTransparent.checked = safeSettings.exportTransparent;
 
   updateSymmetryControlsState();
   refreshUndoRedoButtons();

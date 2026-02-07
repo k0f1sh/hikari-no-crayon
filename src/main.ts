@@ -1,5 +1,4 @@
 import "./style.css";
-import "../lib/StackBlur.js";
 import { hsvToRgb, colorToString } from "./core/color";
 import { app } from "./core/state";
 import { applyDrawCompositeOperation, clear, drawPreviewCircle, getDrawCompositeOperation } from "./core/draw";

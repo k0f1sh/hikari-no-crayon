@@ -100,10 +100,6 @@ export function reverseImage(): void {
   c.putImageData(img, 0, 0);
 }
 
-export function blurImage(): void {
-  stackBlurCanvasRGB("canvas", 0, 0, app.width, app.height, app.blurRadius);
-}
-
 export function drawDarkCircle(x: number, y: number, r: number): void {
   const c = requireMainContext();
   c.globalCompositeOperation = "source-over";

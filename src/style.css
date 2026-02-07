@@ -255,10 +255,6 @@ body {
   opacity: 0.45;
 }
 
-.compact_mode_button {
-  margin: 0;
-}
-
 #etc ul {
   display: grid;
   gap: 8px;

@@ -19,7 +19,6 @@ export interface PersistedSettings {
   symmetryOriginX: number;
   symmetryOriginY: number;
   exportScale: number;
-  exportTransparent: boolean;
 }
 
 export const defaultPersistedSettings: PersistedSettings = {
@@ -38,7 +37,6 @@ export const defaultPersistedSettings: PersistedSettings = {
   symmetryOriginX: 50,
   symmetryOriginY: 50,
   exportScale: 1,
-  exportTransparent: false,
 };
 
 export function loadSettings(): PersistedSettings {

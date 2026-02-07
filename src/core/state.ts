@@ -26,7 +26,6 @@ export const app = {
   symmetryOriginY: 0.5,
   margin: 40,
   toolboxWidth: 200,
-  blurRadius: 15,
   penTools: {} as PenToolMap,
   penTool: null as PenTool | null,
   selectedPenName: "normal_pen",
