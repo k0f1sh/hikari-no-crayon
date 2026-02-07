@@ -12,6 +12,7 @@ import { NormalPen } from "./pens/NormalPen";
 import { OrbitPen } from "./pens/OrbitPen";
 import { SnowPen } from "./pens/SnowPen";
 import { SprayPen } from "./pens/SprayPen";
+import { ShinmyakuPen } from "./pens/ShinmyakuPen";
 
 export function createPenTools(): PenToolMap {
   return {
@@ -27,6 +28,7 @@ export function createPenTools(): PenToolMap {
     bubble_pen: new BubblePen(),
     orbit_pen: new OrbitPen(),
     degi_pen: new DegiPen(),
+    shinmyaku_pen: new ShinmyakuPen(),
   };
 }
 

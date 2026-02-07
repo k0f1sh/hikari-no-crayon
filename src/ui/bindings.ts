@@ -98,7 +98,62 @@ function setPointerPosition(event: PointerEvent): void {
   app.mouse.y = event.pageY;
 }
 
+const PEN_CATALOG = [
+  { value: "normal_pen", icon: "光", name: "ひかりのくれよん" },
+  { value: "blood_pen", icon: "血", name: "けっかんぺんしる" },
+  { value: "fur_pen", icon: "毛", name: "ふぁーえんぴつ" },
+  { value: "snow_pen", icon: "雪", name: "ゆきぱすてる" },
+  { value: "collatz_pen", icon: "∞", name: "こらっつすたんぷ" },
+  { value: "hoshi_pen", icon: "星", name: "ほしわいやー" },
+  { value: "hane_pen", icon: "羽", name: "はねぺん" },
+  { value: "nami_pen", icon: "波", name: "なみふで" },
+  { value: "spray_pen", icon: "霧", name: "すぷれーかん" },
+  { value: "bubble_pen", icon: "泡", name: "あわすぷれー" },
+  { value: "orbit_pen", icon: "彗", name: "おーびっとぺん" },
+  { value: "degi_pen", icon: "電", name: "でじたるぺん" },
+  { value: "shinmyaku_pen", icon: "脈", name: "しんみゃくぺん" },
+] as const;
+
+function ensurePenOptions(): void {
+  const penList = document.getElementById("pl");
+  if (!penList) {
+    return;
+  }
+
+  for (const pen of PEN_CATALOG) {
+    const existing = penList.querySelector<HTMLInputElement>(`input[name="pen"][value="${pen.value}"]`);
+    if (existing) {
+      continue;
+    }
+
+    const item = document.createElement("li");
+    const label = document.createElement("label");
+    label.className = "pen_option";
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "pen";
+    input.value = pen.value;
+
+    const icon = document.createElement("span");
+    icon.className = "pen_icon";
+    icon.textContent = pen.icon;
+
+    const name = document.createElement("span");
+    name.className = "pen_name";
+    name.textContent = pen.name;
+
+    label.appendChild(input);
+    label.appendChild(icon);
+    label.appendChild(name);
+    item.appendChild(label);
+    penList.appendChild(item);
+  }
+}
+
 export function bindUiEvents(): void {
+  ensurePenOptions();
+
   const dockShowButton = byId<HTMLButtonElement>("dock_show_button");
   const dockHideButton = byId<HTMLButtonElement>("dock_hide_button");
   const menu = byId<HTMLElement>("menu");

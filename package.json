@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/ensure-dev-entry.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/ensure-dev-entry.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"

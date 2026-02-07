@@ -6,3 +6,4 @@ export { NamiEffect } from "./items/NamiEffect";
 export { CollatzEffect } from "./items/CollatzEffect";
 export { DegiEffect } from "./items/DegiEffect";
 export { OrbitEffect } from "./items/OrbitEffect";
+export { ShinmyakuEffect } from "./items/ShinmyakuEffect";
