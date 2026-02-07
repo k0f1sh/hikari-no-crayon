@@ -2,6 +2,11 @@ import { app, requireCanvas } from "../core/state";
 import { applyDrawCompositeOperation, clear, reverseImage } from "../core/draw";
 import { rgbToHex } from "../core/color";
 import {
+  extractSvgPathDataList,
+  fitPointsToCanvas,
+  sampleSvgPathPoints,
+} from "../core/svgPathTrace";
+import {
   canRedo,
   canUndo,
   captureHistorySnapshot,
@@ -136,6 +141,10 @@ export function bindUiEvents(): void {
   const recordResolutionInput = byId<HTMLSelectElement>("record_resolution");
   const recordQualityInput = byId<HTMLSelectElement>("record_quality");
   const recordButton = byId<HTMLElement>("record_button");
+  const svgPathInput = byId<HTMLTextAreaElement>("svg_path_input");
+  const svgPathStepInput = byId<HTMLInputElement>("svg_path_step");
+  const svgPathFitInput = byId<HTMLInputElement>("svg_path_fit");
+  const svgPathDrawButton = byId<HTMLButtonElement>("svg_path_draw_button");
   const resetSettingsButton = byId<HTMLElement>("reset_settings_button");
   const recordStatus = byId<HTMLElement>("record_status");
   const recordFrameHud = byId<HTMLElement>("record_frame_hud");
@@ -568,6 +577,88 @@ export function bindUiEvents(): void {
     exportPng({
       scale: 1,
     });
+  });
+
+  const traceSvgPath = () => {
+    const pathDataList = extractSvgPathDataList(svgPathInput.value);
+    if (pathDataList.length === 0) {
+      window.alert("SVG path を入力してください。");
+      return;
+    }
+
+    const stepValue = Number(svgPathStepInput.value);
+    const step = Number.isFinite(stepValue) ? Math.max(0.5, Math.min(64, stepValue)) : 4;
+    svgPathStepInput.value = String(step);
+
+    try {
+      const pointGroups: Array<Array<{ x: number; y: number }>> = [];
+      pathDataList.forEach((pathData) => {
+        try {
+          const points = sampleSvgPathPoints(pathData, step);
+          if (points.length > 0) {
+            pointGroups.push(points);
+          }
+        } catch {
+          // Skip malformed path segments and continue with valid ones.
+        }
+      });
+      if (pointGroups.length === 0) {
+        window.alert("有効な path を読み取れませんでした。");
+        return;
+      }
+
+      let groupsToDraw = pointGroups;
+
+      if (svgPathFitInput.checked) {
+        const allPoints = pointGroups.flat();
+        const fittedAllPoints = fitPointsToCanvas(allPoints, app.width, app.height, app.margin);
+        let cursor = 0;
+        groupsToDraw = pointGroups.map((group) => {
+          const fittedGroup = fittedAllPoints.slice(cursor, cursor + group.length);
+          cursor += group.length;
+          return fittedGroup;
+        });
+      }
+
+      applyDrawCompositeOperation();
+      groupsToDraw.forEach((group) => {
+        group.forEach((point) => {
+          drawWithSymmetry(point.x, point.y);
+        });
+      });
+
+      app.didDrawInStroke = groupsToDraw.some((group) => group.length > 0);
+      if (app.didDrawInStroke) {
+        commitHistory();
+        app.didDrawInStroke = false;
+      }
+      closePanels();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "SVG path の解析に失敗しました。";
+      window.alert(message);
+    }
+  };
+
+  const runSvgTrace = () => {
+    if (svgPathDrawButton.disabled) {
+      return;
+    }
+    svgPathDrawButton.disabled = true;
+    const originalText = svgPathDrawButton.textContent;
+    svgPathDrawButton.textContent = "なぞりちゅう...";
+    window.setTimeout(() => {
+      try {
+        traceSvgPath();
+      } finally {
+        svgPathDrawButton.disabled = false;
+        svgPathDrawButton.textContent = originalText;
+      }
+    }, 0);
+  };
+
+  svgPathDrawButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    runSvgTrace();
   });
 
   let isRecording = false;

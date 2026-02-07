@@ -535,8 +535,30 @@ body {
 
 #etc ul {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   justify-items: center;
+}
+
+.etc_group {
+  width: 100%;
+  max-width: var(--ui-max);
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(162, 193, 255, 0.26);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.etc_group_title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.etc_group_body {
+  display: grid;
+  gap: 8px;
 }
 
 .button_row {
@@ -625,7 +647,9 @@ body {
 #record_seconds,
 #record_fps,
 #record_resolution,
-#record_quality {
+#record_quality,
+#svg_path_step,
+#svg_path_input {
   width: 100%;
   min-height: 32px;
   border: 1px solid rgba(162, 193, 255, 0.35);
@@ -633,6 +657,13 @@ body {
   background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
   color: var(--text);
   padding: 6px 8px;
+}
+
+#svg_path_input {
+  min-height: 84px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height: 1.4;
 }
 
 #record_preset option,
