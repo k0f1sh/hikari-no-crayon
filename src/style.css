@@ -9,8 +9,10 @@
   --accent: #56b1ff;
   --accent-2: #76f6d0;
   --line: rgba(162, 193, 255, 0.28);
-  --radius: 16px;
-  --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(255, 255, 255, 0.14);
+  --radius: 0px;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -28,15 +30,15 @@ body {
   font-family: "Avenir Next", "Avenir", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 15% 15%, rgba(86, 177, 255, 0.2), transparent 32%),
-    radial-gradient(circle at 80% 0%, rgba(118, 246, 208, 0.12), transparent 38%),
-    linear-gradient(160deg, var(--bg-0), var(--bg-1) 45%, var(--bg-2));
+    linear-gradient(125deg, rgba(86, 177, 255, 0.16), transparent 34%),
+    linear-gradient(300deg, rgba(118, 246, 208, 0.1), transparent 42%),
+    linear-gradient(160deg, #050a14, #0c1630 46%, #121f3d);
   background-image:
-    radial-gradient(circle at 15% 15%, rgba(86, 177, 255, 0.2), transparent 32%),
-    radial-gradient(circle at 80% 0%, rgba(118, 246, 208, 0.12), transparent 38%),
-    linear-gradient(160deg, var(--bg-0), var(--bg-1) 45%, var(--bg-2)),
+    linear-gradient(125deg, rgba(86, 177, 255, 0.16), transparent 34%),
+    linear-gradient(300deg, rgba(118, 246, 208, 0.1), transparent 42%),
+    linear-gradient(160deg, #050a14, #0c1630 46%, #121f3d),
     url("/bg.png");
-  background-blend-mode: screen, screen, normal, soft-light;
+  background-blend-mode: screen, screen, normal, overlay;
 }
 
 #wrapper,
@@ -72,12 +74,12 @@ body {
   z-index: 20;
   padding: 7px 12px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--text);
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: rgba(9, 15, 30, 0.82);
+  background: linear-gradient(135deg, rgba(20, 30, 58, 0.9), rgba(8, 14, 30, 0.84));
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
   cursor: pointer;
@@ -95,7 +97,8 @@ body {
   padding: 12px 12px 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--panel);
+  background:
+    linear-gradient(160deg, rgba(18, 30, 58, 0.86), rgba(9, 16, 34, 0.88) 58%, rgba(7, 12, 26, 0.92));
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
 }
@@ -118,8 +121,8 @@ body {
   display: block;
   margin-bottom: 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
 }
 
 .size_list,
@@ -166,12 +169,12 @@ body {
   align-items: center;
   gap: 6px;
   padding: 7px 10px;
-  border: 1px solid transparent;
-  border-radius: 999px;
+  border: 1px solid var(--line);
+  border-radius: 0;
   font-size: 12px;
   line-height: 1;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
   cursor: pointer;
   transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
@@ -182,7 +185,7 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 8px 10px;
   font-size: 12px;
   line-height: 1.25;
@@ -193,16 +196,16 @@ body {
 .color_list label:hover,
 .pen_list label:hover {
   transform: translateY(-1px);
-  border-color: rgba(118, 246, 208, 0.45);
-  background: rgba(118, 246, 208, 0.1);
+  border-color: rgba(162, 193, 255, 0.5);
+  background: var(--glass-hover);
 }
 
 .size_list label.selected,
 .color_list label.selected,
 .pen_list label.selected {
-  border-color: rgba(86, 177, 255, 0.58);
-  background: rgba(86, 177, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(86, 177, 255, 0.3);
+  border-color: rgba(162, 193, 255, 0.72);
+  background: rgba(162, 193, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(162, 193, 255, 0.32);
 }
 
 .size_list label input[type="radio"],
@@ -221,15 +224,15 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
   cursor: pointer;
 }
 
 .mode_button:has(input:checked) {
-  border-color: rgba(118, 246, 208, 0.55);
-  background: rgba(118, 246, 208, 0.13);
+  border-color: rgba(162, 193, 255, 0.72);
+  background: rgba(162, 193, 255, 0.2);
 }
 
 .mode_button input {
@@ -262,9 +265,9 @@ body {
   width: 100%;
   display: grid;
   gap: 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
   padding: 10px 12px;
   font-size: 12px;
   letter-spacing: 0.04em;
@@ -286,7 +289,7 @@ body {
   height: 40px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
   appearance: none;
@@ -296,8 +299,8 @@ body {
   width: 100%;
   min-height: 36px;
   border: 1px solid rgba(162, 193, 255, 0.4);
-  border-radius: 8px;
-  background: rgba(7, 13, 26, 0.8);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(16, 25, 49, 0.9), rgba(8, 14, 28, 0.88));
   color: var(--text);
   padding: 6px 8px;
 }
@@ -308,22 +311,23 @@ body {
   justify-content: center;
   width: 100%;
   min-height: 40px;
-  border: 1px solid rgba(86, 177, 255, 0.5);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(66, 141, 255, 0.92), rgba(28, 88, 183, 0.92));
-  color: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  color: var(--text);
   text-decoration: none;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(17, 84, 178, 0.45);
-  filter: saturate(1.1);
+  background: linear-gradient(135deg, rgba(86, 177, 255, 0.22), rgba(255, 255, 255, 0.06));
+  border-color: rgba(162, 193, 255, 0.55);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 .btn:active {
@@ -331,8 +335,8 @@ body {
 }
 
 .btn.btn-secondary {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: linear-gradient(180deg, rgba(114, 133, 173, 0.88), rgba(72, 86, 118, 0.88));
+  border-color: var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
 }
 
 .btn.is-disabled {
@@ -354,7 +358,7 @@ body {
     bottom: auto;
     width: auto;
     max-height: 62vh;
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .pen_list {
