@@ -339,6 +339,20 @@ export function bindUiEvents(): void {
     });
   });
 
+  document.addEventListener("pointerdown", (event) => {
+    if (!activePanelId) {
+      return;
+    }
+    const target = event.target as Node | null;
+    if (!target) {
+      return;
+    }
+    if (menu.contains(target)) {
+      return;
+    }
+    closePanels();
+  });
+
   const applyDockVisibility = (visible: boolean) => {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
