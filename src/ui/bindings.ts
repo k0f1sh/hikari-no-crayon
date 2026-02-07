@@ -107,6 +107,9 @@ export function bindUiEvents(): void {
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
+  const dockUndoButton = byId<HTMLButtonElement>("dock_undo_button");
+  const dockRedoButton = byId<HTMLButtonElement>("dock_redo_button");
+  const dockClearButton = byId<HTMLButtonElement>("dock_clear_button");
   const rainbowMode = byId<HTMLInputElement>("rainbow_mode");
   const rainbowSaturation = byId<HTMLInputElement>("rainbow_saturation");
   const rainbowSaturationValue = byId<HTMLElement>("rainbow_saturation_value");
@@ -208,6 +211,10 @@ export function bindUiEvents(): void {
     redoButton.classList.toggle("is-disabled", !redoEnabled);
     undoButton.setAttribute("aria-disabled", String(!undoEnabled));
     redoButton.setAttribute("aria-disabled", String(!redoEnabled));
+    dockUndoButton.classList.toggle("is-disabled", !undoEnabled);
+    dockRedoButton.classList.toggle("is-disabled", !redoEnabled);
+    dockUndoButton.setAttribute("aria-disabled", String(!undoEnabled));
+    dockRedoButton.setAttribute("aria-disabled", String(!redoEnabled));
   };
 
   const updateSymmetryControlsState = () => {
@@ -438,7 +445,10 @@ export function bindUiEvents(): void {
 
   const penGroup = setupRadioGroup("pen", (value) => {
     app.selectedPenName = value;
-    app.penTool = app.penTools[value];
+    app.penTool = app.penTools[value]
+      ?? app.penTools[defaultPersistedSettings.pen]
+      ?? Object.values(app.penTools)[0]
+      ?? null;
     const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
     const selectedPenName = selectedPenInput?.closest("label")?.querySelector<HTMLElement>(".pen_name")
       ?.textContent;
@@ -539,12 +549,15 @@ export function bindUiEvents(): void {
     persist();
   });
 
-  byId<HTMLElement>("clear_button").addEventListener("click", () => {
+  const clearCanvas = () => {
     clear(app.c!);
     app.effects = [];
     commitHistory();
     closePanels();
-  });
+  };
+
+  byId<HTMLElement>("clear_button").addEventListener("click", clearCanvas);
+  dockClearButton.addEventListener("click", clearCanvas);
 
   byId<HTMLElement>("reverse_button").addEventListener("click", () => {
     reverseImage();
@@ -969,17 +982,22 @@ export function bindUiEvents(): void {
 
   refreshRecordButtonText();
 
-  undoButton.addEventListener("click", () => {
+  const performUndo = () => {
     if (undo()) {
       refreshUndoRedoButtons();
     }
-  });
+  };
 
-  redoButton.addEventListener("click", () => {
+  const performRedo = () => {
     if (redo()) {
       refreshUndoRedoButtons();
     }
-  });
+  };
+
+  undoButton.addEventListener("click", performUndo);
+  dockUndoButton.addEventListener("click", performUndo);
+  redoButton.addEventListener("click", performRedo);
+  dockRedoButton.addEventListener("click", performRedo);
 
   window.addEventListener("keydown", (event) => {
     const isMeta = event.ctrlKey || event.metaKey;
@@ -990,25 +1008,19 @@ export function bindUiEvents(): void {
     const key = event.key.toLowerCase();
     if (key === "z" && event.shiftKey) {
       event.preventDefault();
-      if (redo()) {
-        refreshUndoRedoButtons();
-      }
+      performRedo();
       return;
     }
 
     if (key === "z") {
       event.preventDefault();
-      if (undo()) {
-        refreshUndoRedoButtons();
-      }
+      performUndo();
       return;
     }
 
     if (key === "y") {
       event.preventDefault();
-      if (redo()) {
-        refreshUndoRedoButtons();
-      }
+      performRedo();
     }
   });
 

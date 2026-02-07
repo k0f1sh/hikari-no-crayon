@@ -9,6 +9,7 @@ import { HanePen } from "./pens/HanePen";
 import { HoshiPen } from "./pens/HoshiPen";
 import { NamiPen } from "./pens/NamiPen";
 import { NormalPen } from "./pens/NormalPen";
+import { OrbitPen } from "./pens/OrbitPen";
 import { SnowPen } from "./pens/SnowPen";
 import { SprayPen } from "./pens/SprayPen";
 
@@ -24,6 +25,7 @@ export function createPenTools(): PenToolMap {
     nami_pen: new NamiPen(),
     spray_pen: new SprayPen(),
     bubble_pen: new BubblePen(),
+    orbit_pen: new OrbitPen(),
     degi_pen: new DegiPen(),
   };
 }

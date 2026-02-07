@@ -24,6 +24,7 @@ This checklist defines current expected behavior before modernization.
    - nami_pen
    - spray_pen
    - bubble_pen
+   - orbit_pen
    - degi_pen
    - yami_pen
 3. Draw a stroke for each and confirm visually distinct output.

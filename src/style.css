@@ -261,6 +261,57 @@ body {
   background: rgba(162, 193, 255, 0.16);
 }
 
+.dock_action_tile {
+  flex: 0 0 74px;
+  min-height: 44px;
+  border: 1px solid rgba(162, 193, 255, 0.25);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015));
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  padding: 2px;
+}
+
+.dock_action_top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.dock_action_btn {
+  border: 1px solid rgba(162, 193, 255, 0.28);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: var(--text);
+  font-size: 9px;
+  line-height: 1;
+  padding: 0;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.dock_action_btn:hover {
+  border-color: rgba(162, 193, 255, 0.6);
+  background: rgba(162, 193, 255, 0.18);
+}
+
+.dock_action_clear {
+  font-size: 10px;
+  border-color: rgba(255, 140, 140, 0.38);
+}
+
+.dock_action_clear:hover {
+  border-color: rgba(255, 140, 140, 0.72);
+  background: linear-gradient(140deg, rgba(255, 98, 98, 0.28), rgba(255, 206, 84, 0.12));
+}
+
+.dock_action_btn.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.25);
+}
+
 .dock_main {
   font-size: 10px;
   font-weight: 600;
@@ -672,6 +723,10 @@ select:focus-visible,
   }
 
   .dock_btn {
+    flex: none;
+  }
+
+  .dock_action_tile {
     flex: none;
   }
 
