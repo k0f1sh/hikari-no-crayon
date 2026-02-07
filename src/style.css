@@ -68,6 +68,36 @@ body {
   pointer-events: none;
 }
 
+#record_frame_hud {
+  position: absolute;
+  z-index: 35;
+  display: none;
+  border: 2px solid rgba(118, 246, 208, 0.58);
+  box-shadow:
+    0 0 0 9999px rgba(4, 8, 16, 0.48),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 0 18px rgba(118, 246, 208, 0.22);
+  pointer-events: none;
+}
+
+#record_frame_hud.is-visible {
+  display: block;
+}
+
+#record_frame_hud_label {
+  position: absolute;
+  top: -26px;
+  left: 0;
+  padding: 3px 8px;
+  border: 1px solid rgba(118, 246, 208, 0.75);
+  background: linear-gradient(150deg, rgba(7, 15, 29, 0.95), rgba(11, 24, 44, 0.95));
+  color: #d8fff3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 #record_status {
   position: fixed;
   top: 12px;
@@ -537,6 +567,27 @@ body {
 .mini_reset_button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+#record_preset,
+#record_seconds,
+#record_fps,
+#record_resolution,
+#record_quality {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid rgba(162, 193, 255, 0.35);
+  border-radius: 0;
+  background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
+  color: var(--text);
+  padding: 6px 8px;
+}
+
+#record_preset option,
+#record_resolution option,
+#record_quality option {
+  color: #0b1224;
+  background: #f2f7ff;
 }
 
 .btn {
