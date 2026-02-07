@@ -127,7 +127,12 @@ export function bindUiEvents(): void {
   const yamiMode = byId<HTMLInputElement>("yami_mode");
   const yamiStrength = byId<HTMLInputElement>("yami_strength");
   const yamiStrengthValue = byId<HTMLElement>("yami_strength_value");
+  const recordSecondsInput = byId<HTMLInputElement>("record_seconds");
+  const recordFpsInput = byId<HTMLInputElement>("record_fps");
+  const recordResolutionInput = byId<HTMLSelectElement>("record_resolution");
+  const recordQualityInput = byId<HTMLSelectElement>("record_quality");
   const recordButton = byId<HTMLElement>("record_button");
+  const resetSettingsButton = byId<HTMLElement>("reset_settings_button");
   const recordStatus = byId<HTMLElement>("record_status");
 
   const persist = () => {
@@ -527,6 +532,79 @@ export function bindUiEvents(): void {
 
   let isRecording = false;
   let recordTicker: number | null = null;
+  let durationSeconds = 10;
+  const defaultRecordSettings = {
+    seconds: 10,
+    fps: 60,
+    resolution: "source",
+    quality: "auto",
+  };
+
+  const clampNumber = (value: number, min: number, max: number, fallback: number): number => {
+    if (!Number.isFinite(value)) {
+      return fallback;
+    }
+    return Math.max(min, Math.min(max, Math.round(value)));
+  };
+
+  const parseResolution = (value: string): { width: number; height: number } | null => {
+    if (value === "source") {
+      return null;
+    }
+
+    const [widthText, heightText] = value.split("x");
+    const width = Number.parseInt(widthText ?? "", 10);
+    const height = Number.parseInt(heightText ?? "", 10);
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+      return null;
+    }
+
+    return { width, height };
+  };
+
+  const getRecordingConfig = () => {
+    const seconds = clampNumber(Number(recordSecondsInput.value), 1, 120, 10);
+    const fps = clampNumber(Number(recordFpsInput.value), 1, 60, 60);
+    const resolution = parseResolution(recordResolutionInput.value);
+    const quality =
+      recordQualityInput.value === "auto"
+        ? undefined
+        : clampNumber(Number(recordQualityInput.value), 100_000, 50_000_000, 5_000_000);
+
+    recordSecondsInput.value = String(seconds);
+    recordFpsInput.value = String(fps);
+    if (!resolution) {
+      recordResolutionInput.value = "source";
+    }
+    if (quality === undefined) {
+      recordQualityInput.value = "auto";
+    }
+
+    return {
+      seconds,
+      fps,
+      quality,
+      resolution,
+    };
+  };
+
+  const refreshRecordButtonText = () => {
+    if (isRecording) {
+      return;
+    }
+    const seconds = clampNumber(Number(recordSecondsInput.value), 1, 120, durationSeconds);
+    durationSeconds = seconds;
+    recordSecondsInput.value = String(seconds);
+    recordButton.textContent = `${seconds}秒録画`;
+  };
+
+  const applyDefaultRecordSettings = () => {
+    recordSecondsInput.value = String(defaultRecordSettings.seconds);
+    recordFpsInput.value = String(defaultRecordSettings.fps);
+    recordResolutionInput.value = defaultRecordSettings.resolution;
+    recordQualityInput.value = defaultRecordSettings.quality;
+    refreshRecordButtonText();
+  };
 
   const setRecordingStatusText = (secondsLeft: number) => {
     recordStatus.textContent = `● 録画中 ${secondsLeft}s`;
@@ -543,12 +621,14 @@ export function bindUiEvents(): void {
     isRecording = recording;
     recordButton.classList.toggle("is-disabled", recording);
     recordButton.setAttribute("aria-disabled", String(recording));
-    recordButton.textContent = recording ? "録画中..." : "10秒録画";
+    recordButton.textContent = recording ? "録画中..." : `${durationSeconds}秒録画`;
     recordStatus.classList.toggle("is-visible", recording);
     if (!recording) {
       clearRecordingTicker();
     }
   };
+
+  recordSecondsInput.addEventListener("input", refreshRecordButtonText);
 
   recordButton.addEventListener("click", (event) => {
     event.preventDefault();
@@ -560,30 +640,58 @@ export function bindUiEvents(): void {
       return;
     }
 
-    const canvas = requireCanvas();
-    if (typeof canvas.captureStream !== "function") {
+    const sourceCanvas = requireCanvas();
+    if (typeof sourceCanvas.captureStream !== "function") {
       window.alert("このブラウザは録画に対応していません。");
       return;
     }
 
-    const stream = canvas.captureStream(60);
+    const config = getRecordingConfig();
+    durationSeconds = config.seconds;
+
+    let streamSourceCanvas: HTMLCanvasElement = sourceCanvas;
+    let previewCopyTicker: number | null = null;
+    if (config.resolution) {
+      const scaledCanvas = document.createElement("canvas");
+      scaledCanvas.width = config.resolution.width;
+      scaledCanvas.height = config.resolution.height;
+      const scaledContext = scaledCanvas.getContext("2d");
+      if (!scaledContext) {
+        window.alert("録画用キャンバスの作成に失敗しました。");
+        return;
+      }
+
+      const drawScaledFrame = () => {
+        scaledContext.drawImage(sourceCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+      };
+      drawScaledFrame();
+      previewCopyTicker = window.setInterval(drawScaledFrame, Math.max(16, Math.floor(1000 / config.fps)));
+      streamSourceCanvas = scaledCanvas;
+    }
+
+    const stream = streamSourceCanvas.captureStream(config.fps);
     const optionsList = [
       "video/webm;codecs=vp9",
       "video/webm;codecs=vp8",
       "video/webm",
     ];
     const mimeType = optionsList.find((type) => MediaRecorder.isTypeSupported(type));
-    const recorder = mimeType
-      ? new MediaRecorder(stream, { mimeType })
-      : new MediaRecorder(stream);
+    const recorderOptions: MediaRecorderOptions = {};
+    if (mimeType) {
+      recorderOptions.mimeType = mimeType;
+    }
+    if (config.quality) {
+      recorderOptions.videoBitsPerSecond = config.quality;
+    }
+    const recorder = new MediaRecorder(stream, recorderOptions);
     const chunks: BlobPart[] = [];
 
     setRecordingState(true);
-    setRecordingStatusText(10);
+    setRecordingStatusText(config.seconds);
     const startedAt = Date.now();
     recordTicker = window.setInterval(() => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      const remaining = Math.max(0, 10 - elapsed);
+      const remaining = Math.max(0, config.seconds - elapsed);
       setRecordingStatusText(remaining);
     }, 200);
     closePanels();
@@ -598,6 +706,10 @@ export function bindUiEvents(): void {
       stream.getTracks().forEach((track) => {
         track.stop();
       });
+      if (previewCopyTicker !== null) {
+        window.clearInterval(previewCopyTicker);
+        previewCopyTicker = null;
+      }
 
       const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
       const url = URL.createObjectURL(blob);
@@ -616,6 +728,10 @@ export function bindUiEvents(): void {
       stream.getTracks().forEach((track) => {
         track.stop();
       });
+      if (previewCopyTicker !== null) {
+        window.clearInterval(previewCopyTicker);
+        previewCopyTicker = null;
+      }
       setRecordingState(false);
       window.alert("録画に失敗しました。");
     });
@@ -625,8 +741,10 @@ export function bindUiEvents(): void {
       if (recorder.state !== "inactive") {
         recorder.stop();
       }
-    }, 10_000);
+    }, config.seconds * 1000);
   });
+
+  refreshRecordButtonText();
 
   undoButton.addEventListener("click", () => {
     if (undo()) {
@@ -707,52 +825,66 @@ export function bindUiEvents(): void {
     app.mouse.y = "none";
   });
 
+  const applyPersistedSettingsToUi = (settings: PersistedSettings) => {
+    applyDockVisibility(true);
+    penGroup.selectByValue(settings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
+    closePanels();
+    applySize(settings.size);
+    applyColor(settings.colorHex);
+
+    rainbowMode.checked = settings.rainbowMode;
+    app.isRainbowMode = settings.rainbowMode;
+    applyRainbowSaturation(settings.rainbowSaturation);
+    applyRainbowBrightness(settings.rainbowBrightness);
+    updateRainbowControlsState();
+
+    fadeMode.checked = settings.fadeMode;
+    app.isFadeMode = settings.fadeMode;
+
+    autoMode.checked = settings.autoMode;
+    app.isAutoMode = settings.autoMode;
+
+    yamiMode.checked = settings.yamiMode;
+    app.isYamiMode = settings.yamiMode;
+    applyYamiStrength(settings.yamiStrength);
+    updateYamiControlsState();
+    applyDrawCompositeOperation();
+
+    symmetryMode.checked = settings.symmetryMode;
+    app.isSymmetryMode = settings.symmetryMode;
+    symmetryHud.checked = settings.symmetryHud;
+    app.isSymmetryHudVisible = settings.symmetryHud;
+    symmetryType.value = settings.symmetryType;
+    app.symmetryType = settings.symmetryType;
+    symmetryCount.value = String(settings.symmetryCount);
+    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(settings.symmetryCount)
+      ? settings.symmetryCount
+      : 4;
+    applySymmetryOriginX(settings.symmetryOriginX);
+    applySymmetryOriginY(settings.symmetryOriginY);
+
+    updateSymmetryControlsState();
+    updateModeDockValue();
+    updateYamiDockValue();
+    updateSymmetryDockValue();
+    refreshUndoRedoButtons();
+  };
+
+  resetSettingsButton.addEventListener("click", () => {
+    if (isRecording) {
+      return;
+    }
+    saveSettings(defaultPersistedSettings);
+    applyPersistedSettingsToUi(defaultPersistedSettings);
+    applyDefaultRecordSettings();
+  });
+
   const settings = loadSettings();
   const safeSettings: PersistedSettings = {
     ...defaultPersistedSettings,
     ...settings,
   };
 
-  applyDockVisibility(true);
-  penGroup.selectByValue(safeSettings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
-  closePanels();
-  applySize(safeSettings.size);
-  applyColor(safeSettings.colorHex);
-
-  rainbowMode.checked = safeSettings.rainbowMode;
-  app.isRainbowMode = safeSettings.rainbowMode;
-  applyRainbowSaturation(safeSettings.rainbowSaturation);
-  applyRainbowBrightness(safeSettings.rainbowBrightness);
-  updateRainbowControlsState();
-
-  fadeMode.checked = safeSettings.fadeMode;
-  app.isFadeMode = safeSettings.fadeMode;
-
-  autoMode.checked = safeSettings.autoMode;
-  app.isAutoMode = safeSettings.autoMode;
-
-  yamiMode.checked = safeSettings.yamiMode;
-  app.isYamiMode = safeSettings.yamiMode;
-  applyYamiStrength(safeSettings.yamiStrength);
-  updateYamiControlsState();
-  applyDrawCompositeOperation();
-
-  symmetryMode.checked = safeSettings.symmetryMode;
-  app.isSymmetryMode = safeSettings.symmetryMode;
-  symmetryHud.checked = safeSettings.symmetryHud;
-  app.isSymmetryHudVisible = safeSettings.symmetryHud;
-  symmetryType.value = safeSettings.symmetryType;
-  app.symmetryType = safeSettings.symmetryType;
-  symmetryCount.value = String(safeSettings.symmetryCount);
-  app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(safeSettings.symmetryCount)
-    ? safeSettings.symmetryCount
-    : 4;
-  applySymmetryOriginX(safeSettings.symmetryOriginX);
-  applySymmetryOriginY(safeSettings.symmetryOriginY);
-
-  updateSymmetryControlsState();
-  updateModeDockValue();
-  updateYamiDockValue();
-  updateSymmetryDockValue();
-  refreshUndoRedoButtons();
+  applyPersistedSettingsToUi(safeSettings);
+  applyDefaultRecordSettings();
 }

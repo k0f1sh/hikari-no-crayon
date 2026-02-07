@@ -539,6 +539,25 @@ body {
   cursor: not-allowed;
 }
 
+#record_seconds,
+#record_fps,
+#record_resolution,
+#record_quality {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid rgba(162, 193, 255, 0.35);
+  border-radius: 0;
+  background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
+  color: var(--text);
+  padding: 6px 8px;
+}
+
+#record_resolution option,
+#record_quality option {
+  color: #0b1224;
+  background: #f2f7ff;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

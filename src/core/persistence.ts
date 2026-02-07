@@ -24,8 +24,8 @@ export interface PersistedSettings {
 
 export const defaultPersistedSettings: PersistedSettings = {
   pen: "normal_pen",
-  size: 40,
-  colorHex: rgbToHex({ r: 55, g: 200, b: 120 }),
+  size: 64,
+  colorHex: rgbToHex({ r: 86, g: 177, b: 255 }),
   rainbowMode: false,
   rainbowSaturation: 200,
   rainbowBrightness: 200,
