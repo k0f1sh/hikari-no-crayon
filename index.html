@@ -19,6 +19,9 @@
         <div id="menu">
           <h1 id="plh">ぺんのしゅるい</h1>
           <ul id="pl" class="pen_list">
+            <li class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </li>
             <li>
               <label class="pen_option"><input type="radio" name="pen" value="normal_pen" checked /><span class="pen_icon">光</span><span class="pen_name">ひかりのくれよん</span></label>
             </li>
@@ -56,6 +59,9 @@
 
           <h1 id="mlh">もーど</h1>
           <div id="ml">
+            <div class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </div>
             <label class="mode_button">
               <input type="checkbox" id="rainbow_mode" value="true" />
               <span>れいんぼーもーど</span>
@@ -72,6 +78,9 @@
 
           <h1 id="yhh">やみのくれよん</h1>
           <div id="yh">
+            <div class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </div>
             <label class="mode_button">
               <input type="checkbox" id="yami_mode" value="true" />
               <span>やみのくれよんもーど</span>
@@ -85,6 +94,9 @@
 
           <h1 id="syh">たいしょう</h1>
           <div id="sy">
+            <div class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </div>
             <label class="mode_button">
               <input type="checkbox" id="symmetry_mode" value="true" />
               <span>たいしょうもーど</span>
@@ -125,6 +137,9 @@
 
           <h1 id="etch">そのた</h1>
           <div id="etc">
+            <div class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </div>
             <ul>
               <li class="button_row">
                 <a class="btn btn-secondary btn-large" id="undo_button">もどす</a>
@@ -158,10 +173,22 @@
             <span class="dock_main">いろ</span>
             <input type="color" id="dock_color_picker" value="#37c878" />
           </label>
-          <button type="button" class="dock_btn" data-panel="pl">ぺん</button>
-          <button type="button" class="dock_btn" data-panel="ml">もーど</button>
-          <button type="button" class="dock_btn" data-panel="yh">やみ</button>
-          <button type="button" class="dock_btn" data-panel="sy">たいしょう</button>
+          <button type="button" class="dock_btn" data-panel="pl">
+            <span class="dock_main">ぺん</span>
+            <span class="dock_sub" id="pen_dock_value">ひかりのくれよん</span>
+          </button>
+          <button type="button" class="dock_btn" data-panel="ml">
+            <span class="dock_main">もーど</span>
+            <span class="dock_sub" id="mode_dock_value">OFF</span>
+          </button>
+          <button type="button" class="dock_btn" data-panel="yh">
+            <span class="dock_main">やみ</span>
+            <span class="dock_sub" id="yami_dock_value">OFF</span>
+          </button>
+          <button type="button" class="dock_btn" data-panel="sy">
+            <span class="dock_main">たいしょう</span>
+            <span class="dock_sub" id="symmetry_dock_value">OFF</span>
+          </button>
           <button type="button" class="dock_btn" data-panel="etc">そのた</button>
         </div>
       </div>

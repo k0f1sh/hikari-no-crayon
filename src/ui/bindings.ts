@@ -99,10 +99,17 @@ export function bindUiEvents(): void {
   const dock = byId<HTMLElement>("bottom_dock");
   const sizeRange = byId<HTMLInputElement>("dock_size_range");
   const sizeDockValue = byId<HTMLElement>("size_dock_value");
+  const penDockValue = byId<HTMLElement>("pen_dock_value");
+  const modeDockValue = byId<HTMLElement>("mode_dock_value");
+  const yamiDockValue = byId<HTMLElement>("yami_dock_value");
+  const symmetryDockValue = byId<HTMLElement>("symmetry_dock_value");
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
   const exportScale = byId<HTMLSelectElement>("export_scale");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
+  const rainbowMode = byId<HTMLInputElement>("rainbow_mode");
+  const fadeMode = byId<HTMLInputElement>("fade_mode");
+  const autoMode = byId<HTMLInputElement>("auto_mode");
   const symmetryMode = byId<HTMLInputElement>("symmetry_mode");
   const symmetryHud = byId<HTMLInputElement>("symmetry_hud");
   const symmetryType = byId<HTMLSelectElement>("symmetry_type");
@@ -218,6 +225,7 @@ export function bindUiEvents(): void {
     app.yamiStrength = clamped;
     yamiStrength.value = String(clamped);
     yamiStrengthValue.textContent = String(clamped);
+    updateYamiDockValue();
     persist();
   };
 
@@ -225,6 +233,33 @@ export function bindUiEvents(): void {
     const disabled = !app.isYamiMode;
     yamiStrength.disabled = disabled;
     yamiStrength.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
+  const updateModeDockValue = () => {
+    const activeModes: string[] = [];
+    if (app.isRainbowMode) {
+      activeModes.push("R");
+    }
+    if (app.isFadeMode) {
+      activeModes.push("F");
+    }
+    if (app.isAutoMode) {
+      activeModes.push("A");
+    }
+    modeDockValue.textContent = activeModes.length > 0 ? activeModes.join("+") : "OFF";
+  };
+
+  const updateYamiDockValue = () => {
+    yamiDockValue.textContent = app.isYamiMode ? `ON ${app.yamiStrength}` : "OFF";
+  };
+
+  const updateSymmetryDockValue = () => {
+    if (!app.isSymmetryMode) {
+      symmetryDockValue.textContent = "OFF";
+      return;
+    }
+    const typeLabel = app.symmetryType === "mirror" ? "M" : "R";
+    symmetryDockValue.textContent = `${typeLabel}${app.symmetryCount}`;
   };
 
   const commitHistory = () => {
@@ -292,6 +327,13 @@ export function bindUiEvents(): void {
     });
   });
 
+  const panelCloseButtons = Array.from(menu.querySelectorAll<HTMLButtonElement>(".panel_close"));
+  panelCloseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      closePanels();
+    });
+  });
+
   const applyDockVisibility = (visible: boolean) => {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
@@ -311,6 +353,11 @@ export function bindUiEvents(): void {
   const penGroup = setupRadioGroup("pen", (value) => {
     app.selectedPenName = value;
     app.penTool = app.penTools[value];
+    const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
+    const selectedPenName = selectedPenInput?.closest("label")?.querySelector<HTMLElement>(".pen_name")
+      ?.textContent;
+    penDockValue.textContent = selectedPenName ?? value;
+    closePanels();
     persist();
   });
 
@@ -324,19 +371,22 @@ export function bindUiEvents(): void {
     applyColor(value);
   });
 
-  byId<HTMLInputElement>("rainbow_mode").addEventListener("change", (event) => {
+  rainbowMode.addEventListener("change", (event) => {
     app.isRainbowMode = (event.currentTarget as HTMLInputElement).checked;
+    updateModeDockValue();
     persist();
   });
 
-  byId<HTMLInputElement>("auto_mode").addEventListener("change", (event) => {
+  autoMode.addEventListener("change", (event) => {
     app.isAutoMode = (event.currentTarget as HTMLInputElement).checked;
+    updateModeDockValue();
     persist();
   });
 
   yamiMode.addEventListener("change", (event) => {
     app.isYamiMode = (event.currentTarget as HTMLInputElement).checked;
     updateYamiControlsState();
+    updateYamiDockValue();
     applyDrawCompositeOperation();
     persist();
   });
@@ -348,6 +398,7 @@ export function bindUiEvents(): void {
   symmetryMode.addEventListener("change", (event) => {
     app.isSymmetryMode = (event.currentTarget as HTMLInputElement).checked;
     updateSymmetryControlsState();
+    updateSymmetryDockValue();
     persist();
   });
 
@@ -360,12 +411,14 @@ export function bindUiEvents(): void {
     app.symmetryType = ((event.currentTarget as HTMLSelectElement).value === "mirror"
       ? "mirror"
       : "rotate");
+    updateSymmetryDockValue();
     persist();
   });
 
   symmetryCount.addEventListener("change", (event) => {
     const value = Number((event.currentTarget as HTMLSelectElement).value);
     app.symmetryCount = [2, 4, 6, 8].includes(value) ? value : 4;
+    updateSymmetryDockValue();
     persist();
   });
 
@@ -385,8 +438,9 @@ export function bindUiEvents(): void {
     applySymmetryOriginY(50);
   });
 
-  byId<HTMLInputElement>("fade_mode").addEventListener("change", (event) => {
+  fadeMode.addEventListener("change", (event) => {
     app.isFadeMode = (event.currentTarget as HTMLInputElement).checked;
+    updateModeDockValue();
     persist();
   });
 
@@ -500,13 +554,13 @@ export function bindUiEvents(): void {
   applySize(safeSettings.size);
   applyColor(safeSettings.colorHex);
 
-  byId<HTMLInputElement>("rainbow_mode").checked = safeSettings.rainbowMode;
+  rainbowMode.checked = safeSettings.rainbowMode;
   app.isRainbowMode = safeSettings.rainbowMode;
 
-  byId<HTMLInputElement>("fade_mode").checked = safeSettings.fadeMode;
+  fadeMode.checked = safeSettings.fadeMode;
   app.isFadeMode = safeSettings.fadeMode;
 
-  byId<HTMLInputElement>("auto_mode").checked = safeSettings.autoMode;
+  autoMode.checked = safeSettings.autoMode;
   app.isAutoMode = safeSettings.autoMode;
 
   yamiMode.checked = safeSettings.yamiMode;
@@ -529,5 +583,8 @@ export function bindUiEvents(): void {
   exportScale.value = String(safeSettings.exportScale);
 
   updateSymmetryControlsState();
+  updateModeDockValue();
+  updateYamiDockValue();
+  updateSymmetryDockValue();
   refreshUndoRedoButtons();
 }
