@@ -224,6 +224,12 @@ export function bindUiEvents(): void {
     persist();
   };
 
+  const updateYamiControlsState = () => {
+    const disabled = !app.isYamiMode;
+    yamiStrength.disabled = disabled;
+    yamiStrength.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
   const commitHistory = () => {
     captureHistorySnapshot();
     refreshUndoRedoButtons();
@@ -276,6 +282,7 @@ export function bindUiEvents(): void {
 
   yamiMode.addEventListener("change", (event) => {
     app.isYamiMode = (event.currentTarget as HTMLInputElement).checked;
+    updateYamiControlsState();
     applyDrawCompositeOperation();
     persist();
   });
@@ -456,6 +463,7 @@ export function bindUiEvents(): void {
   yamiMode.checked = safeSettings.yamiMode;
   app.isYamiMode = safeSettings.yamiMode;
   applyYamiStrength(safeSettings.yamiStrength);
+  updateYamiControlsState();
   applyDrawCompositeOperation();
 
   symmetryMode.checked = safeSettings.symmetryMode;

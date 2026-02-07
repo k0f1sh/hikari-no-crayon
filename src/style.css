@@ -219,6 +219,11 @@ body {
   gap: 8px;
 }
 
+#yh {
+  display: grid;
+  gap: 8px;
+}
+
 #sy {
   display: grid;
   gap: 8px;
