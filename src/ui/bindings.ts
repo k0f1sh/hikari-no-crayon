@@ -122,6 +122,8 @@ export function bindUiEvents(): void {
   const yamiMode = byId<HTMLInputElement>("yami_mode");
   const yamiStrength = byId<HTMLInputElement>("yami_strength");
   const yamiStrengthValue = byId<HTMLElement>("yami_strength_value");
+  const recordButton = byId<HTMLElement>("record_button");
+  const recordStatus = byId<HTMLElement>("record_status");
 
   const persist = () => {
     const settings: PersistedSettings = {
@@ -480,6 +482,109 @@ export function bindUiEvents(): void {
     exportPng({
       scale: 1,
     });
+  });
+
+  let isRecording = false;
+  let recordTicker: number | null = null;
+
+  const setRecordingStatusText = (secondsLeft: number) => {
+    recordStatus.textContent = `● 録画中 ${secondsLeft}s`;
+  };
+
+  const clearRecordingTicker = () => {
+    if (recordTicker !== null) {
+      window.clearInterval(recordTicker);
+      recordTicker = null;
+    }
+  };
+
+  const setRecordingState = (recording: boolean) => {
+    isRecording = recording;
+    recordButton.classList.toggle("is-disabled", recording);
+    recordButton.setAttribute("aria-disabled", String(recording));
+    recordButton.textContent = recording ? "録画中..." : "10秒録画";
+    recordStatus.classList.toggle("is-visible", recording);
+    if (!recording) {
+      clearRecordingTicker();
+    }
+  };
+
+  recordButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (isRecording) {
+      return;
+    }
+    if (typeof MediaRecorder === "undefined") {
+      window.alert("このブラウザは録画に対応していません。");
+      return;
+    }
+
+    const canvas = requireCanvas();
+    if (typeof canvas.captureStream !== "function") {
+      window.alert("このブラウザは録画に対応していません。");
+      return;
+    }
+
+    const stream = canvas.captureStream(60);
+    const optionsList = [
+      "video/webm;codecs=vp9",
+      "video/webm;codecs=vp8",
+      "video/webm",
+    ];
+    const mimeType = optionsList.find((type) => MediaRecorder.isTypeSupported(type));
+    const recorder = mimeType
+      ? new MediaRecorder(stream, { mimeType })
+      : new MediaRecorder(stream);
+    const chunks: BlobPart[] = [];
+
+    setRecordingState(true);
+    setRecordingStatusText(10);
+    const startedAt = Date.now();
+    recordTicker = window.setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = Math.max(0, 10 - elapsed);
+      setRecordingStatusText(remaining);
+    }, 200);
+    closePanels();
+
+    recorder.addEventListener("dataavailable", (e) => {
+      if (e.data.size > 0) {
+        chunks.push(e.data);
+      }
+    });
+
+    recorder.addEventListener("stop", () => {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.href = url;
+      link.download = `hikari-no-crayon-${timestamp}.webm`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setRecordingState(false);
+    });
+
+    recorder.addEventListener("error", () => {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setRecordingState(false);
+      window.alert("録画に失敗しました。");
+    });
+
+    recorder.start(250);
+    window.setTimeout(() => {
+      if (recorder.state !== "inactive") {
+        recorder.stop();
+      }
+    }, 10_000);
   });
 
   undoButton.addEventListener("click", () => {
