@@ -12,6 +12,7 @@
       <div id="contentWrapper">
         <div id="canvasField">
           <canvas id="canvas"></canvas>
+          <canvas id="hud"></canvas>
         </div>
 
         <div id="switch">hide</div>
@@ -90,6 +91,30 @@
             <label class="mode_button">
               <input type="checkbox" id="auto_mode" value="true" />
               <span>おーともーど</span>
+            </label>
+            <label class="mode_button">
+              <input type="checkbox" id="symmetry_mode" value="true" />
+              <span>たいしょうもーど</span>
+            </label>
+            <label class="mode_button">
+              <input type="checkbox" id="symmetry_hud" value="true" />
+              <span>じくひょうじ</span>
+            </label>
+            <label class="export_label">
+              <span>たいしょうしゅるい</span>
+              <select id="symmetry_type">
+                <option value="rotate" selected>かいてん</option>
+                <option value="mirror">みらー</option>
+              </select>
+            </label>
+            <label class="export_label">
+              <span>たいしょうぶんかつ</span>
+              <select id="symmetry_count">
+                <option value="2">2</option>
+                <option value="4" selected>4</option>
+                <option value="6">6</option>
+                <option value="8">8</option>
+              </select>
             </label>
           </div>
 

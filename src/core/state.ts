@@ -5,6 +5,8 @@ export const app = {
   c: null as CanvasRenderingContext2D | null,
   preCanvas: null as HTMLCanvasElement | null,
   preC: null as CanvasRenderingContext2D | null,
+  hudCanvas: null as HTMLCanvasElement | null,
+  hudC: null as CanvasRenderingContext2D | null,
   width: 0,
   height: 0,
   count: 0,
@@ -14,6 +16,10 @@ export const app = {
   isRainbowMode: false,
   isFadeMode: false,
   isAutoMode: false,
+  isSymmetryMode: false,
+  isSymmetryHudVisible: true,
+  symmetryType: "rotate" as "rotate" | "mirror",
+  symmetryCount: 4,
   margin: 40,
   toolboxWidth: 200,
   blurRadius: 15,
@@ -46,4 +52,11 @@ export function requireCanvas(): HTMLCanvasElement {
     throw new Error("Canvas is not initialized");
   }
   return app.canvas;
+}
+
+export function requireHudContext(): CanvasRenderingContext2D {
+  if (!app.hudC) {
+    throw new Error("HUD canvas context is not initialized");
+  }
+  return app.hudC;
 }

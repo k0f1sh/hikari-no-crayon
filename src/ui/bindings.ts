@@ -133,6 +133,10 @@ export function bindUiEvents(): void {
   const exportTransparent = byId<HTMLInputElement>("export_transparent");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
+  const symmetryMode = byId<HTMLInputElement>("symmetry_mode");
+  const symmetryHud = byId<HTMLInputElement>("symmetry_hud");
+  const symmetryType = byId<HTMLSelectElement>("symmetry_type");
+  const symmetryCount = byId<HTMLSelectElement>("symmetry_count");
 
   const persist = () => {
     const settings: PersistedSettings = {
@@ -142,10 +146,46 @@ export function bindUiEvents(): void {
       rainbowMode: app.isRainbowMode,
       fadeMode: app.isFadeMode,
       autoMode: app.isAutoMode,
+      symmetryMode: app.isSymmetryMode,
+      symmetryHud: app.isSymmetryHudVisible,
+      symmetryType: app.symmetryType,
+      symmetryCount: app.symmetryCount,
       exportScale: Number(exportScale.value),
       exportTransparent: exportTransparent.checked,
     };
     saveSettings(settings);
+  };
+
+  const drawWithSymmetry = (x: number, y: number) => {
+    if (!app.penTool) {
+      return;
+    }
+
+    if (!app.isSymmetryMode) {
+      app.penTool.draw(x, y);
+      return;
+    }
+
+    const centerX = app.width / 2;
+    const centerY = app.height / 2;
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const count = Math.max(1, app.symmetryCount);
+
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const rx = dx * cos - dy * sin;
+      const ry = dx * sin + dy * cos;
+      app.penTool.draw(centerX + rx, centerY + ry);
+
+      if (app.symmetryType === "mirror") {
+        const mx = dx * cos + dy * sin;
+        const my = dx * sin - dy * cos;
+        app.penTool.draw(centerX + mx, centerY + my);
+      }
+    }
   };
 
   const refreshUndoRedoButtons = () => {
@@ -232,6 +272,29 @@ export function bindUiEvents(): void {
     persist();
   });
 
+  symmetryMode.addEventListener("change", (event) => {
+    app.isSymmetryMode = (event.currentTarget as HTMLInputElement).checked;
+    persist();
+  });
+
+  symmetryHud.addEventListener("change", (event) => {
+    app.isSymmetryHudVisible = (event.currentTarget as HTMLInputElement).checked;
+    persist();
+  });
+
+  symmetryType.addEventListener("change", (event) => {
+    app.symmetryType = ((event.currentTarget as HTMLSelectElement).value === "mirror"
+      ? "mirror"
+      : "rotate");
+    persist();
+  });
+
+  symmetryCount.addEventListener("change", (event) => {
+    const value = Number((event.currentTarget as HTMLSelectElement).value);
+    app.symmetryCount = [2, 4, 6, 8].includes(value) ? value : 4;
+    persist();
+  });
+
   byId<HTMLInputElement>("fade_mode").addEventListener("change", (event) => {
     app.isFadeMode = (event.currentTarget as HTMLInputElement).checked;
     persist();
@@ -313,7 +376,7 @@ export function bindUiEvents(): void {
     setPointerPosition(event);
     app.c!.globalCompositeOperation = "lighter";
     if (app.isDown && app.penTool) {
-      app.penTool.draw(event.pageX, event.pageY);
+      drawWithSymmetry(event.pageX, event.pageY);
       app.didDrawInStroke = true;
     }
   });
@@ -322,7 +385,7 @@ export function bindUiEvents(): void {
     app.isDown = true;
     app.didDrawInStroke = false;
     setPointerPosition(event);
-    app.penTool?.draw(event.pageX, event.pageY);
+    drawWithSymmetry(event.pageX, event.pageY);
     app.didDrawInStroke = true;
   });
 
@@ -365,6 +428,15 @@ export function bindUiEvents(): void {
 
   byId<HTMLInputElement>("auto_mode").checked = safeSettings.autoMode;
   app.isAutoMode = safeSettings.autoMode;
+
+  symmetryMode.checked = safeSettings.symmetryMode;
+  app.isSymmetryMode = safeSettings.symmetryMode;
+  symmetryHud.checked = safeSettings.symmetryHud;
+  app.isSymmetryHudVisible = safeSettings.symmetryHud;
+  symmetryType.value = safeSettings.symmetryType;
+  app.symmetryType = safeSettings.symmetryType;
+  symmetryCount.value = String(safeSettings.symmetryCount);
+  app.symmetryCount = [2, 4, 6, 8].includes(safeSettings.symmetryCount) ? safeSettings.symmetryCount : 4;
 
   exportScale.value = String(safeSettings.exportScale);
   exportTransparent.checked = safeSettings.exportTransparent;
