@@ -10,6 +10,7 @@ import { HoshiPen } from "./pens/HoshiPen";
 import { NamiPen } from "./pens/NamiPen";
 import { NormalPen } from "./pens/NormalPen";
 import { OrbitPen } from "./pens/OrbitPen";
+import { FractalBloomPen } from "./pens/FractalBloomPen";
 import { SnowPen } from "./pens/SnowPen";
 import { SprayPen } from "./pens/SprayPen";
 import { ShinmyakuPen } from "./pens/ShinmyakuPen";
@@ -27,6 +28,7 @@ export function createPenTools(): PenToolMap {
     spray_pen: new SprayPen(),
     bubble_pen: new BubblePen(),
     orbit_pen: new OrbitPen(),
+    fractal_bloom_pen: new FractalBloomPen(),
     degi_pen: new DegiPen(),
     shinmyaku_pen: new ShinmyakuPen(),
   };

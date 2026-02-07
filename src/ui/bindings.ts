@@ -110,6 +110,7 @@ const PEN_CATALOG = [
   { value: "spray_pen", icon: "霧", name: "すぷれーかん" },
   { value: "bubble_pen", icon: "泡", name: "あわすぷれー" },
   { value: "orbit_pen", icon: "彗", name: "おーびっとぺん" },
+  { value: "fractal_bloom_pen", icon: "渦", name: "ふらくたるぶるーむ" },
   { value: "degi_pen", icon: "電", name: "でじたるぺん" },
   { value: "shinmyaku_pen", icon: "脈", name: "しんみゃくぺん" },
 ] as const;
