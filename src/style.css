@@ -398,7 +398,7 @@ body {
 
 .button_row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
   width: 100%;
   max-width: var(--ui-max);
@@ -457,17 +457,6 @@ body {
   accent-color: #66bcff;
 }
 
-#export_scale {
-  width: 100%;
-  min-height: 38px;
-  border: 1px solid rgba(162, 193, 255, 0.45);
-  border-radius: 0;
-  background: linear-gradient(140deg, rgba(15, 24, 46, 0.95), rgba(8, 14, 28, 0.93));
-  color: var(--text);
-  padding: 7px 8px;
-}
-
-#export_scale:disabled,
 #symmetry_type:disabled,
 #symmetry_count:disabled {
   opacity: 0.65;

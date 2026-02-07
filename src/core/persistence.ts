@@ -18,7 +18,6 @@ export interface PersistedSettings {
   symmetryCount: number;
   symmetryOriginX: number;
   symmetryOriginY: number;
-  exportScale: number;
 }
 
 export const defaultPersistedSettings: PersistedSettings = {
@@ -36,7 +35,6 @@ export const defaultPersistedSettings: PersistedSettings = {
   symmetryCount: 4,
   symmetryOriginX: 50,
   symmetryOriginY: 50,
-  exportScale: 1,
 };
 
 export function loadSettings(): PersistedSettings {
@@ -55,7 +53,6 @@ export function loadSettings(): PersistedSettings {
       symmetryCount: Number(parsed.symmetryCount ?? defaultPersistedSettings.symmetryCount),
       symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),
       symmetryOriginY: Number(parsed.symmetryOriginY ?? defaultPersistedSettings.symmetryOriginY),
-      exportScale: Number(parsed.exportScale ?? defaultPersistedSettings.exportScale),
       colorHex: typeof parsed.colorHex === "string" ? parsed.colorHex : defaultPersistedSettings.colorHex,
       symmetryType:
         parsed.symmetryType === "mirror" || parsed.symmetryType === "rotate"

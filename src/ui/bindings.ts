@@ -104,7 +104,6 @@ export function bindUiEvents(): void {
   const yamiDockValue = byId<HTMLElement>("yami_dock_value");
   const symmetryDockValue = byId<HTMLElement>("symmetry_dock_value");
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
-  const exportScale = byId<HTMLSelectElement>("export_scale");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
   const rainbowMode = byId<HTMLInputElement>("rainbow_mode");
@@ -140,7 +139,6 @@ export function bindUiEvents(): void {
       symmetryCount: app.symmetryCount,
       symmetryOriginX: Math.round(app.symmetryOriginX * 100),
       symmetryOriginY: Math.round(app.symmetryOriginY * 100),
-      exportScale: Number(exportScale.value),
     };
     saveSettings(settings);
   };
@@ -444,8 +442,6 @@ export function bindUiEvents(): void {
     persist();
   });
 
-  exportScale.addEventListener("change", persist);
-
   byId<HTMLElement>("clear_button").addEventListener("click", () => {
     clear(app.c!);
     app.effects = [];
@@ -459,7 +455,7 @@ export function bindUiEvents(): void {
 
   byId<HTMLElement>("save_button").addEventListener("click", () => {
     exportPng({
-      scale: Number(exportScale.value),
+      scale: 1,
     });
   });
 
@@ -579,8 +575,6 @@ export function bindUiEvents(): void {
   app.symmetryCount = [2, 4, 6, 8].includes(safeSettings.symmetryCount) ? safeSettings.symmetryCount : 4;
   applySymmetryOriginX(safeSettings.symmetryOriginX);
   applySymmetryOriginY(safeSettings.symmetryOriginY);
-
-  exportScale.value = String(safeSettings.exportScale);
 
   updateSymmetryControlsState();
   updateModeDockValue();
