@@ -94,7 +94,8 @@ function setPointerPosition(event: PointerEvent): void {
 }
 
 export function bindUiEvents(): void {
-  const dockToggle = byId<HTMLButtonElement>("switch");
+  const dockShowButton = byId<HTMLButtonElement>("dock_show_button");
+  const dockHideButton = byId<HTMLButtonElement>("dock_hide_button");
   const menu = byId<HTMLElement>("menu");
   const dock = byId<HTMLElement>("bottom_dock");
   const sizeRange = byId<HTMLInputElement>("dock_size_range");
@@ -358,17 +359,18 @@ export function bindUiEvents(): void {
   const applyDockVisibility = (visible: boolean) => {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
-    dockToggle.textContent = visible ? "dock hide" : "dock show";
+    dockShowButton.style.display = visible ? "none" : "block";
     if (!visible) {
       closePanels();
     }
   };
 
-  dockToggle.addEventListener("click", () => {
-    applyDockVisibility(!isDockVisible);
-    if (isDockVisible && !activePanelId) {
-      setActivePanel("pl");
-    }
+  dockHideButton.addEventListener("click", () => {
+    applyDockVisibility(false);
+  });
+
+  dockShowButton.addEventListener("click", () => {
+    applyDockVisibility(true);
   });
 
   const penGroup = setupRadioGroup("pen", (value) => {
