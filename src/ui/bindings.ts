@@ -94,6 +94,7 @@ function setPointerPosition(event: PointerEvent): void {
 }
 
 export function bindUiEvents(): void {
+  const dockToggle = byId<HTMLButtonElement>("switch");
   const menu = byId<HTMLElement>("menu");
   const dock = byId<HTMLElement>("bottom_dock");
   const sizeRange = byId<HTMLInputElement>("size_range");
@@ -255,8 +256,23 @@ export function bindUiEvents(): void {
     acc[id] = byId<HTMLElement>(id);
     return acc;
   }, {});
+  let activePanelId: string | null = null;
+  let isDockVisible = true;
+
+  const closePanels = () => {
+    panelIds.forEach((id) => {
+      panels[id].style.display = "none";
+    });
+    dockButtons.forEach((button) => {
+      button.classList.remove("is-active");
+    });
+    activePanelId = null;
+    menu.style.display = "none";
+  };
 
   const setActivePanel = (panelId: string) => {
+    activePanelId = panelId;
+    menu.style.display = "";
     panelIds.forEach((id) => {
       panels[id].style.display = id === panelId ? "" : "none";
     });
@@ -272,8 +288,28 @@ export function bindUiEvents(): void {
       if (!panelId || !panels[panelId]) {
         return;
       }
+      if (activePanelId === panelId) {
+        closePanels();
+        return;
+      }
       setActivePanel(panelId);
     });
+  });
+
+  const applyDockVisibility = (visible: boolean) => {
+    isDockVisible = visible;
+    dock.style.display = visible ? "" : "none";
+    dockToggle.textContent = visible ? "dock hide" : "dock show";
+    if (!visible) {
+      closePanels();
+    }
+  };
+
+  dockToggle.addEventListener("click", () => {
+    applyDockVisibility(!isDockVisible);
+    if (isDockVisible && !activePanelId) {
+      setActivePanel("pl");
+    }
   });
 
   const penGroup = setupRadioGroup("pen", (value) => {
@@ -462,6 +498,7 @@ export function bindUiEvents(): void {
     ...settings,
   };
 
+  applyDockVisibility(true);
   penGroup.selectByValue(safeSettings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
   setActivePanel("pl");
   applySize(safeSettings.size);
