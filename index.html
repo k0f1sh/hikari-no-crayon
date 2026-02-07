@@ -14,6 +14,9 @@
         <div id="canvasField">
           <canvas id="canvas"></canvas>
           <canvas id="hud"></canvas>
+          <div id="record_frame_hud" aria-hidden="true">
+            <span id="record_frame_hud_label"></span>
+          </div>
           <div id="record_status" aria-live="polite">● 録画中 10s</div>
         </div>
 
@@ -164,6 +167,15 @@
               <li><a class="btn btn-primary btn-large" id="save_button">PNGほぞん</a></li>
               <li class="export_row">
                 <label class="export_label">
+                  <span>ろくが ぷりせっと</span>
+                  <select id="record_preset">
+                    <option value="standard" selected>ひょうじゅん (10s / 60fps)</option>
+                    <option value="short_standard">しょーと きれい (15s / 1080x1920)</option>
+                    <option value="short_light">しょーと かるめ (15s / 720x1280)</option>
+                    <option value="custom">かすたむ</option>
+                  </select>
+                </label>
+                <label class="export_label">
                   <span>ろくが びょうすう</span>
                   <input type="number" id="record_seconds" min="1" max="120" step="1" value="10" />
                 </label>
@@ -175,6 +187,8 @@
                   <span>ろくが かいぞうど</span>
                   <select id="record_resolution">
                     <option value="source" selected>げんざいのきゃんばす</option>
+                    <option value="1080x1920">1080x1920 (たて)</option>
+                    <option value="720x1280">720x1280 (たて)</option>
                     <option value="1920x1080">1920x1080</option>
                     <option value="1280x720">1280x720</option>
                     <option value="854x480">854x480</option>

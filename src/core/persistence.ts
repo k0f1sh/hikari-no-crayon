@@ -20,6 +20,11 @@ export interface PersistedSettings {
   symmetryCount: number;
   symmetryOriginX: number;
   symmetryOriginY: number;
+  recordPreset: string;
+  recordSeconds: number;
+  recordFps: number;
+  recordResolution: string;
+  recordQuality: string;
 }
 
 export const defaultPersistedSettings: PersistedSettings = {
@@ -39,6 +44,11 @@ export const defaultPersistedSettings: PersistedSettings = {
   symmetryCount: 4,
   symmetryOriginX: 50,
   symmetryOriginY: 50,
+  recordPreset: "standard",
+  recordSeconds: 10,
+  recordFps: 60,
+  recordResolution: "source",
+  recordQuality: "auto",
 };
 
 export function loadSettings(): PersistedSettings {
@@ -60,6 +70,20 @@ export function loadSettings(): PersistedSettings {
       symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),
       symmetryOriginY: Number(parsed.symmetryOriginY ?? defaultPersistedSettings.symmetryOriginY),
       colorHex: typeof parsed.colorHex === "string" ? parsed.colorHex : defaultPersistedSettings.colorHex,
+      recordPreset:
+        typeof parsed.recordPreset === "string"
+          ? parsed.recordPreset
+          : defaultPersistedSettings.recordPreset,
+      recordSeconds: Number(parsed.recordSeconds ?? defaultPersistedSettings.recordSeconds),
+      recordFps: Number(parsed.recordFps ?? defaultPersistedSettings.recordFps),
+      recordResolution:
+        typeof parsed.recordResolution === "string"
+          ? parsed.recordResolution
+          : defaultPersistedSettings.recordResolution,
+      recordQuality:
+        typeof parsed.recordQuality === "string"
+          ? parsed.recordQuality
+          : defaultPersistedSettings.recordQuality,
       symmetryType:
         parsed.symmetryType === "mirror" || parsed.symmetryType === "rotate"
           ? parsed.symmetryType

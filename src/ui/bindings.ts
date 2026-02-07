@@ -127,6 +127,7 @@ export function bindUiEvents(): void {
   const yamiMode = byId<HTMLInputElement>("yami_mode");
   const yamiStrength = byId<HTMLInputElement>("yami_strength");
   const yamiStrengthValue = byId<HTMLElement>("yami_strength_value");
+  const recordPresetInput = byId<HTMLSelectElement>("record_preset");
   const recordSecondsInput = byId<HTMLInputElement>("record_seconds");
   const recordFpsInput = byId<HTMLInputElement>("record_fps");
   const recordResolutionInput = byId<HTMLSelectElement>("record_resolution");
@@ -134,8 +135,14 @@ export function bindUiEvents(): void {
   const recordButton = byId<HTMLElement>("record_button");
   const resetSettingsButton = byId<HTMLElement>("reset_settings_button");
   const recordStatus = byId<HTMLElement>("record_status");
+  const recordFrameHud = byId<HTMLElement>("record_frame_hud");
+  const recordFrameHudLabel = byId<HTMLElement>("record_frame_hud_label");
+  let shouldPersist = true;
 
   const persist = () => {
+    if (!shouldPersist) {
+      return;
+    }
     const settings: PersistedSettings = {
       pen: app.selectedPenName,
       size: app.penSize,
@@ -153,6 +160,11 @@ export function bindUiEvents(): void {
       symmetryCount: app.symmetryCount,
       symmetryOriginX: Math.round(app.symmetryOriginX * 100),
       symmetryOriginY: Math.round(app.symmetryOriginY * 100),
+      recordPreset: recordPresetInput.value,
+      recordSeconds: Number(recordSecondsInput.value),
+      recordFps: Number(recordFpsInput.value),
+      recordResolution: recordResolutionInput.value,
+      recordQuality: recordQualityInput.value,
     };
     saveSettings(settings);
   };
@@ -533,11 +545,41 @@ export function bindUiEvents(): void {
   let isRecording = false;
   let recordTicker: number | null = null;
   let durationSeconds = 10;
+  type RecordPresetKey = "standard" | "short_standard" | "short_light" | "custom";
+  type RecordFormValues = {
+    seconds: number;
+    fps: number;
+    resolution: string;
+    quality: string;
+  };
+
+  const recordPresetConfigs: Record<Exclude<RecordPresetKey, "custom">, RecordFormValues> = {
+    standard: {
+      seconds: 10,
+      fps: 60,
+      resolution: "source",
+      quality: "auto",
+    },
+    short_standard: {
+      seconds: 15,
+      fps: 30,
+      resolution: "1080x1920",
+      quality: "10000000",
+    },
+    short_light: {
+      seconds: 15,
+      fps: 30,
+      resolution: "720x1280",
+      quality: "5000000",
+    },
+  };
+
   const defaultRecordSettings = {
-    seconds: 10,
-    fps: 60,
-    resolution: "source",
-    quality: "auto",
+    preset: defaultPersistedSettings.recordPreset as RecordPresetKey,
+    seconds: defaultPersistedSettings.recordSeconds,
+    fps: defaultPersistedSettings.recordFps,
+    resolution: defaultPersistedSettings.recordResolution,
+    quality: defaultPersistedSettings.recordQuality,
   };
 
   const clampNumber = (value: number, min: number, max: number, fallback: number): number => {
@@ -545,6 +587,60 @@ export function bindUiEvents(): void {
       return fallback;
     }
     return Math.max(min, Math.min(max, Math.round(value)));
+  };
+
+  const hasOption = (select: HTMLSelectElement, value: string): boolean =>
+    Array.from(select.options).some((option) => option.value === value);
+
+  const sanitizePreset = (value: string): RecordPresetKey => {
+    if (value === "standard" || value === "short_standard" || value === "short_light" || value === "custom") {
+      return value;
+    }
+    return "standard";
+  };
+
+  const getRecordFormValues = (): RecordFormValues => {
+    const seconds = clampNumber(Number(recordSecondsInput.value), 1, 120, defaultRecordSettings.seconds);
+    const fps = clampNumber(Number(recordFpsInput.value), 1, 60, defaultRecordSettings.fps);
+    const resolution = hasOption(recordResolutionInput, recordResolutionInput.value)
+      ? recordResolutionInput.value
+      : defaultRecordSettings.resolution;
+    const quality = hasOption(recordQualityInput, recordQualityInput.value)
+      ? recordQualityInput.value
+      : defaultRecordSettings.quality;
+
+    return { seconds, fps, resolution, quality };
+  };
+
+  const applyRecordFormValues = (values: RecordFormValues) => {
+    const normalized: RecordFormValues = {
+      seconds: clampNumber(values.seconds, 1, 120, defaultRecordSettings.seconds),
+      fps: clampNumber(values.fps, 1, 60, defaultRecordSettings.fps),
+      resolution: hasOption(recordResolutionInput, values.resolution)
+        ? values.resolution
+        : defaultRecordSettings.resolution,
+      quality: hasOption(recordQualityInput, values.quality) ? values.quality : defaultRecordSettings.quality,
+    };
+
+    recordSecondsInput.value = String(normalized.seconds);
+    recordFpsInput.value = String(normalized.fps);
+    recordResolutionInput.value = normalized.resolution;
+    recordQualityInput.value = normalized.quality;
+    updateRecordFrameHud();
+  };
+
+  const getMatchingRecordPreset = (values: RecordFormValues): Exclude<RecordPresetKey, "custom"> | null => {
+    const entries = Object.entries(recordPresetConfigs) as Array<
+      [Exclude<RecordPresetKey, "custom">, RecordFormValues]
+    >;
+    const match = entries.find(
+      ([, preset]) =>
+        preset.seconds === values.seconds &&
+        preset.fps === values.fps &&
+        preset.resolution === values.resolution &&
+        preset.quality === values.quality,
+    );
+    return match ? match[0] : null;
   };
 
   const parseResolution = (value: string): { width: number; height: number } | null => {
@@ -562,27 +658,72 @@ export function bindUiEvents(): void {
     return { width, height };
   };
 
-  const getRecordingConfig = () => {
-    const seconds = clampNumber(Number(recordSecondsInput.value), 1, 120, 10);
-    const fps = clampNumber(Number(recordFpsInput.value), 1, 60, 60);
-    const resolution = parseResolution(recordResolutionInput.value);
-    const quality =
-      recordQualityInput.value === "auto"
-        ? undefined
-        : clampNumber(Number(recordQualityInput.value), 100_000, 50_000_000, 5_000_000);
+  const computeCenteredAspectCropRect = (
+    sourceWidth: number,
+    sourceHeight: number,
+    targetAspect: number,
+  ): { x: number; y: number; width: number; height: number } => {
+    if (!Number.isFinite(targetAspect) || targetAspect <= 0 || sourceWidth <= 0 || sourceHeight <= 0) {
+      return { x: 0, y: 0, width: sourceWidth, height: sourceHeight };
+    }
 
-    recordSecondsInput.value = String(seconds);
-    recordFpsInput.value = String(fps);
+    const sourceAspect = sourceWidth / sourceHeight;
+    if (Math.abs(sourceAspect - targetAspect) < 0.0001) {
+      return { x: 0, y: 0, width: sourceWidth, height: sourceHeight };
+    }
+
+    if (sourceAspect > targetAspect) {
+      const cropWidth = Math.max(1, Math.round(sourceHeight * targetAspect));
+      const x = Math.round((sourceWidth - cropWidth) / 2);
+      return { x, y: 0, width: cropWidth, height: sourceHeight };
+    }
+
+    const cropHeight = Math.max(1, Math.round(sourceWidth / targetAspect));
+    const y = Math.round((sourceHeight - cropHeight) / 2);
+    return { x: 0, y, width: sourceWidth, height: cropHeight };
+  };
+
+  const updateRecordFrameHud = () => {
+    if (!isRecording) {
+      recordFrameHud.classList.remove("is-visible");
+      return;
+    }
+
+    const resolution = parseResolution(recordResolutionInput.value);
     if (!resolution) {
-      recordResolutionInput.value = "source";
+      recordFrameHud.classList.remove("is-visible");
+      return;
     }
-    if (quality === undefined) {
-      recordQualityInput.value = "auto";
-    }
+
+    const sourceCanvas = requireCanvas();
+    const crop = computeCenteredAspectCropRect(
+      sourceCanvas.width,
+      sourceCanvas.height,
+      resolution.width / resolution.height,
+    );
+    const scaleX = sourceCanvas.clientWidth / sourceCanvas.width;
+    const scaleY = sourceCanvas.clientHeight / sourceCanvas.height;
+    recordFrameHud.style.left = `${crop.x * scaleX}px`;
+    recordFrameHud.style.top = `${crop.y * scaleY}px`;
+    recordFrameHud.style.width = `${crop.width * scaleX}px`;
+    recordFrameHud.style.height = `${crop.height * scaleY}px`;
+    recordFrameHudLabel.textContent = `${resolution.width}x${resolution.height} クロップ`;
+    recordFrameHud.classList.add("is-visible");
+  };
+
+  const getRecordingConfig = () => {
+    const formValues = getRecordFormValues();
+    const resolution = parseResolution(formValues.resolution);
+    const quality =
+      formValues.quality === "auto"
+        ? undefined
+        : clampNumber(Number(formValues.quality), 100_000, 50_000_000, 5_000_000);
+
+    applyRecordFormValues(formValues);
 
     return {
-      seconds,
-      fps,
+      seconds: formValues.seconds,
+      fps: formValues.fps,
       quality,
       resolution,
     };
@@ -598,11 +739,36 @@ export function bindUiEvents(): void {
     recordButton.textContent = `${seconds}秒録画`;
   };
 
-  const applyDefaultRecordSettings = () => {
-    recordSecondsInput.value = String(defaultRecordSettings.seconds);
-    recordFpsInput.value = String(defaultRecordSettings.fps);
-    recordResolutionInput.value = defaultRecordSettings.resolution;
-    recordQualityInput.value = defaultRecordSettings.quality;
+  const updateRecordPresetFromInputs = () => {
+    const matchingPreset = getMatchingRecordPreset(getRecordFormValues());
+    recordPresetInput.value = matchingPreset ?? "custom";
+  };
+
+  const applyRecordPreset = (preset: RecordPresetKey) => {
+    if (preset !== "custom") {
+      applyRecordFormValues(recordPresetConfigs[preset]);
+      recordPresetInput.value = preset;
+    } else {
+      updateRecordPresetFromInputs();
+    }
+    refreshRecordButtonText();
+  };
+
+  const applyRecordSettingsFromStorage = (settings: PersistedSettings) => {
+    const preset = sanitizePreset(settings.recordPreset);
+    const customValues: RecordFormValues = {
+      seconds: settings.recordSeconds,
+      fps: settings.recordFps,
+      resolution: settings.recordResolution,
+      quality: settings.recordQuality,
+    };
+
+    if (preset === "custom") {
+      applyRecordFormValues(customValues);
+      updateRecordPresetFromInputs();
+    } else {
+      applyRecordPreset(preset);
+    }
     refreshRecordButtonText();
   };
 
@@ -623,12 +789,38 @@ export function bindUiEvents(): void {
     recordButton.setAttribute("aria-disabled", String(recording));
     recordButton.textContent = recording ? "録画中..." : `${durationSeconds}秒録画`;
     recordStatus.classList.toggle("is-visible", recording);
+    updateRecordFrameHud();
     if (!recording) {
       clearRecordingTicker();
     }
   };
 
-  recordSecondsInput.addEventListener("input", refreshRecordButtonText);
+  recordSecondsInput.addEventListener("input", () => {
+    refreshRecordButtonText();
+    updateRecordPresetFromInputs();
+    persist();
+  });
+
+  recordFpsInput.addEventListener("input", () => {
+    updateRecordPresetFromInputs();
+    persist();
+  });
+
+  recordResolutionInput.addEventListener("change", () => {
+    updateRecordPresetFromInputs();
+    updateRecordFrameHud();
+    persist();
+  });
+
+  recordQualityInput.addEventListener("change", () => {
+    updateRecordPresetFromInputs();
+    persist();
+  });
+
+  recordPresetInput.addEventListener("change", () => {
+    applyRecordPreset(sanitizePreset(recordPresetInput.value));
+    persist();
+  });
 
   recordButton.addEventListener("click", (event) => {
     event.preventDefault();
@@ -661,8 +853,23 @@ export function bindUiEvents(): void {
         return;
       }
 
+      const crop = computeCenteredAspectCropRect(
+        sourceCanvas.width,
+        sourceCanvas.height,
+        config.resolution.width / config.resolution.height,
+      );
       const drawScaledFrame = () => {
-        scaledContext.drawImage(sourceCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+        scaledContext.drawImage(
+          sourceCanvas,
+          crop.x,
+          crop.y,
+          crop.width,
+          crop.height,
+          0,
+          0,
+          scaledCanvas.width,
+          scaledCanvas.height,
+        );
       };
       drawScaledFrame();
       previewCopyTicker = window.setInterval(drawScaledFrame, Math.max(16, Math.floor(1000 / config.fps)));
@@ -791,6 +998,7 @@ export function bindUiEvents(): void {
 
   const canvas = requireCanvas();
   canvas.style.touchAction = "none";
+  window.addEventListener("resize", updateRecordFrameHud);
 
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
@@ -826,48 +1034,55 @@ export function bindUiEvents(): void {
   });
 
   const applyPersistedSettingsToUi = (settings: PersistedSettings) => {
-    applyDockVisibility(true);
-    penGroup.selectByValue(settings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
-    closePanels();
-    applySize(settings.size);
-    applyColor(settings.colorHex);
+    shouldPersist = false;
+    try {
+      applyDockVisibility(true);
+      penGroup.selectByValue(settings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
+      closePanels();
+      applySize(settings.size);
+      applyColor(settings.colorHex);
 
-    rainbowMode.checked = settings.rainbowMode;
-    app.isRainbowMode = settings.rainbowMode;
-    applyRainbowSaturation(settings.rainbowSaturation);
-    applyRainbowBrightness(settings.rainbowBrightness);
-    updateRainbowControlsState();
+      rainbowMode.checked = settings.rainbowMode;
+      app.isRainbowMode = settings.rainbowMode;
+      applyRainbowSaturation(settings.rainbowSaturation);
+      applyRainbowBrightness(settings.rainbowBrightness);
+      updateRainbowControlsState();
 
-    fadeMode.checked = settings.fadeMode;
-    app.isFadeMode = settings.fadeMode;
+      fadeMode.checked = settings.fadeMode;
+      app.isFadeMode = settings.fadeMode;
 
-    autoMode.checked = settings.autoMode;
-    app.isAutoMode = settings.autoMode;
+      autoMode.checked = settings.autoMode;
+      app.isAutoMode = settings.autoMode;
 
-    yamiMode.checked = settings.yamiMode;
-    app.isYamiMode = settings.yamiMode;
-    applyYamiStrength(settings.yamiStrength);
-    updateYamiControlsState();
-    applyDrawCompositeOperation();
+      yamiMode.checked = settings.yamiMode;
+      app.isYamiMode = settings.yamiMode;
+      applyYamiStrength(settings.yamiStrength);
+      updateYamiControlsState();
+      applyDrawCompositeOperation();
 
-    symmetryMode.checked = settings.symmetryMode;
-    app.isSymmetryMode = settings.symmetryMode;
-    symmetryHud.checked = settings.symmetryHud;
-    app.isSymmetryHudVisible = settings.symmetryHud;
-    symmetryType.value = settings.symmetryType;
-    app.symmetryType = settings.symmetryType;
-    symmetryCount.value = String(settings.symmetryCount);
-    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(settings.symmetryCount)
-      ? settings.symmetryCount
-      : 4;
-    applySymmetryOriginX(settings.symmetryOriginX);
-    applySymmetryOriginY(settings.symmetryOriginY);
+      symmetryMode.checked = settings.symmetryMode;
+      app.isSymmetryMode = settings.symmetryMode;
+      symmetryHud.checked = settings.symmetryHud;
+      app.isSymmetryHudVisible = settings.symmetryHud;
+      symmetryType.value = settings.symmetryType;
+      app.symmetryType = settings.symmetryType;
+      symmetryCount.value = String(settings.symmetryCount);
+      app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(settings.symmetryCount)
+        ? settings.symmetryCount
+        : 4;
+      applySymmetryOriginX(settings.symmetryOriginX);
+      applySymmetryOriginY(settings.symmetryOriginY);
 
-    updateSymmetryControlsState();
-    updateModeDockValue();
-    updateYamiDockValue();
-    updateSymmetryDockValue();
-    refreshUndoRedoButtons();
+      updateSymmetryControlsState();
+      updateModeDockValue();
+      updateYamiDockValue();
+      updateSymmetryDockValue();
+      refreshUndoRedoButtons();
+      applyRecordSettingsFromStorage(settings);
+    } finally {
+      shouldPersist = true;
+    }
+    persist();
   };
 
   resetSettingsButton.addEventListener("click", () => {
@@ -876,7 +1091,6 @@ export function bindUiEvents(): void {
     }
     saveSettings(defaultPersistedSettings);
     applyPersistedSettingsToUi(defaultPersistedSettings);
-    applyDefaultRecordSettings();
   });
 
   const settings = loadSettings();
@@ -886,5 +1100,4 @@ export function bindUiEvents(): void {
   };
 
   applyPersistedSettingsToUi(safeSettings);
-  applyDefaultRecordSettings();
 }
