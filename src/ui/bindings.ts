@@ -245,19 +245,23 @@ export function bindUiEvents(): void {
       activeModes.push("A");
     }
     modeDockValue.textContent = activeModes.length > 0 ? activeModes.join("+") : "OFF";
+    modeDockButton?.classList.toggle("is-on-state", activeModes.length > 0);
   };
 
   const updateYamiDockValue = () => {
     yamiDockValue.textContent = app.isYamiMode ? `ON ${app.yamiStrength}` : "OFF";
+    yamiDockButton?.classList.toggle("is-on-state", app.isYamiMode);
   };
 
   const updateSymmetryDockValue = () => {
     if (!app.isSymmetryMode) {
       symmetryDockValue.textContent = "OFF";
+      symmetryDockButton?.classList.remove("is-on-state");
       return;
     }
     const typeLabel = app.symmetryType === "mirror" ? "M" : "R";
     symmetryDockValue.textContent = `${typeLabel}${app.symmetryCount}`;
+    symmetryDockButton?.classList.add("is-on-state");
   };
 
   const commitHistory = () => {
@@ -280,6 +284,9 @@ export function bindUiEvents(): void {
   };
 
   const dockButtons = Array.from(dock.querySelectorAll<HTMLButtonElement>(".dock_btn"));
+  const modeDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="ml"]');
+  const yamiDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="yh"]');
+  const symmetryDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="sy"]');
   const panelIds = ["pl", "ml", "yh", "sy", "etc"];
   const panels = panelIds.reduce<Record<string, HTMLElement>>((acc, id) => {
     acc[id] = byId<HTMLElement>(id);

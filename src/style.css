@@ -182,6 +182,22 @@ body {
   background: linear-gradient(140deg, rgba(75, 153, 232, 0.35), rgba(118, 246, 208, 0.12));
 }
 
+.dock_btn.is-on-state {
+  border-color: rgba(118, 246, 208, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(118, 246, 208, 0.42), 0 0 14px rgba(118, 246, 208, 0.32);
+}
+
+.dock_btn[data-panel="yh"].is-on-state {
+  border-color: rgba(255, 115, 115, 0.95);
+  background: linear-gradient(140deg, rgba(255, 110, 110, 0.34), rgba(255, 206, 84, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(255, 132, 132, 0.45), 0 0 16px rgba(255, 98, 98, 0.36);
+}
+
+.dock_btn[data-panel="sy"].is-on-state {
+  border-color: rgba(111, 229, 255, 0.95);
+  background: linear-gradient(140deg, rgba(87, 186, 255, 0.34), rgba(111, 229, 255, 0.2));
+}
+
 .dock_btn:hover {
   border-color: rgba(162, 193, 255, 0.6);
   background: rgba(162, 193, 255, 0.16);
@@ -380,9 +396,22 @@ body {
 }
 
 .mode_button:has(input:checked) {
-  border-color: rgba(162, 193, 255, 0.82);
-  background: linear-gradient(140deg, rgba(86, 177, 255, 0.28), rgba(118, 246, 208, 0.11));
-  box-shadow: inset 0 0 0 1px rgba(162, 193, 255, 0.36), 0 8px 16px rgba(0, 0, 0, 0.28);
+  border-color: rgba(162, 193, 255, 0.95);
+  background: linear-gradient(140deg, rgba(86, 177, 255, 0.38), rgba(118, 246, 208, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(162, 193, 255, 0.5), 0 0 16px rgba(111, 229, 255, 0.3);
+  font-weight: 700;
+}
+
+#yh .mode_button:has(#yami_mode:checked) {
+  border-color: rgba(255, 122, 122, 0.98);
+  background: linear-gradient(140deg, rgba(255, 96, 96, 0.42), rgba(255, 196, 82, 0.18));
+  box-shadow: inset 0 0 0 1px rgba(255, 146, 146, 0.52), 0 0 18px rgba(255, 98, 98, 0.42);
+}
+
+#sy .mode_button:has(#symmetry_mode:checked) {
+  border-color: rgba(111, 229, 255, 0.98);
+  background: linear-gradient(140deg, rgba(87, 186, 255, 0.4), rgba(111, 229, 255, 0.2));
+  box-shadow: inset 0 0 0 1px rgba(111, 229, 255, 0.5), 0 0 16px rgba(111, 229, 255, 0.35);
 }
 
 .mode_button input {
