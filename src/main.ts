@@ -5,6 +5,7 @@ import { app } from "./core/state";
 import { clear, drawPreviewCircle } from "./core/draw";
 import { createPenTools, defaultPenName, defaultPenColor } from "./tools";
 import { bindUiEvents } from "./ui/bindings";
+import { captureHistorySnapshot, resetHistory } from "./core/history";
 
 function initCanvas(): void {
   app.width = window.innerWidth;
@@ -77,15 +78,21 @@ function setupResize(): void {
     app.canvas!.width = app.width;
     app.canvas!.height = app.height;
     clear(app.c!);
+    app.effects = [];
+    resetHistory();
+    captureHistorySnapshot();
   });
 }
 
 function init(): void {
   app.penColor = defaultPenColor;
+  app.selectedPenName = defaultPenName;
   app.penTools = createPenTools();
   app.penTool = app.penTools[defaultPenName];
 
   initCanvas();
+  resetHistory();
+  captureHistorySnapshot();
   bindUiEvents();
   setupResize();
   renderLoop();

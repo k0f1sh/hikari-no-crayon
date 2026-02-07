@@ -19,6 +19,13 @@
           <canvas id="pre"></canvas>
           <h1 id="slh">ぺんのおおきさ</h1>
           <ul id="sl" class="size_list">
+            <li class="control_row">
+              <label class="range_label">
+                <span>スライダー</span>
+                <input type="range" id="size_range" min="5" max="400" step="1" value="40" />
+                <strong id="size_value">40px</strong>
+              </label>
+            </li>
             <li><label><input type="radio" name="size" value="5" />5px</label></li>
             <li><label><input type="radio" name="size" value="10" />10px</label></li>
             <li><label><input type="radio" name="size" value="20" />20px</label></li>
@@ -37,6 +44,12 @@
 
           <h1 id="clh">ぺんのいろ</h1>
           <ul id="cl" class="color_list">
+            <li class="control_row">
+              <label class="picker_label">
+                <span>カラーピッカー</span>
+                <input type="color" id="color_picker" value="#37c878" />
+              </label>
+            </li>
             <li><label><input type="radio" name="color" value="0" />あか</label></li>
             <li><label><input type="radio" name="color" value="40" />おれんじ</label></li>
             <li><label><input type="radio" name="color" value="80" />きいろ</label></li>
@@ -83,10 +96,29 @@
           <h1 id="etch">そのた</h1>
           <div id="etc">
             <ul>
+              <li class="button_row">
+                <a class="btn btn-secondary btn-large" id="undo_button">もどす</a>
+                <a class="btn btn-secondary btn-large" id="redo_button">やりなおし</a>
+              </li>
               <li><a class="btn btn-primary btn-large" id="clear_button">けす！</a></li>
               <li><a class="btn btn-primary btn-large" id="reverse_button">はんてん!</a></li>
               <li><a class="btn btn-primary btn-large" id="blur_button">ぼかす!</a></li>
-              <li><a class="btn btn-primary btn-large" id="save_button">ほぞん!</a></li>
+              <li class="export_row">
+                <label class="export_label">
+                  <span>しゅつりょくばいりつ</span>
+                  <select id="export_scale">
+                    <option value="1" selected>1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                  </select>
+                </label>
+                <label class="mode_button compact_mode_button">
+                  <input type="checkbox" id="export_transparent" value="true" />
+                  <span>とうめいはいけい</span>
+                </label>
+              </li>
+              <li><a class="btn btn-primary btn-large" id="save_button">PNGほぞん</a></li>
             </ul>
           </div>
         </div>

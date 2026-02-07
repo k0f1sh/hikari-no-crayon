@@ -19,8 +19,12 @@ export const app = {
   blurRadius: 15,
   penTools: {} as PenToolMap,
   penTool: null as PenTool | null,
+  selectedPenName: "normal_pen",
   penSize: 30,
   penColor: { r: 200, g: 200, b: 200 } as Color,
+  historyStack: [] as ImageData[],
+  historyIndex: -1,
+  didDrawInStroke: false,
 };
 
 export function requireMainContext(): CanvasRenderingContext2D {

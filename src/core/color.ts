@@ -61,3 +61,28 @@ export function hsvToRgb(h: number, s: number, v: number): Color {
 
   return { r: Math.round(r), g: Math.round(g), b: Math.round(b) };
 }
+
+export function rgbToHex(color: Color): string {
+  const toHex = (value: number) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
+  return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+}
+
+export function hexToRgb(hex: string): Color {
+  const normalized = hex.replace("#", "");
+  const value = normalized.length === 3
+    ? normalized
+        .split("")
+        .map((char) => `${char}${char}`)
+        .join("")
+    : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) {
+    return { r: 200, g: 200, b: 200 };
+  }
+
+  return {
+    r: Number.parseInt(value.slice(0, 2), 16),
+    g: Number.parseInt(value.slice(2, 4), 16),
+    b: Number.parseInt(value.slice(4, 6), 16),
+  };
+}
