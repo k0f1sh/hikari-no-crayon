@@ -11,6 +11,7 @@
   --line: rgba(162, 193, 255, 0.28);
   --glass: rgba(255, 255, 255, 0.08);
   --glass-hover: rgba(255, 255, 255, 0.14);
+  --dock-offset: 66px;
   --radius: 0px;
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
   --ui-max: 320px;
@@ -144,7 +145,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   top: auto;
-  bottom: 66px;
+  bottom: var(--dock-offset);
   width: min(420px, calc(100vw - 28px));
   z-index: 15;
   overflow: visible;

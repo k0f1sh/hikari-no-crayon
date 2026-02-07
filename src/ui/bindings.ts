@@ -345,6 +345,11 @@ export function bindUiEvents(): void {
   let activePanelId: string | null = null;
   let isDockVisible = true;
 
+  const updateDockOffset = () => {
+    const offset = isDockVisible ? Math.ceil(dock.getBoundingClientRect().height) + 8 : 0;
+    document.documentElement.style.setProperty("--dock-offset", `${offset}px`);
+  };
+
   const closePanels = () => {
     panelIds.forEach((id) => {
       panels[id].style.display = "none";
@@ -407,10 +412,21 @@ export function bindUiEvents(): void {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
     dockShowButton.style.display = visible ? "none" : "block";
+    updateDockOffset();
     if (!visible) {
       closePanels();
     }
   };
+
+  if (typeof ResizeObserver !== "undefined") {
+    const dockResizeObserver = new ResizeObserver(() => {
+      updateDockOffset();
+    });
+    dockResizeObserver.observe(dock);
+  }
+
+  window.addEventListener("resize", updateDockOffset);
+  updateDockOffset();
 
   dockHideButton.addEventListener("click", () => {
     applyDockVisibility(false);
