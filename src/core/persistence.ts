@@ -10,6 +10,7 @@ export interface PersistedSettings {
   rainbowMode: boolean;
   fadeMode: boolean;
   autoMode: boolean;
+  yamiMode: boolean;
   symmetryMode: boolean;
   symmetryHud: boolean;
   symmetryType: "rotate" | "mirror";
@@ -27,6 +28,7 @@ export const defaultPersistedSettings: PersistedSettings = {
   rainbowMode: false,
   fadeMode: false,
   autoMode: false,
+  yamiMode: false,
   symmetryMode: false,
   symmetryHud: true,
   symmetryType: "rotate",

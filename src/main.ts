@@ -2,7 +2,7 @@ import "./style.css";
 import "../lib/StackBlur.js";
 import { hsvToRgb, colorToString } from "./core/color";
 import { app } from "./core/state";
-import { clear, drawPreviewCircle } from "./core/draw";
+import { applyDrawCompositeOperation, clear, drawPreviewCircle, getDrawCompositeOperation } from "./core/draw";
 import { createPenTools, defaultPenName, defaultPenColor } from "./tools";
 import { bindUiEvents } from "./ui/bindings";
 import { captureHistorySnapshot, resetHistory } from "./core/history";
@@ -37,7 +37,7 @@ function initCanvas(): void {
 
   clear(app.c);
   clear(app.preC);
-  app.c.globalCompositeOperation = "lighter";
+  applyDrawCompositeOperation();
 }
 
 function updatePreviewCanvas(): void {
@@ -52,8 +52,8 @@ function renderLoop(): void {
     app.c!.globalCompositeOperation = "source-over";
     app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, 0.05);
     app.c!.fillRect(0, 0, app.width, app.height);
-    app.c!.globalCompositeOperation = "lighter";
   }
+  app.c!.globalCompositeOperation = getDrawCompositeOperation();
 
   if (app.isAutoMode && app.penTool) {
     app.penTool.draw(

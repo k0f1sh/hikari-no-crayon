@@ -11,7 +11,6 @@ import { NamiPen } from "./pens/NamiPen";
 import { NormalPen } from "./pens/NormalPen";
 import { SnowPen } from "./pens/SnowPen";
 import { SprayPen } from "./pens/SprayPen";
-import { YamiPen } from "./pens/YamiPen";
 
 export function createPenTools(): PenToolMap {
   return {
@@ -22,7 +21,6 @@ export function createPenTools(): PenToolMap {
     collatz_pen: new CollatzPen(),
     hoshi_pen: new HoshiPen(),
     hane_pen: new HanePen(),
-    yami_pen: new YamiPen(),
     nami_pen: new NamiPen(),
     spray_pen: new SprayPen(),
     bubble_pen: new BubblePen(),

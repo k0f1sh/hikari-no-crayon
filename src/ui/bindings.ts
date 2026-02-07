@@ -1,5 +1,5 @@
 import { app, requireCanvas } from "../core/state";
-import { clear, blurImage, reverseImage } from "../core/draw";
+import { applyDrawCompositeOperation, clear, blurImage, reverseImage } from "../core/draw";
 import { rgbToHex } from "../core/color";
 import {
   canRedo,
@@ -115,6 +115,7 @@ export function bindUiEvents(): void {
   const symmetryOriginYValue = byId<HTMLElement>("symmetry_origin_y_value");
   const symmetryOriginXReset = byId<HTMLButtonElement>("symmetry_origin_x_reset");
   const symmetryOriginYReset = byId<HTMLButtonElement>("symmetry_origin_y_reset");
+  const yamiMode = byId<HTMLInputElement>("yami_mode");
 
   const persist = () => {
     const settings: PersistedSettings = {
@@ -124,6 +125,7 @@ export function bindUiEvents(): void {
       rainbowMode: app.isRainbowMode,
       fadeMode: app.isFadeMode,
       autoMode: app.isAutoMode,
+      yamiMode: app.isYamiMode,
       symmetryMode: app.isSymmetryMode,
       symmetryHud: app.isSymmetryHudVisible,
       symmetryType: app.symmetryType,
@@ -261,6 +263,12 @@ export function bindUiEvents(): void {
     persist();
   });
 
+  yamiMode.addEventListener("change", (event) => {
+    app.isYamiMode = (event.currentTarget as HTMLInputElement).checked;
+    applyDrawCompositeOperation();
+    persist();
+  });
+
   symmetryMode.addEventListener("change", (event) => {
     app.isSymmetryMode = (event.currentTarget as HTMLInputElement).checked;
     updateSymmetryControlsState();
@@ -380,7 +388,7 @@ export function bindUiEvents(): void {
 
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
-    app.c!.globalCompositeOperation = "lighter";
+    applyDrawCompositeOperation();
     if (app.isDown && app.penTool) {
       drawWithSymmetry(event.pageX, event.pageY);
       app.didDrawInStroke = true;
@@ -429,6 +437,10 @@ export function bindUiEvents(): void {
 
   byId<HTMLInputElement>("auto_mode").checked = safeSettings.autoMode;
   app.isAutoMode = safeSettings.autoMode;
+
+  yamiMode.checked = safeSettings.yamiMode;
+  app.isYamiMode = safeSettings.yamiMode;
+  applyDrawCompositeOperation();
 
   symmetryMode.checked = safeSettings.symmetryMode;
   app.isSymmetryMode = safeSettings.symmetryMode;

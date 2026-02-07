@@ -7,7 +7,20 @@ export function clear(context: CanvasRenderingContext2D): void {
   context.globalCompositeOperation = "source-over";
   context.fillStyle = "#000000";
   context.fillRect(0, 0, app.width, app.height);
-  context.globalCompositeOperation = "lighter";
+  if (context === app.c) {
+    context.globalCompositeOperation = getDrawCompositeOperation();
+  } else {
+    context.globalCompositeOperation = "lighter";
+  }
+}
+
+export function getDrawCompositeOperation(): GlobalCompositeOperation {
+  return app.isYamiMode ? "source-over" : "lighter";
+}
+
+export function applyDrawCompositeOperation(): void {
+  const c = requireMainContext();
+  c.globalCompositeOperation = getDrawCompositeOperation();
 }
 
 export function drawCircle(x: number, y: number, r: number, color: Color, p: number, q: number): void {
@@ -95,5 +108,5 @@ export function drawDarkCircle(x: number, y: number, r: number): void {
   const c = requireMainContext();
   c.globalCompositeOperation = "source-over";
   drawCircle(x, y, r, hsvToRgb(0, 0, 0), 0.2, 1.0);
-  c.globalCompositeOperation = "lighter";
+  c.globalCompositeOperation = getDrawCompositeOperation();
 }
