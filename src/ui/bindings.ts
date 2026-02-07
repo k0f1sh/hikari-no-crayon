@@ -562,7 +562,6 @@ export function bindUiEvents(): void {
   byId<HTMLElement>("reverse_button").addEventListener("click", () => {
     reverseImage();
     commitHistory();
-    closePanels();
   });
 
   byId<HTMLElement>("save_button").addEventListener("click", () => {

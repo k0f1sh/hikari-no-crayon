@@ -195,7 +195,7 @@ body {
 }
 
 .dock_size_inline {
-  flex: 1 1 230px;
+  flex: 1 1 280px;
 }
 
 .dock_size_inline input[type="range"] {
@@ -204,7 +204,7 @@ body {
 }
 
 .dock_color_inline {
-  flex: 0 0 104px;
+  flex: 0 0 84px;
   justify-items: center;
 }
 
