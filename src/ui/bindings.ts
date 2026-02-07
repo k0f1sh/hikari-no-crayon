@@ -100,7 +100,6 @@ export function bindUiEvents(): void {
   const sizeRange = byId<HTMLInputElement>("dock_size_range");
   const sizeDockValue = byId<HTMLElement>("size_dock_value");
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
-  const colorDockSwatch = byId<HTMLElement>("color_dock_swatch");
   const exportScale = byId<HTMLSelectElement>("export_scale");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
@@ -244,7 +243,6 @@ export function bindUiEvents(): void {
     app.penColor = colorFromSettings(hex);
     const colorHex = rgbToHex(app.penColor);
     colorPicker.value = colorHex;
-    colorDockSwatch.style.backgroundColor = colorHex;
     persist();
   };
 
@@ -498,7 +496,7 @@ export function bindUiEvents(): void {
 
   applyDockVisibility(true);
   penGroup.selectByValue(safeSettings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
-  setActivePanel("pl");
+  closePanels();
   applySize(safeSettings.size);
   applyColor(safeSettings.colorHex);
 

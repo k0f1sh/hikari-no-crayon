@@ -197,13 +197,6 @@ body {
   color: var(--muted);
 }
 
-.dock_color {
-  width: 16px;
-  height: 10px;
-  border: 1px solid var(--line);
-  background: #ffffff;
-}
-
 .size_list,
 .color_list,
 .pen_list,
