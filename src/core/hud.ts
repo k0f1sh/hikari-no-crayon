@@ -7,8 +7,8 @@ function clearHud(): void {
 
 function drawSymmetryAxes(): void {
   const hud = requireHudContext();
-  const centerX = app.width / 2;
-  const centerY = app.height / 2;
+  const centerX = app.width * app.symmetryOriginX;
+  const centerY = app.height * app.symmetryOriginY;
   const radius = Math.sqrt(centerX * centerX + centerY * centerY);
   const count = Math.max(1, app.symmetryCount);
 

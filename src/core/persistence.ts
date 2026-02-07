@@ -14,6 +14,8 @@ export interface PersistedSettings {
   symmetryHud: boolean;
   symmetryType: "rotate" | "mirror";
   symmetryCount: number;
+  symmetryOriginX: number;
+  symmetryOriginY: number;
   exportScale: number;
   exportTransparent: boolean;
 }
@@ -29,6 +31,8 @@ export const defaultPersistedSettings: PersistedSettings = {
   symmetryHud: true,
   symmetryType: "rotate",
   symmetryCount: 4,
+  symmetryOriginX: 50,
+  symmetryOriginY: 50,
   exportScale: 1,
   exportTransparent: false,
 };
@@ -46,6 +50,8 @@ export function loadSettings(): PersistedSettings {
       ...parsed,
       size: Number(parsed.size ?? defaultPersistedSettings.size),
       symmetryCount: Number(parsed.symmetryCount ?? defaultPersistedSettings.symmetryCount),
+      symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),
+      symmetryOriginY: Number(parsed.symmetryOriginY ?? defaultPersistedSettings.symmetryOriginY),
       exportScale: Number(parsed.exportScale ?? defaultPersistedSettings.exportScale),
       colorHex: typeof parsed.colorHex === "string" ? parsed.colorHex : defaultPersistedSettings.colorHex,
       symmetryType:

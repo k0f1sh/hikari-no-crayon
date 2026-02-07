@@ -20,6 +20,8 @@ export const app = {
   isSymmetryHudVisible: true,
   symmetryType: "rotate" as "rotate" | "mirror",
   symmetryCount: 4,
+  symmetryOriginX: 0.5,
+  symmetryOriginY: 0.5,
   margin: 40,
   toolboxWidth: 200,
   blurRadius: 15,

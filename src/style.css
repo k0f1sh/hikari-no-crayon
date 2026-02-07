@@ -245,7 +245,8 @@ body {
 }
 
 .mode_button.is-disabled,
-.export_label.is-disabled {
+.export_label.is-disabled,
+.range_label.is-disabled {
   opacity: 0.45;
 }
 
@@ -319,6 +320,21 @@ body {
 #symmetry_type:disabled,
 #symmetry_count:disabled {
   opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.mini_reset_button {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  color: var(--text);
+  font-size: 11px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.mini_reset_button:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 

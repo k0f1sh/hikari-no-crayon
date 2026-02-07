@@ -109,6 +109,12 @@ export function bindUiEvents(): void {
   const symmetryHud = byId<HTMLInputElement>("symmetry_hud");
   const symmetryType = byId<HTMLSelectElement>("symmetry_type");
   const symmetryCount = byId<HTMLSelectElement>("symmetry_count");
+  const symmetryOriginX = byId<HTMLInputElement>("symmetry_origin_x");
+  const symmetryOriginY = byId<HTMLInputElement>("symmetry_origin_y");
+  const symmetryOriginXValue = byId<HTMLElement>("symmetry_origin_x_value");
+  const symmetryOriginYValue = byId<HTMLElement>("symmetry_origin_y_value");
+  const symmetryOriginXReset = byId<HTMLButtonElement>("symmetry_origin_x_reset");
+  const symmetryOriginYReset = byId<HTMLButtonElement>("symmetry_origin_y_reset");
 
   const persist = () => {
     const settings: PersistedSettings = {
@@ -122,6 +128,8 @@ export function bindUiEvents(): void {
       symmetryHud: app.isSymmetryHudVisible,
       symmetryType: app.symmetryType,
       symmetryCount: app.symmetryCount,
+      symmetryOriginX: Math.round(app.symmetryOriginX * 100),
+      symmetryOriginY: Math.round(app.symmetryOriginY * 100),
       exportScale: Number(exportScale.value),
       exportTransparent: exportTransparent.checked,
     };
@@ -138,8 +146,8 @@ export function bindUiEvents(): void {
       return;
     }
 
-    const centerX = app.width / 2;
-    const centerY = app.height / 2;
+    const centerX = app.width * app.symmetryOriginX;
+    const centerY = app.height * app.symmetryOriginY;
     const dx = x - centerX;
     const dy = y - centerY;
     const count = Math.max(1, app.symmetryCount);
@@ -175,10 +183,32 @@ export function bindUiEvents(): void {
     symmetryHud.disabled = disabled;
     symmetryType.disabled = disabled;
     symmetryCount.disabled = disabled;
+    symmetryOriginX.disabled = disabled;
+    symmetryOriginY.disabled = disabled;
+    symmetryOriginXReset.disabled = disabled;
+    symmetryOriginYReset.disabled = disabled;
 
     symmetryHud.closest("label")?.classList.toggle("is-disabled", disabled);
     symmetryType.closest("label")?.classList.toggle("is-disabled", disabled);
     symmetryCount.closest("label")?.classList.toggle("is-disabled", disabled);
+    symmetryOriginX.closest("label")?.classList.toggle("is-disabled", disabled);
+    symmetryOriginY.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
+  const applySymmetryOriginX = (value: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(value)));
+    symmetryOriginX.value = String(clamped);
+    symmetryOriginXValue.textContent = `${clamped}%`;
+    app.symmetryOriginX = clamped / 100;
+    persist();
+  };
+
+  const applySymmetryOriginY = (value: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(value)));
+    symmetryOriginY.value = String(clamped);
+    symmetryOriginYValue.textContent = `${clamped}%`;
+    app.symmetryOriginY = clamped / 100;
+    persist();
   };
 
   const commitHistory = () => {
@@ -253,6 +283,22 @@ export function bindUiEvents(): void {
     const value = Number((event.currentTarget as HTMLSelectElement).value);
     app.symmetryCount = [2, 4, 6, 8].includes(value) ? value : 4;
     persist();
+  });
+
+  symmetryOriginX.addEventListener("input", (event) => {
+    applySymmetryOriginX(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  symmetryOriginY.addEventListener("input", (event) => {
+    applySymmetryOriginY(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  symmetryOriginXReset.addEventListener("click", () => {
+    applySymmetryOriginX(50);
+  });
+
+  symmetryOriginYReset.addEventListener("click", () => {
+    applySymmetryOriginY(50);
   });
 
   byId<HTMLInputElement>("fade_mode").addEventListener("change", (event) => {
@@ -392,6 +438,8 @@ export function bindUiEvents(): void {
   app.symmetryType = safeSettings.symmetryType;
   symmetryCount.value = String(safeSettings.symmetryCount);
   app.symmetryCount = [2, 4, 6, 8].includes(safeSettings.symmetryCount) ? safeSettings.symmetryCount : 4;
+  applySymmetryOriginX(safeSettings.symmetryOriginX);
+  applySymmetryOriginY(safeSettings.symmetryOriginY);
 
   exportScale.value = String(safeSettings.exportScale);
   exportTransparent.checked = safeSettings.exportTransparent;
