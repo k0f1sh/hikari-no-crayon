@@ -8,6 +8,8 @@ export interface PersistedSettings {
   size: number;
   colorHex: string;
   rainbowMode: boolean;
+  rainbowSaturation: number;
+  rainbowBrightness: number;
   fadeMode: boolean;
   autoMode: boolean;
   yamiMode: boolean;
@@ -25,6 +27,8 @@ export const defaultPersistedSettings: PersistedSettings = {
   size: 40,
   colorHex: rgbToHex({ r: 55, g: 200, b: 120 }),
   rainbowMode: false,
+  rainbowSaturation: 200,
+  rainbowBrightness: 200,
   fadeMode: false,
   autoMode: false,
   yamiMode: false,
@@ -49,6 +53,8 @@ export function loadSettings(): PersistedSettings {
       ...defaultPersistedSettings,
       ...parsed,
       size: Number(parsed.size ?? defaultPersistedSettings.size),
+      rainbowSaturation: Number(parsed.rainbowSaturation ?? defaultPersistedSettings.rainbowSaturation),
+      rainbowBrightness: Number(parsed.rainbowBrightness ?? defaultPersistedSettings.rainbowBrightness),
       yamiStrength: Number(parsed.yamiStrength ?? defaultPersistedSettings.yamiStrength),
       symmetryCount: Number(parsed.symmetryCount ?? defaultPersistedSettings.symmetryCount),
       symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),

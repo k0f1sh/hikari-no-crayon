@@ -12,6 +12,8 @@ export const app = {
   effects: [] as Effect[],
   isDown: false,
   isRainbowMode: false,
+  rainbowSaturation: 200,
+  rainbowBrightness: 200,
   isFadeMode: false,
   isAutoMode: false,
   isYamiMode: false,

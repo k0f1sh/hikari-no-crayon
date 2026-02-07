@@ -75,7 +75,7 @@ function renderLoop(): void {
   }
 
   if (app.isRainbowMode) {
-    app.penColor = hsvToRgb((app.count % 60) * 6, 200, 200);
+    app.penColor = hsvToRgb((app.count % 60) * 6, app.rainbowSaturation, app.rainbowBrightness);
   }
 
   app.effects.forEach((effect) => {

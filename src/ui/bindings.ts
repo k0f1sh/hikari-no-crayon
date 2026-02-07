@@ -108,6 +108,10 @@ export function bindUiEvents(): void {
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
   const rainbowMode = byId<HTMLInputElement>("rainbow_mode");
+  const rainbowSaturation = byId<HTMLInputElement>("rainbow_saturation");
+  const rainbowSaturationValue = byId<HTMLElement>("rainbow_saturation_value");
+  const rainbowBrightness = byId<HTMLInputElement>("rainbow_brightness");
+  const rainbowBrightnessValue = byId<HTMLElement>("rainbow_brightness_value");
   const fadeMode = byId<HTMLInputElement>("fade_mode");
   const autoMode = byId<HTMLInputElement>("auto_mode");
   const symmetryMode = byId<HTMLInputElement>("symmetry_mode");
@@ -132,6 +136,8 @@ export function bindUiEvents(): void {
       size: app.penSize,
       colorHex: rgbToHex(app.penColor),
       rainbowMode: app.isRainbowMode,
+      rainbowSaturation: app.rainbowSaturation,
+      rainbowBrightness: app.rainbowBrightness,
       fadeMode: app.isFadeMode,
       autoMode: app.isAutoMode,
       yamiMode: app.isYamiMode,
@@ -234,6 +240,30 @@ export function bindUiEvents(): void {
     const disabled = !app.isYamiMode;
     yamiStrength.disabled = disabled;
     yamiStrength.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
+  const updateRainbowControlsState = () => {
+    const disabled = !app.isRainbowMode;
+    rainbowSaturation.disabled = disabled;
+    rainbowBrightness.disabled = disabled;
+    rainbowSaturation.closest("label")?.classList.toggle("is-disabled", disabled);
+    rainbowBrightness.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
+  const applyRainbowSaturation = (value: number) => {
+    const clamped = Math.max(0, Math.min(255, Math.round(value)));
+    app.rainbowSaturation = clamped;
+    rainbowSaturation.value = String(clamped);
+    rainbowSaturationValue.textContent = String(clamped);
+    persist();
+  };
+
+  const applyRainbowBrightness = (value: number) => {
+    const clamped = Math.max(0, Math.min(255, Math.round(value)));
+    app.rainbowBrightness = clamped;
+    rainbowBrightness.value = String(clamped);
+    rainbowBrightnessValue.textContent = String(clamped);
+    persist();
   };
 
   const updateModeDockValue = () => {
@@ -396,8 +426,17 @@ export function bindUiEvents(): void {
 
   rainbowMode.addEventListener("change", (event) => {
     app.isRainbowMode = (event.currentTarget as HTMLInputElement).checked;
+    updateRainbowControlsState();
     updateModeDockValue();
     persist();
+  });
+
+  rainbowSaturation.addEventListener("input", (event) => {
+    applyRainbowSaturation(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  rainbowBrightness.addEventListener("input", (event) => {
+    applyRainbowBrightness(Number((event.currentTarget as HTMLInputElement).value));
   });
 
   autoMode.addEventListener("change", (event) => {
@@ -682,6 +721,9 @@ export function bindUiEvents(): void {
 
   rainbowMode.checked = safeSettings.rainbowMode;
   app.isRainbowMode = safeSettings.rainbowMode;
+  applyRainbowSaturation(safeSettings.rainbowSaturation);
+  applyRainbowBrightness(safeSettings.rainbowBrightness);
+  updateRainbowControlsState();
 
   fadeMode.checked = safeSettings.fadeMode;
   app.isFadeMode = safeSettings.fadeMode;
