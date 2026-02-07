@@ -94,13 +94,13 @@ function setPointerPosition(event: PointerEvent): void {
 }
 
 export function bindUiEvents(): void {
-  let showMenu = true;
-
-  const switchButton = byId<HTMLElement>("switch");
   const menu = byId<HTMLElement>("menu");
+  const dock = byId<HTMLElement>("bottom_dock");
   const sizeRange = byId<HTMLInputElement>("size_range");
   const sizeValue = byId<HTMLElement>("size_value");
+  const sizeDockValue = byId<HTMLElement>("size_dock_value");
   const colorPicker = byId<HTMLInputElement>("color_picker");
+  const colorDockSwatch = byId<HTMLElement>("color_dock_swatch");
   const exportScale = byId<HTMLSelectElement>("export_scale");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
@@ -237,19 +237,43 @@ export function bindUiEvents(): void {
     app.penSize = Math.max(5, Math.min(400, value));
     sizeRange.value = String(app.penSize);
     sizeValue.textContent = `${app.penSize}px`;
+    sizeDockValue.textContent = `${app.penSize}px`;
     persist();
   };
 
   const applyColor = (hex: string) => {
     app.penColor = colorFromSettings(hex);
-    colorPicker.value = rgbToHex(app.penColor);
+    const colorHex = rgbToHex(app.penColor);
+    colorPicker.value = colorHex;
+    colorDockSwatch.style.backgroundColor = colorHex;
     persist();
   };
 
-  switchButton.addEventListener("click", () => {
-    showMenu = !showMenu;
-    menu.style.display = showMenu ? "block" : "none";
-    switchButton.textContent = showMenu ? "hide" : "show";
+  const dockButtons = Array.from(dock.querySelectorAll<HTMLButtonElement>(".dock_btn"));
+  const panelIds = ["sl", "cl", "pl", "ml", "yh", "sy", "etc"];
+  const panels = panelIds.reduce<Record<string, HTMLElement>>((acc, id) => {
+    acc[id] = byId<HTMLElement>(id);
+    return acc;
+  }, {});
+
+  const setActivePanel = (panelId: string) => {
+    panelIds.forEach((id) => {
+      panels[id].style.display = id === panelId ? "block" : "none";
+    });
+
+    dockButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.panel === panelId);
+    });
+  };
+
+  dockButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const panelId = button.dataset.panel;
+      if (!panelId || !panels[panelId]) {
+        return;
+      }
+      setActivePanel(panelId);
+    });
   });
 
   const penGroup = setupRadioGroup("pen", (value) => {
@@ -439,6 +463,7 @@ export function bindUiEvents(): void {
   };
 
   penGroup.selectByValue(safeSettings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
+  setActivePanel("pl");
   applySize(safeSettings.size);
   applyColor(safeSettings.colorHex);
 

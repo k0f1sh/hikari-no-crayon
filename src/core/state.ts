@@ -3,8 +3,6 @@ import type { Color, Effect, MouseState, PenTool, PenToolMap } from "../types";
 export const app = {
   canvas: null as HTMLCanvasElement | null,
   c: null as CanvasRenderingContext2D | null,
-  preCanvas: null as HTMLCanvasElement | null,
-  preC: null as CanvasRenderingContext2D | null,
   hudCanvas: null as HTMLCanvasElement | null,
   hudC: null as CanvasRenderingContext2D | null,
   width: 0,
@@ -41,13 +39,6 @@ export function requireMainContext(): CanvasRenderingContext2D {
     throw new Error("Main canvas context is not initialized");
   }
   return app.c;
-}
-
-export function requirePreviewContext(): CanvasRenderingContext2D {
-  if (!app.preC) {
-    throw new Error("Preview canvas context is not initialized");
-  }
-  return app.preC;
 }
 
 export function requireCanvas(): HTMLCanvasElement {

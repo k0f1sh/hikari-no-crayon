@@ -1,7 +1,7 @@
 import "./style.css";
 import { hsvToRgb, colorToString } from "./core/color";
 import { app } from "./core/state";
-import { applyDrawCompositeOperation, clear, drawPreviewCircle, getDrawCompositeOperation } from "./core/draw";
+import { applyDrawCompositeOperation, clear, getDrawCompositeOperation } from "./core/draw";
 import { createPenTools, defaultPenName, defaultPenColor } from "./tools";
 import { bindUiEvents } from "./ui/bindings";
 import { captureHistorySnapshot, resetHistory } from "./core/history";
@@ -12,36 +12,26 @@ function initCanvas(): void {
   app.height = window.innerHeight;
 
   app.canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
-  app.preCanvas = document.getElementById("pre") as HTMLCanvasElement | null;
   app.hudCanvas = document.getElementById("hud") as HTMLCanvasElement | null;
 
-  if (!app.canvas || !app.preCanvas || !app.hudCanvas) {
+  if (!app.canvas || !app.hudCanvas) {
     throw new Error("Canvas elements were not found");
   }
 
   app.canvas.width = app.width;
   app.canvas.height = app.height;
-  app.preCanvas.width = app.toolboxWidth;
-  app.preCanvas.height = 50;
   app.hudCanvas.width = app.width;
   app.hudCanvas.height = app.height;
 
   app.c = app.canvas.getContext("2d");
-  app.preC = app.preCanvas.getContext("2d");
   app.hudC = app.hudCanvas.getContext("2d");
 
-  if (!app.c || !app.preC || !app.hudC) {
+  if (!app.c || !app.hudC) {
     throw new Error("2D context initialization failed");
   }
 
   clear(app.c);
-  clear(app.preC);
   applyDrawCompositeOperation();
-}
-
-function updatePreviewCanvas(): void {
-  clear(app.preC!);
-  drawPreviewCircle(100, 25, app.penSize, app.penColor);
 }
 
 function renderLoop(): void {
@@ -71,7 +61,6 @@ function renderLoop(): void {
   });
   app.effects = app.effects.filter((effect) => !effect.delFlg);
 
-  updatePreviewCanvas();
   renderHud();
   window.requestAnimationFrame(renderLoop);
 }

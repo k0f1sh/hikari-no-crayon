@@ -1,4 +1,4 @@
-import { app, requireMainContext, requirePreviewContext } from "./state";
+import { app, requireMainContext } from "./state";
 import { colorToString, hsvToRgb } from "./color";
 import { d2r } from "./math";
 import type { Color, Point } from "../types";
@@ -33,18 +33,6 @@ export function drawCircle(x: number, y: number, r: number, color: Color, p: num
   c.arc(x, y, r, 0, Math.PI * 2, false);
   c.fill();
   c.closePath();
-}
-
-export function drawPreviewCircle(x: number, y: number, r: number, color: Color): void {
-  const preC = requirePreviewContext();
-  const grad = preC.createRadialGradient(x, y, 1, x, y, r);
-  grad.addColorStop(0.1, colorToString(color, 1));
-  grad.addColorStop(1.0, "rgba(0, 0, 0, 0)");
-  preC.fillStyle = grad;
-  preC.beginPath();
-  preC.arc(x, y, r, 0, Math.PI * 2, false);
-  preC.fill();
-  preC.closePath();
 }
 
 export function drawTriangle(pos1: Point, pos2: Point, pos3: Point, color: Color, a: number): void {
