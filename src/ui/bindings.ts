@@ -144,6 +144,7 @@ export function bindUiEvents(): void {
   const svgPathInput = byId<HTMLTextAreaElement>("svg_path_input");
   const svgPathStepInput = byId<HTMLInputElement>("svg_path_step");
   const svgPathFitInput = byId<HTMLInputElement>("svg_path_fit");
+  const svgPathSpeedInput = byId<HTMLSelectElement>("svg_path_speed");
   const svgPathDrawButton = byId<HTMLButtonElement>("svg_path_draw_button");
   const resetSettingsButton = byId<HTMLElement>("reset_settings_button");
   const recordStatus = byId<HTMLElement>("record_status");
@@ -579,7 +580,42 @@ export function bindUiEvents(): void {
     });
   });
 
-  const traceSvgPath = () => {
+  const animateSvgTrace = (
+    groups: Array<Array<{ x: number; y: number }>>,
+    pointsPerFrame: number,
+  ): Promise<void> =>
+    new Promise((resolve) => {
+      let groupIndex = 0;
+      let pointIndex = 0;
+
+      const drawFrame = () => {
+        applyDrawCompositeOperation();
+        let frameRemaining = pointsPerFrame;
+        while (groupIndex < groups.length && frameRemaining > 0) {
+          const group = groups[groupIndex];
+          if (!group || pointIndex >= group.length) {
+            groupIndex += 1;
+            pointIndex = 0;
+            continue;
+          }
+
+          const point = group[pointIndex];
+          drawWithSymmetry(point.x, point.y);
+          pointIndex += 1;
+          frameRemaining -= 1;
+        }
+
+        if (groupIndex >= groups.length) {
+          resolve();
+          return;
+        }
+        window.requestAnimationFrame(drawFrame);
+      };
+
+      window.requestAnimationFrame(drawFrame);
+    });
+
+  const traceSvgPath = async () => {
     const pathDataList = extractSvgPathDataList(svgPathInput.value);
     if (pathDataList.length === 0) {
       window.alert("SVG path を入力してください。");
@@ -587,8 +623,11 @@ export function bindUiEvents(): void {
     }
 
     const stepValue = Number(svgPathStepInput.value);
-    const step = Number.isFinite(stepValue) ? Math.max(0.5, Math.min(64, stepValue)) : 4;
+    const step = Number.isFinite(stepValue) ? Math.max(0.5, Math.min(10, stepValue)) : 4;
     svgPathStepInput.value = String(step);
+    const speedValue = Number.parseInt(svgPathSpeedInput.value, 10);
+    const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 1;
+    svgPathSpeedInput.value = String(pointsPerFrame);
 
     try {
       const pointGroups: Array<Array<{ x: number; y: number }>> = [];
@@ -620,45 +659,38 @@ export function bindUiEvents(): void {
         });
       }
 
-      applyDrawCompositeOperation();
-      groupsToDraw.forEach((group) => {
-        group.forEach((point) => {
-          drawWithSymmetry(point.x, point.y);
-        });
-      });
+      closePanels();
+      await animateSvgTrace(groupsToDraw, pointsPerFrame);
 
       app.didDrawInStroke = groupsToDraw.some((group) => group.length > 0);
       if (app.didDrawInStroke) {
         commitHistory();
         app.didDrawInStroke = false;
       }
-      closePanels();
     } catch (error) {
       const message = error instanceof Error ? error.message : "SVG path の解析に失敗しました。";
       window.alert(message);
     }
   };
 
-  const runSvgTrace = () => {
+  const runSvgTrace = async () => {
     if (svgPathDrawButton.disabled) {
       return;
     }
     svgPathDrawButton.disabled = true;
     const originalText = svgPathDrawButton.textContent;
     svgPathDrawButton.textContent = "なぞりちゅう...";
-    window.setTimeout(() => {
-      try {
-        traceSvgPath();
-      } finally {
-        svgPathDrawButton.disabled = false;
-        svgPathDrawButton.textContent = originalText;
-      }
-    }, 0);
+    try {
+      await traceSvgPath();
+    } finally {
+      svgPathDrawButton.disabled = false;
+      svgPathDrawButton.textContent = originalText;
+    }
   };
 
   svgPathDrawButton.addEventListener("click", (event) => {
     event.preventDefault();
-    runSvgTrace();
+    void runSvgTrace();
   });
 
   let isRecording = false;
