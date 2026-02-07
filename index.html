@@ -1,19 +1,12 @@
-<html>
+<!doctype html>
+<html lang="ja">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon-precomposed" href="icon.png" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="apple-touch-icon-precomposed" href="/icon.png" />
     <title>ひかりのくれよん</title>
-    <script type="text/javascript" src="lib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="lib/underscore-min.js"></script>
-    <script type="text/javascript" src="lib/StackBlur.js"></script>
-    <script type="text/javascript" src="hc.js"></script>
-    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="lib/slider/css/slider.css" rel="stylesheet">
-    <script type="text/javascript" src="lib/slider/js/bootstrap-slider.js"></script>
-    <link href="hc.css" rel="stylesheet" type="text/css">
-   </head>
+  </head>
   <body>
     <div id="wrapper">
       <div id="contentWrapper">
@@ -70,19 +63,19 @@
             <li><label><input type="radio" name="pen" value="degi_pen" />でじたるぺん</label></li>
             <li><label><input type="radio" name="pen" value="yami_pen" />やみのくれよん</label></li>
           </ul>
-          
+
           <h1 id="mlh">もーど</h1>
           <div id="ml">
             <label class="mode_button">
-              <input type="checkbox" id="rainbow_mode" value="true">
+              <input type="checkbox" id="rainbow_mode" value="true" />
               <span>れいんぼーもーど</span>
             </label>
             <label class="mode_button">
-              <input type="checkbox" id="fade_mode" value="true">
+              <input type="checkbox" id="fade_mode" value="true" />
               <span>ふぇーどもーど</span>
             </label>
             <label class="mode_button">
-              <input type="checkbox" id="auto_mode" value="true">
+              <input type="checkbox" id="auto_mode" value="true" />
               <span>おーともーど</span>
             </label>
           </div>
@@ -99,5 +92,6 @@
         </div>
       </div>
     </div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

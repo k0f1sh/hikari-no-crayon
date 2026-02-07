@@ -1,0 +1,219 @@
+body {
+    padding: 0px;
+    margin: 0px;
+    background-image: url("/bg.png");
+}
+
+#wrapper {
+    margin: 0px;
+}
+
+#wrapper div {
+}
+
+#contentWrapper div {
+}
+
+#canvasField div {
+}
+
+#switch {
+    position: absolute;
+    z-index: 2;
+    top:0;
+    right:0;
+    float: none;
+    color: #ffffff;
+    text-shadow: 0px 0px 3px #ffffff;
+    background-color: #000000;
+    border-radius: 5px / 5px 0px 0px 5px;
+    box-shadow: 0px 0px 2px rgb(255, 255, 255) inset;
+    padding: 4px;
+}
+
+
+#menu {
+    position: absolute;
+    z-index: 1;
+    top:0;
+    right:0;
+    
+    float: none;
+    width: 200px;
+    color: #ffffff;
+    text-shadow: 0px 0px 10px #000000;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#title {
+    display: block;
+    padding: 10px;
+    text-align: center;
+    text-shadow: 0px 0px 10px #ffffff;
+    font-size: 14px;
+}
+
+#pre canvas {
+    display: block;
+}
+
+#menu h1 {
+    display: block;
+    font-size: 16px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    text-shadow: 0px 0px 10px rgba(205, 205, 225, 0.7);
+    background: rgba(4, 4, 15, 0.7);
+    box-shadow: 0px 0px 6px rgba(255, 255, 255, 0.7) inset;
+}
+
+
+.size_list ul {
+}
+
+.size_list li {
+    display: inline;
+    list-style-type: none;
+    margin: 4px;
+}
+
+.size_list label {
+    display: inline;
+    font-size: 10px;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+.size_list label:hover{
+    text-shadow: 0px 0px 10px #ffffff;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.size_list label.selected {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.size_list label input {
+    display:none;
+
+}
+
+
+.color_list ul {
+}
+
+.color_list li {
+    display: inline;
+    list-style-type: none;
+    margin: 4px;
+}
+
+.color_list label {
+    display: inline;
+    font-size: 10px;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+.color_list label:hover{
+    text-shadow: 0px 0px 10px #ffffff;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.color_list label.selected {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.color_list label input {
+    display:none;
+
+}
+
+.pen_list ul {
+    margin-left: 20px;
+}
+
+.pen_list li {
+    list-style-type: none;
+}
+
+.pen_list label input {
+    display:none;
+
+}
+.pen_list label {
+    font-size: 14px;
+    margin-left: 20px;
+    color: #ffffff;
+    background-color: #000000;
+
+    
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+.pen_list label:hover{
+    text-shadow: 0px 0px 10px #ffffff;
+    background-color: #141C34;
+}
+
+.pen_list label.selected {
+    margin-left: 0px;
+    text-shadow: 0px 0px 10px #ffffff;
+    background-color: #141C34;
+}
+
+.mode_button {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.help_block {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 5px;
+    border: solid 1px #2e2e2e;
+    border-radius: 10px;
+    background-color: rgba(110, 110, 110, 0.3);
+    text-shadow: none;
+    color: #fefefe;
+    font-size: 10px;
+}
+
+#etc li {
+    list-style-type: none;
+    margin-top: 5px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(80, 160, 255, 0.8);
+    background-color: rgba(30, 110, 210, 0.95);
+    color: #ffffff;
+    text-decoration: none;
+    text-shadow: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    background-color: rgba(45, 130, 235, 1);
+    box-shadow: 0px 0px 8px rgba(120, 190, 255, 0.8);
+}
+
+.btn.btn-large {
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.btn.btn-primary {
+    background-image: linear-gradient(180deg, rgba(52, 141, 255, 0.95), rgba(23, 97, 186, 0.95));
+}
