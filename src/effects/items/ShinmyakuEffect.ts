@@ -1,6 +1,8 @@
 import { app } from "../../core/state";
 import { d2r, movePos } from "../../core/math";
-import { drawCircle, drawLines } from "../../core/draw";
+import { colorToString } from "../../core/color";
+import { drawLines } from "../../core/draw";
+import { requireMainContext } from "../../core/state";
 import type { Color, Effect, Point } from "../../types";
 import { isOutOfBounds, tail } from "./utils";
 
@@ -19,7 +21,7 @@ export class ShinmyakuEffect implements Effect {
     this.pos = { x, y };
     this.d = Math.floor(Math.random() * 360);
     this.spd = Math.max(1.2, app.penSize / 8);
-    this.alpha = 0.34;
+    this.alpha = 0.26;
     this.delFlg = false;
     this.color = color;
     this.life = 90 + Math.floor(Math.random() * 70);
@@ -29,7 +31,7 @@ export class ShinmyakuEffect implements Effect {
 
   move(): void {
     this.life -= 1;
-    this.alpha *= 0.992;
+    this.alpha *= 0.989;
     this.pulsePhase += 0.35;
 
     this.posHistory.push({ x: this.pos.x, y: this.pos.y });
@@ -45,23 +47,38 @@ export class ShinmyakuEffect implements Effect {
 
   render(): void {
     const pulse = (Math.sin(this.pulsePhase) + 1) / 2;
-    const pulseRadius = Math.max(1.5, (app.penSize / 5) * (0.5 + pulse));
-    const pulseAlpha = this.alpha * (0.35 + pulse * 0.65);
+    const coreRadius = Math.max(1.2, (app.penSize / 7) * (0.45 + pulse * 0.4));
+    const haloRadius = Math.max(7, app.penSize * (0.55 + pulse * 0.8));
+    const trailAlpha = this.alpha * (0.24 + pulse * 0.36);
+    const glowAlpha = Math.min(0.24, this.alpha * (0.5 + pulse * 0.5));
 
-    drawLines(this.posHistory, this.color, this.alpha, 1.4 + pulse * 2.8);
-    drawCircle(this.pos.x, this.pos.y, pulseRadius, this.color, 0.05, 1.0);
-    drawCircle(this.pos.x, this.pos.y, pulseRadius * 2, this.color, 0.9, 1.0);
+    drawLines(this.posHistory, this.color, trailAlpha, 0.9 + pulse * 1.4);
+    this.drawGlow(this.pos.x, this.pos.y, coreRadius, glowAlpha * 0.9);
+    this.drawGlow(this.pos.x, this.pos.y, haloRadius * 0.45, glowAlpha * 0.46);
+    this.drawGlow(this.pos.x, this.pos.y, haloRadius, glowAlpha * 0.2);
 
-    if (pulse > 0.9) {
-      const dx = Math.cos(d2r(this.d + 90)) * pulseRadius;
-      const dy = Math.sin(d2r(this.d + 90)) * pulseRadius;
-      drawCircle(this.pos.x + dx, this.pos.y + dy, pulseRadius * 0.7, this.color, 0.1, 1.0);
-      drawCircle(this.pos.x - dx, this.pos.y - dy, pulseRadius * 0.7, this.color, 0.1, 1.0);
+    if (pulse > 0.86) {
+      const dx = Math.cos(d2r(this.d + 90)) * coreRadius;
+      const dy = Math.sin(d2r(this.d + 90)) * coreRadius;
+      this.drawGlow(this.pos.x + dx, this.pos.y + dy, coreRadius * 0.85, glowAlpha * 0.34);
+      this.drawGlow(this.pos.x - dx, this.pos.y - dy, coreRadius * 0.85, glowAlpha * 0.34);
     }
 
-    if (pulseAlpha < 0.01) {
+    if (glowAlpha < 0.01) {
       this.delete();
     }
+  }
+
+  drawGlow(x: number, y: number, radius: number, alpha: number): void {
+    const c = requireMainContext();
+    const grad = c.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0, colorToString(this.color, alpha));
+    grad.addColorStop(0.55, colorToString(this.color, alpha * 0.35));
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    c.fillStyle = grad;
+    c.beginPath();
+    c.arc(x, y, radius, 0, Math.PI * 2, false);
+    c.fill();
   }
 
   delete(): void {
