@@ -11,6 +11,7 @@ export interface PersistedSettings {
   fadeMode: boolean;
   autoMode: boolean;
   yamiMode: boolean;
+  yamiStrength: number;
   symmetryMode: boolean;
   symmetryHud: boolean;
   symmetryType: "rotate" | "mirror";
@@ -29,6 +30,7 @@ export const defaultPersistedSettings: PersistedSettings = {
   fadeMode: false,
   autoMode: false,
   yamiMode: false,
+  yamiStrength: 100,
   symmetryMode: false,
   symmetryHud: true,
   symmetryType: "rotate",
@@ -51,6 +53,7 @@ export function loadSettings(): PersistedSettings {
       ...defaultPersistedSettings,
       ...parsed,
       size: Number(parsed.size ?? defaultPersistedSettings.size),
+      yamiStrength: Number(parsed.yamiStrength ?? defaultPersistedSettings.yamiStrength),
       symmetryCount: Number(parsed.symmetryCount ?? defaultPersistedSettings.symmetryCount),
       symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),
       symmetryOriginY: Number(parsed.symmetryOriginY ?? defaultPersistedSettings.symmetryOriginY),

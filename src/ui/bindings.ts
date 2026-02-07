@@ -116,6 +116,8 @@ export function bindUiEvents(): void {
   const symmetryOriginXReset = byId<HTMLButtonElement>("symmetry_origin_x_reset");
   const symmetryOriginYReset = byId<HTMLButtonElement>("symmetry_origin_y_reset");
   const yamiMode = byId<HTMLInputElement>("yami_mode");
+  const yamiStrength = byId<HTMLInputElement>("yami_strength");
+  const yamiStrengthValue = byId<HTMLElement>("yami_strength_value");
 
   const persist = () => {
     const settings: PersistedSettings = {
@@ -126,6 +128,7 @@ export function bindUiEvents(): void {
       fadeMode: app.isFadeMode,
       autoMode: app.isAutoMode,
       yamiMode: app.isYamiMode,
+      yamiStrength: app.yamiStrength,
       symmetryMode: app.isSymmetryMode,
       symmetryHud: app.isSymmetryHudVisible,
       symmetryType: app.symmetryType,
@@ -213,6 +216,14 @@ export function bindUiEvents(): void {
     persist();
   };
 
+  const applyYamiStrength = (value: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(value)));
+    app.yamiStrength = clamped;
+    yamiStrength.value = String(clamped);
+    yamiStrengthValue.textContent = String(clamped);
+    persist();
+  };
+
   const commitHistory = () => {
     captureHistorySnapshot();
     refreshUndoRedoButtons();
@@ -267,6 +278,10 @@ export function bindUiEvents(): void {
     app.isYamiMode = (event.currentTarget as HTMLInputElement).checked;
     applyDrawCompositeOperation();
     persist();
+  });
+
+  yamiStrength.addEventListener("input", (event) => {
+    applyYamiStrength(Number((event.currentTarget as HTMLInputElement).value));
   });
 
   symmetryMode.addEventListener("change", (event) => {
@@ -440,6 +455,7 @@ export function bindUiEvents(): void {
 
   yamiMode.checked = safeSettings.yamiMode;
   app.isYamiMode = safeSettings.yamiMode;
+  applyYamiStrength(safeSettings.yamiStrength);
   applyDrawCompositeOperation();
 
   symmetryMode.checked = safeSettings.symmetryMode;

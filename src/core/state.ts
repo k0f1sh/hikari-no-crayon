@@ -17,6 +17,7 @@ export const app = {
   isFadeMode: false,
   isAutoMode: false,
   isYamiMode: false,
+  yamiStrength: 100,
   isSymmetryMode: false,
   isSymmetryHudVisible: true,
   symmetryType: "rotate" as "rotate" | "mirror",

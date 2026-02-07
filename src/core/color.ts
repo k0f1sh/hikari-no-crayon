@@ -1,7 +1,23 @@
 import type { Color } from "../types";
+import { app } from "./state";
 
 export function colorToString(color: Color, a: number): string {
-  return `rgba(${Math.floor(color.r)},${Math.floor(color.g)},${Math.floor(color.b)},${a})`;
+  const applied = applyYamiColor(color);
+  return `rgba(${Math.floor(applied.r)},${Math.floor(applied.g)},${Math.floor(applied.b)},${a})`;
+}
+
+function applyYamiColor(color: Color): Color {
+  if (!app.isYamiMode) {
+    return color;
+  }
+
+  const strength = Math.max(0, Math.min(100, app.yamiStrength)) / 100;
+  const keepRatio = 1 - strength;
+  return {
+    r: color.r * keepRatio,
+    g: color.g * keepRatio,
+    b: color.b * keepRatio,
+  };
 }
 
 export function hsvToRgb(h: number, s: number, v: number): Color {
