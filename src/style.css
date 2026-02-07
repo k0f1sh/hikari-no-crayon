@@ -257,6 +257,11 @@ body {
   margin: 0 0 8px;
 }
 
+#etc li {
+  width: 100%;
+  max-width: var(--ui-max);
+}
+
 .pen_list {
   display: flex;
   flex-wrap: wrap;
