@@ -5,28 +5,50 @@ import type { Color, Effect, Point } from "../../types";
 import { isOutOfBounds, tail } from "./utils";
 
 export class DegiEffect implements Effect {
+  static readonly TURN_GRID = 28;
+
   pos: Point;
   spd: number;
   d: number;
-  rotateCount: number;
   alpha: number;
   delFlg: boolean;
   color: Color;
   posHistory: Point[];
   decAlphaP: number;
   historyNum: number;
+  lastTurnNodeKey: string | null;
 
   constructor(x: number, y: number, color: Color) {
     this.pos = { x, y };
     this.spd = app.penSize / 10;
     this.d = sample([0, 90, 180, 270]);
-    this.rotateCount = 2 + Math.floor(Math.random() * 5);
     this.alpha = 0.3;
     this.delFlg = false;
     this.color = color;
     this.posHistory = [];
     this.decAlphaP = 0.001;
     this.historyNum = 3;
+    this.lastTurnNodeKey = null;
+  }
+
+  wrappedModDistance(value: number, mod: number): number {
+    const r = ((value % mod) + mod) % mod;
+    return Math.min(r, mod - r);
+  }
+
+  getTurnNodeKey(): string | null {
+    const tolerance = Math.max(0.8, this.spd * 0.52);
+    const gx = DegiEffect.TURN_GRID;
+    const nearX = this.wrappedModDistance(this.pos.x, gx) <= tolerance;
+    const nearY = this.wrappedModDistance(this.pos.y, gx) <= tolerance;
+
+    if (!nearX || !nearY) {
+      return null;
+    }
+
+    const nodeX = Math.round(this.pos.x / gx);
+    const nodeY = Math.round(this.pos.y / gx);
+    return `${nodeX},${nodeY}`;
   }
 
   move(): void {
@@ -44,11 +66,17 @@ export class DegiEffect implements Effect {
     }
 
     this.pos = movePos(this.pos, this.spd, this.d);
-    this.rotateCount -= 1;
 
-    if (this.rotateCount <= 0) {
-      this.rotateCount = 2 + Math.floor(Math.random() * 2);
-      this.d += sample([0, 90, 180, 270]);
+    const nodeKey = this.getTurnNodeKey();
+    if (!nodeKey) {
+      this.lastTurnNodeKey = null;
+    } else if (nodeKey !== this.lastTurnNodeKey) {
+      const [nxText, nyText] = nodeKey.split(",");
+      const nx = Number(nxText);
+      const ny = Number(nyText);
+      const turn = (nx + ny) % 2 === 0 ? 90 : -90;
+      this.d += turn;
+      this.lastTurnNodeKey = nodeKey;
     }
 
     if (isOutOfBounds(this.pos, this.alpha)) {
