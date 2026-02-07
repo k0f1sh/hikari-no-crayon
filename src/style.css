@@ -90,7 +90,7 @@ body {
   transform: translateX(-50%);
   bottom: 64px;
   top: auto;
-  width: min(960px, calc(100vw - 32px));
+  width: min(360px, calc(100vw - 32px));
   z-index: 15;
   overflow-y: auto;
   padding: 10px 12px calc(14px + env(safe-area-inset-bottom));
@@ -177,7 +177,8 @@ body {
 .control_row {
   display: block !important;
   width: 100%;
-  margin: 0 0 10px !important;
+  max-width: 320px;
+  margin: 0 auto 10px !important;
 }
 
 .pen_list li,
@@ -273,22 +274,27 @@ body {
 #ml {
   display: grid;
   gap: 8px;
+  justify-items: center;
 }
 
 #yh {
   display: grid;
   gap: 8px;
+  justify-items: center;
 }
 
 #sy {
   display: grid;
   gap: 8px;
+  justify-items: center;
 }
 
 .mode_button {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 320px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 0;
@@ -314,23 +320,29 @@ body {
 #etc ul {
   display: grid;
   gap: 8px;
+  justify-items: center;
 }
 
 .button_row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  width: 100%;
+  max-width: 320px;
 }
 
 .export_row {
   display: grid;
   gap: 8px;
+  width: 100%;
+  max-width: 320px;
 }
 
 .range_label,
 .picker_label,
 .export_label {
   width: 100%;
+  max-width: 320px;
   display: grid;
   gap: 8px;
   border-radius: 0;
@@ -400,6 +412,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 320px;
   min-height: 40px;
   border: 1px solid var(--line);
   border-radius: 0;
