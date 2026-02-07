@@ -422,7 +422,7 @@ export function bindUiEvents(): void {
 
   symmetryCount.addEventListener("change", (event) => {
     const value = Number((event.currentTarget as HTMLSelectElement).value);
-    app.symmetryCount = [2, 4, 6, 8].includes(value) ? value : 4;
+    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(value) ? value : 4;
     updateSymmetryDockValue();
     persist();
   });
@@ -453,11 +453,13 @@ export function bindUiEvents(): void {
     clear(app.c!);
     app.effects = [];
     commitHistory();
+    closePanels();
   });
 
   byId<HTMLElement>("reverse_button").addEventListener("click", () => {
     reverseImage();
     commitHistory();
+    closePanels();
   });
 
   byId<HTMLElement>("save_button").addEventListener("click", () => {
@@ -579,7 +581,9 @@ export function bindUiEvents(): void {
   symmetryType.value = safeSettings.symmetryType;
   app.symmetryType = safeSettings.symmetryType;
   symmetryCount.value = String(safeSettings.symmetryCount);
-  app.symmetryCount = [2, 4, 6, 8].includes(safeSettings.symmetryCount) ? safeSettings.symmetryCount : 4;
+  app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(safeSettings.symmetryCount)
+    ? safeSettings.symmetryCount
+    : 4;
   applySymmetryOriginX(safeSettings.symmetryOriginX);
   applySymmetryOriginY(safeSettings.symmetryOriginY);
 
