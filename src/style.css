@@ -101,17 +101,15 @@ body {
 }
 
 #menu h1 {
-  margin: 8px 0 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  margin: 12px 2px 8px;
+  padding: 0;
+  border: 0;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: none;
   color: var(--muted);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
-  cursor: pointer;
+  background: transparent;
 }
 
 #pre {
@@ -151,6 +149,16 @@ body {
   margin: 0 0 8px;
 }
 
+.pen_list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pen_list li {
+  margin: 0;
+}
+
 .size_list label,
 .color_list label,
 .pen_list label {
@@ -170,10 +178,15 @@ body {
 
 .pen_list label {
   width: 100%;
-  justify-content: flex-start;
+  min-height: 70px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .size_list label:hover,
@@ -342,5 +355,9 @@ body {
     width: auto;
     max-height: 62vh;
     border-radius: 14px;
+  }
+
+  .pen_list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

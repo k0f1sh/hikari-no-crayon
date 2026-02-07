@@ -1,6 +1,6 @@
 import { app, requireCanvas } from "../core/state";
 import { clear, blurImage, reverseImage } from "../core/draw";
-import { hexToRgb, hsvToRgb, rgbToHex } from "../core/color";
+import { rgbToHex } from "../core/color";
 import {
   canRedo,
   canUndo,
@@ -23,16 +23,6 @@ function byId<T extends HTMLElement>(id: string): T {
     throw new Error(`Element not found: #${id}`);
   }
   return el;
-}
-
-function setSectionToggle(headerId: string, bodyId: string): void {
-  const header = byId<HTMLElement>(headerId);
-  const body = byId<HTMLElement>(bodyId);
-  body.style.display = "none";
-
-  header.addEventListener("click", () => {
-    body.style.display = body.style.display === "none" ? "block" : "none";
-  });
 }
 
 function setupRadioGroup(name: string, onChange: (value: string) => void) {
@@ -101,24 +91,6 @@ function setupRadioGroup(name: string, onChange: (value: string) => void) {
 function setPointerPosition(event: PointerEvent): void {
   app.mouse.x = event.pageX;
   app.mouse.y = event.pageY;
-}
-
-function findHueByColorHex(hex: string): string {
-  const rgb = hexToRgb(hex);
-  let bestHue = 0;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  [0, 40, 80, 120, 160, 200, 240, 280, 320].forEach((hue) => {
-    const candidate = hsvToRgb(hue, 200, 200);
-    const distance =
-      Math.abs(candidate.r - rgb.r) + Math.abs(candidate.g - rgb.g) + Math.abs(candidate.b - rgb.b);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestHue = hue;
-    }
-  });
-
-  return String(bestHue);
 }
 
 export function bindUiEvents(): void {
@@ -221,45 +193,20 @@ export function bindUiEvents(): void {
     switchButton.textContent = showMenu ? "hide" : "show";
   });
 
-  setSectionToggle("slh", "sl");
-  setSectionToggle("plh", "pl");
-  setSectionToggle("clh", "cl");
-  setSectionToggle("mlh", "ml");
-  setSectionToggle("etch", "etc");
-
   const penGroup = setupRadioGroup("pen", (value) => {
     app.selectedPenName = value;
     app.penTool = app.penTools[value];
     persist();
   });
 
-  const sizeGroup = setupRadioGroup("size", (value) => {
-    applySize(Number(value));
-  });
-
-  const colorGroup = setupRadioGroup("color", (value) => {
-    app.penColor = hsvToRgb(Number(value), 200, 200);
-    colorPicker.value = rgbToHex(app.penColor);
-    persist();
-  });
-
   sizeRange.addEventListener("input", (event) => {
     const value = Number((event.currentTarget as HTMLInputElement).value);
     applySize(value);
-
-    const exact = sizeGroup.inputs.find((input) => Number(input.value) === value);
-    if (exact) {
-      sizeGroup.selectByValue(exact.value);
-    } else {
-      sizeGroup.clearSelection();
-    }
   });
 
   colorPicker.addEventListener("input", (event) => {
     const value = (event.currentTarget as HTMLInputElement).value;
     applyColor(value);
-    colorGroup.clearSelection();
-    colorGroup.highlightByValue(findHueByColorHex(value));
   });
 
   byId<HTMLInputElement>("rainbow_mode").addEventListener("change", (event) => {
@@ -413,12 +360,7 @@ export function bindUiEvents(): void {
 
   penGroup.selectByValue(safeSettings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
   applySize(safeSettings.size);
-  if (!sizeGroup.selectByValue(String(safeSettings.size))) {
-    sizeGroup.clearSelection();
-  }
   applyColor(safeSettings.colorHex);
-  colorGroup.clearSelection();
-  colorGroup.highlightByValue(findHueByColorHex(safeSettings.colorHex));
 
   byId<HTMLInputElement>("rainbow_mode").checked = safeSettings.rainbowMode;
   app.isRainbowMode = safeSettings.rainbowMode;
