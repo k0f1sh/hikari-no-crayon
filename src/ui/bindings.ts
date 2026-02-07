@@ -258,7 +258,7 @@ export function bindUiEvents(): void {
 
   const setActivePanel = (panelId: string) => {
     panelIds.forEach((id) => {
-      panels[id].style.display = id === panelId ? "block" : "none";
+      panels[id].style.display = id === panelId ? "" : "none";
     });
 
     dockButtons.forEach((button) => {
