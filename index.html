@@ -17,25 +17,6 @@
 
         <button type="button" id="switch">dock hide</button>
         <div id="menu">
-          <h1 id="slh">ぺんのおおきさ</h1>
-          <ul id="sl" class="size_list">
-            <li class="control_row">
-              <label class="range_label">
-                <input type="range" id="size_range" min="5" max="400" step="1" value="40" />
-                <strong id="size_value">40px</strong>
-              </label>
-            </li>
-          </ul>
-
-          <h1 id="clh">ぺんのいろ</h1>
-          <ul id="cl" class="color_list">
-            <li class="control_row">
-              <label class="picker_label">
-                <input type="color" id="color_picker" value="#37c878" />
-              </label>
-            </li>
-          </ul>
-
           <h1 id="plh">ぺんのしゅるい</h1>
           <ul id="pl" class="pen_list">
             <li>
@@ -168,14 +149,16 @@
         </div>
 
         <div id="bottom_dock">
-          <button type="button" class="dock_btn" data-panel="sl">
+          <label class="dock_inline dock_size_inline">
             <span class="dock_main">おおきさ</span>
+            <input type="range" id="dock_size_range" min="5" max="400" step="1" value="40" />
             <span class="dock_sub" id="size_dock_value">40px</span>
-          </button>
-          <button type="button" class="dock_btn" data-panel="cl">
+          </label>
+          <label class="dock_inline dock_color_inline">
             <span class="dock_main">いろ</span>
+            <input type="color" id="dock_color_picker" value="#37c878" />
             <span class="dock_color" id="color_dock_swatch"></span>
-          </button>
+          </label>
           <button type="button" class="dock_btn" data-panel="pl">ぺん</button>
           <button type="button" class="dock_btn" data-panel="ml">もーど</button>
           <button type="button" class="dock_btn" data-panel="yh">やみ</button>

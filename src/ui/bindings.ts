@@ -97,10 +97,9 @@ export function bindUiEvents(): void {
   const dockToggle = byId<HTMLButtonElement>("switch");
   const menu = byId<HTMLElement>("menu");
   const dock = byId<HTMLElement>("bottom_dock");
-  const sizeRange = byId<HTMLInputElement>("size_range");
-  const sizeValue = byId<HTMLElement>("size_value");
+  const sizeRange = byId<HTMLInputElement>("dock_size_range");
   const sizeDockValue = byId<HTMLElement>("size_dock_value");
-  const colorPicker = byId<HTMLInputElement>("color_picker");
+  const colorPicker = byId<HTMLInputElement>("dock_color_picker");
   const colorDockSwatch = byId<HTMLElement>("color_dock_swatch");
   const exportScale = byId<HTMLSelectElement>("export_scale");
   const undoButton = byId<HTMLElement>("undo_button");
@@ -237,7 +236,6 @@ export function bindUiEvents(): void {
   const applySize = (value: number) => {
     app.penSize = Math.max(5, Math.min(400, value));
     sizeRange.value = String(app.penSize);
-    sizeValue.textContent = `${app.penSize}px`;
     sizeDockValue.textContent = `${app.penSize}px`;
     persist();
   };
@@ -251,7 +249,7 @@ export function bindUiEvents(): void {
   };
 
   const dockButtons = Array.from(dock.querySelectorAll<HTMLButtonElement>(".dock_btn"));
-  const panelIds = ["sl", "cl", "pl", "ml", "yh", "sy", "etc"];
+  const panelIds = ["pl", "ml", "yh", "sy", "etc"];
   const panels = panelIds.reduce<Record<string, HTMLElement>>((acc, id) => {
     acc[id] = byId<HTMLElement>(id);
     return acc;
