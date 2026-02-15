@@ -22,7 +22,7 @@ export class LifeGameEffect implements Effect {
     this.y = y;
     this.color = color;
     this.cellSize = Math.max(2, Math.floor(app.penSize / 24) + 1);
-    this.gridSize = Math.max(16, Math.min(256, Math.floor(app.penSize * 2)));
+    this.gridSize = Math.max(16, Math.min(128, Math.floor(app.penSize * 2)));
     this.alpha = 0.75;
     this.delFlg = false;
     this.age = 0;
