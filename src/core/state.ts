@@ -1,4 +1,5 @@
 import type { Color, Effect, MouseState, PenTool, PenToolMap } from "../types";
+import { getDefaultPenCustomParams } from "./penCustomParams";
 
 export const app = {
   canvas: null as HTMLCanvasElement | null,
@@ -29,6 +30,7 @@ export const app = {
   penTools: {} as PenToolMap,
   penTool: null as PenTool | null,
   selectedPenName: "normal_pen",
+  penCustomParams: getDefaultPenCustomParams(),
   penSize: 30,
   penColor: { r: 200, g: 200, b: 200 } as Color,
   historyStack: [] as ImageData[],

@@ -20,6 +20,12 @@ import {
   saveSettings,
   type PersistedSettings,
 } from "../core/persistence";
+import {
+  normalizePenCustomParams,
+  penCustomParamCatalog,
+  type PenCustomNumberParamDefinition,
+  type PenCustomParamDefinition,
+} from "../core/penCustomParams";
 import { exportPng } from "../core/export";
 
 function byId<T extends HTMLElement>(id: string): T {
@@ -116,6 +122,8 @@ const PEN_CATALOG = [
   { value: "shinmyaku_pen", icon: "脈", name: "しんみゃくぺん" },
 ] as const;
 
+const PEN_CUSTOM_CONTROLS_ID = "pen_custom_controls";
+
 function ensurePenOptions(): void {
   const penList = document.getElementById("pl");
   if (!penList) {
@@ -207,7 +215,101 @@ export function bindUiEvents(): void {
   const recordStatus = byId<HTMLElement>("record_status");
   const recordFrameHud = byId<HTMLElement>("record_frame_hud");
   const recordFrameHudLabel = byId<HTMLElement>("record_frame_hud_label");
+  const penCustomControls = byId<HTMLElement>(PEN_CUSTOM_CONTROLS_ID);
   let shouldPersist = true;
+
+  const ensurePenCustomValue = (penName: string, definition: PenCustomParamDefinition) => {
+    const penParams = app.penCustomParams[penName] ?? {};
+    if (typeof penParams !== "object" || !penParams) {
+      app.penCustomParams[penName] = {};
+    } else {
+      app.penCustomParams[penName] = penParams;
+    }
+
+    if (!(definition.key in app.penCustomParams[penName])) {
+      app.penCustomParams[penName][definition.key] = definition.defaultValue;
+    }
+  };
+
+  const formatNumberValue = (definition: PenCustomNumberParamDefinition, value: number): string => {
+    if (!Number.isFinite(definition.step) || definition.step >= 1) {
+      return String(Math.round(value));
+    }
+    const decimals = Math.min(4, String(definition.step).split(".")[1]?.length ?? 2);
+    return value.toFixed(decimals);
+  };
+
+  const renderPenCustomControls = (penName: string) => {
+    penCustomControls.innerHTML = "";
+    const definitions = penCustomParamCatalog[penName] ?? [];
+
+    if (definitions.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "pen_custom_empty";
+      empty.textContent = "このぺんは かすたむせってい なし";
+      penCustomControls.appendChild(empty);
+      return;
+    }
+
+    definitions.forEach((definition) => {
+      ensurePenCustomValue(penName, definition);
+
+      if (definition.type === "boolean") {
+        const label = document.createElement("label");
+        label.className = "export_label pen_custom_checkbox";
+
+        const text = document.createElement("span");
+        text.textContent = definition.label;
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = app.penCustomParams[penName][definition.key] === true;
+        input.addEventListener("change", () => {
+          app.penCustomParams[penName][definition.key] = input.checked;
+          persist();
+        });
+
+        label.appendChild(text);
+        label.appendChild(input);
+        penCustomControls.appendChild(label);
+        return;
+      }
+
+      const label = document.createElement("label");
+      label.className = "range_label";
+
+      const title = document.createElement("span");
+      title.textContent = definition.label;
+
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = String(definition.min);
+      input.max = String(definition.max);
+      input.step = String(definition.step);
+      const currentValue = Number(app.penCustomParams[penName][definition.key]);
+      const safeValue = Number.isFinite(currentValue)
+        ? Math.max(definition.min, Math.min(definition.max, currentValue))
+        : definition.defaultValue;
+      input.value = String(safeValue);
+
+      const valueText = document.createElement("strong");
+      valueText.className = "pen_custom_value";
+      valueText.textContent = formatNumberValue(definition, safeValue);
+
+      input.addEventListener("input", () => {
+        const value = Number(input.value);
+        const clamped = Number.isFinite(value) ? Math.max(definition.min, Math.min(definition.max, value)) : safeValue;
+        app.penCustomParams[penName][definition.key] = clamped;
+        valueText.textContent = formatNumberValue(definition, clamped);
+        persist();
+      });
+
+      label.appendChild(title);
+      label.appendChild(input);
+      label.appendChild(valueText);
+      penCustomControls.appendChild(label);
+    });
+  };
 
   const persist = () => {
     if (!shouldPersist) {
@@ -235,6 +337,7 @@ export function bindUiEvents(): void {
       recordFps: Number(recordFpsInput.value),
       recordResolution: recordResolutionInput.value,
       recordQuality: recordQualityInput.value,
+      penCustomParams: app.penCustomParams,
     };
     saveSettings(settings);
   };
@@ -411,7 +514,7 @@ export function bindUiEvents(): void {
   const modeDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="ml"]');
   const yamiDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="yh"]');
   const symmetryDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="sy"]');
-  const panelIds = ["pl", "ml", "yh", "sy", "etc"];
+  const panelIds = ["pl", "pc", "ml", "yh", "sy", "etc"];
   const panels = panelIds.reduce<Record<string, HTMLElement>>((acc, id) => {
     acc[id] = byId<HTMLElement>(id);
     return acc;
@@ -516,6 +619,7 @@ export function bindUiEvents(): void {
       ?? app.penTools[defaultPersistedSettings.pen]
       ?? Object.values(app.penTools)[0]
       ?? null;
+    renderPenCustomControls(value);
     const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
     const selectedPenName = selectedPenInput?.closest("label")?.querySelector<HTMLElement>(".pen_name")
       ?.textContent;
@@ -1243,6 +1347,7 @@ export function bindUiEvents(): void {
   const applyPersistedSettingsToUi = (settings: PersistedSettings) => {
     shouldPersist = false;
     try {
+      app.penCustomParams = normalizePenCustomParams(settings.penCustomParams);
       applyDockVisibility(true);
       penGroup.selectByValue(settings.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
       closePanels();

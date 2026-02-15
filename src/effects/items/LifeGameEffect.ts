@@ -3,8 +3,8 @@ import { colorToString } from "../../core/color";
 import type { Color, Effect } from "../../types";
 
 export class LifeGameEffect implements Effect {
-  x: number;
-  y: number;
+  originX: number;
+  originY: number;
   color: Color;
   cellSize: number;
   gridSize: number;
@@ -18,8 +18,6 @@ export class LifeGameEffect implements Effect {
   cellAges: Uint16Array;
 
   constructor(x: number, y: number, color: Color) {
-    this.x = x;
-    this.y = y;
     this.color = color;
     this.cellSize = Math.max(2, Math.floor(app.penSize / 24) + 1);
     this.gridSize = Math.max(16, Math.min(128, Math.floor(app.penSize * 2)));
@@ -33,6 +31,10 @@ export class LifeGameEffect implements Effect {
     this.liveCells = new Uint8Array(area);
     this.nextCells = new Uint8Array(area);
     this.cellAges = new Uint16Array(area);
+    const half = (this.gridSize * this.cellSize) / 2;
+    const snapToGrid = app.penCustomParams.life_pen?.snap_to_grid === true;
+    this.originX = snapToGrid ? Math.floor((x - half) / this.cellSize) * this.cellSize : x - half;
+    this.originY = snapToGrid ? Math.floor((y - half) / this.cellSize) * this.cellSize : y - half;
     this.seedCells();
   }
 
@@ -123,9 +125,6 @@ export class LifeGameEffect implements Effect {
 
   render(): void {
     const c = requireMainContext();
-    const half = (this.gridSize * this.cellSize) / 2;
-    const originX = this.x - half;
-    const originY = this.y - half;
 
     for (let gy = 0; gy < this.gridSize; gy += 1) {
       for (let gx = 0; gx < this.gridSize; gx += 1) {
@@ -137,8 +136,8 @@ export class LifeGameEffect implements Effect {
         const ageAlpha = Math.min(1, 0.45 + this.cellAges[idx] * 0.08);
         c.fillStyle = colorToString(this.color, this.alpha * ageAlpha);
         c.fillRect(
-          originX + gx * this.cellSize,
-          originY + gy * this.cellSize,
+          this.originX + gx * this.cellSize,
+          this.originY + gy * this.cellSize,
           Math.max(1, this.cellSize - 1),
           Math.max(1, this.cellSize - 1),
         );

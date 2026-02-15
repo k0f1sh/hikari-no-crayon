@@ -1,5 +1,10 @@
 import type { Color } from "../types";
 import { hexToRgb, rgbToHex } from "./color";
+import {
+  getDefaultPenCustomParams,
+  normalizePenCustomParams,
+  type PenCustomParamsState,
+} from "./penCustomParams";
 
 const SETTINGS_KEY = "hikari-no-crayon:settings:v1";
 
@@ -25,6 +30,7 @@ export interface PersistedSettings {
   recordFps: number;
   recordResolution: string;
   recordQuality: string;
+  penCustomParams: PenCustomParamsState;
 }
 
 export const defaultPersistedSettings: PersistedSettings = {
@@ -49,6 +55,7 @@ export const defaultPersistedSettings: PersistedSettings = {
   recordFps: 60,
   recordResolution: "source",
   recordQuality: "auto",
+  penCustomParams: getDefaultPenCustomParams(),
 };
 
 export function loadSettings(): PersistedSettings {
@@ -84,6 +91,9 @@ export function loadSettings(): PersistedSettings {
         typeof parsed.recordQuality === "string"
           ? parsed.recordQuality
           : defaultPersistedSettings.recordQuality,
+      penCustomParams: normalizePenCustomParams(
+        (parsed as Partial<PersistedSettings> & { penCustomParams?: unknown }).penCustomParams,
+      ),
       symmetryType:
         parsed.symmetryType === "mirror" || parsed.symmetryType === "rotate"
           ? parsed.symmetryType

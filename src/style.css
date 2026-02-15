@@ -175,7 +175,7 @@ body {
   display: flex;
   align-items: stretch;
   gap: 6px;
-  width: min(760px, calc(100vw - 24px));
+  width: min(860px, calc(100vw - 24px));
   padding: 8px 8px calc(9px + env(safe-area-inset-bottom));
   border: 0;
   background: linear-gradient(180deg, rgba(10, 17, 34, 0.9), rgba(5, 10, 22, 0.95));
@@ -332,6 +332,7 @@ body {
 }
 
 #pl,
+#pc,
 #ml,
 #yh,
 #sy,
@@ -399,6 +400,58 @@ body {
   flex: 0 0 106px;
   width: 106px;
   margin: 0;
+}
+
+.pen_custom_block {
+  flex: 0 0 100%;
+  width: 100%;
+  margin: 0 0 10px;
+}
+
+.pen_custom_panel {
+  width: 100%;
+  border: 1px solid rgba(162, 193, 255, 0.28);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.pen_custom_title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.pen_custom_controls {
+  display: grid;
+  gap: 8px;
+}
+
+.pen_custom_empty {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.pen_custom_checkbox {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.pen_custom_checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #66bcff;
+}
+
+.pen_custom_value {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .size_list label,
@@ -471,6 +524,12 @@ body {
 }
 
 #ml {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+#pc {
   display: grid;
   gap: 8px;
   justify-items: center;
