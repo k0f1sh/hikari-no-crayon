@@ -21,8 +21,8 @@ export class LifeGameEffect implements Effect {
     this.x = x;
     this.y = y;
     this.color = color;
-    this.cellSize = Math.max(2, Math.floor(app.penSize / 10));
-    this.gridSize = Math.max(12, Math.min(256, Math.floor(app.penSize / 2)));
+    this.cellSize = Math.max(2, Math.floor(app.penSize / 24) + 1);
+    this.gridSize = Math.max(16, Math.min(256, Math.floor(app.penSize * 2)));
     this.alpha = 0.75;
     this.delFlg = false;
     this.age = 0;
@@ -38,10 +38,18 @@ export class LifeGameEffect implements Effect {
 
   seedCells(): void {
     const center = (this.gridSize - 1) / 2;
-    const maxDistance = Math.max(1, center);
+    const seedWindow = Math.min(20, this.gridSize);
+    const halfWindow = seedWindow / 2;
+    const minSeed = center - halfWindow;
+    const maxSeed = center + halfWindow;
+    const maxDistance = Math.max(1, halfWindow);
 
     for (let gy = 0; gy < this.gridSize; gy += 1) {
       for (let gx = 0; gx < this.gridSize; gx += 1) {
+        if (gx < minSeed || gx > maxSeed || gy < minSeed || gy > maxSeed) {
+          continue;
+        }
+
         const dx = gx - center;
         const dy = gy - center;
         const distance = Math.sqrt(dx * dx + dy * dy) / maxDistance;
