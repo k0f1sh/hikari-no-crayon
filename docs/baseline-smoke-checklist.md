@@ -20,6 +20,7 @@ This checklist defines current expected behavior before modernization.
    - snow_pen
    - collatz_pen
    - hoshi_pen
+   - life_pen
    - hane_pen
    - nami_pen
    - spray_pen

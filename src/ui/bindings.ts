@@ -105,6 +105,7 @@ const PEN_CATALOG = [
   { value: "snow_pen", icon: "雪", name: "ゆきぱすてる" },
   { value: "collatz_pen", icon: "∞", name: "こらっつすたんぷ" },
   { value: "hoshi_pen", icon: "星", name: "ほしわいやー" },
+  { value: "life_pen", icon: "生", name: "らいふげーむぺん" },
   { value: "hane_pen", icon: "羽", name: "はねぺん" },
   { value: "nami_pen", icon: "波", name: "なみふで" },
   { value: "spray_pen", icon: "霧", name: "すぷれーかん" },

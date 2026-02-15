@@ -7,6 +7,7 @@ import { DegiPen } from "./pens/DegiPen";
 import { FurPen } from "./pens/FurPen";
 import { HanePen } from "./pens/HanePen";
 import { HoshiPen } from "./pens/HoshiPen";
+import { LifeGamePen } from "./pens/LifeGamePen";
 import { NamiPen } from "./pens/NamiPen";
 import { NormalPen } from "./pens/NormalPen";
 import { OrbitPen } from "./pens/OrbitPen";
@@ -23,6 +24,7 @@ export function createPenTools(): PenToolMap {
     snow_pen: new SnowPen(),
     collatz_pen: new CollatzPen(),
     hoshi_pen: new HoshiPen(),
+    life_pen: new LifeGamePen(),
     hane_pen: new HanePen(),
     nami_pen: new NamiPen(),
     spray_pen: new SprayPen(),

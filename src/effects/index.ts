@@ -8,3 +8,4 @@ export { DegiEffect } from "./items/DegiEffect";
 export { OrbitEffect } from "./items/OrbitEffect";
 export { ShinmyakuEffect } from "./items/ShinmyakuEffect";
 export { FractalBloomEffect } from "./items/FractalBloomEffect";
+export { LifeGameEffect } from "./items/LifeGameEffect";
