@@ -42,6 +42,15 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       max: 4,
       step: 0.1,
     },
+    {
+      key: "line_width",
+      label: "せんのふとさ",
+      type: "number",
+      defaultValue: 1,
+      min: 0.2,
+      max: 6,
+      step: 0.1,
+    },
   ],
   life_pen: [
     {
@@ -55,6 +64,15 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       label: "まるでかく",
       type: "boolean",
       defaultValue: false,
+    },
+    {
+      key: "max_generations",
+      label: "せだいすう",
+      type: "number",
+      defaultValue: 80,
+      min: 8,
+      max: 500,
+      step: 1,
     },
   ],
   hane_pen: [

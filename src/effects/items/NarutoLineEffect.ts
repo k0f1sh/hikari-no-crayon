@@ -18,12 +18,13 @@ export abstract class NarutoLineEffect implements Effect {
     y: number,
     color: Color,
     factor: number,
-    options?: { direction?: 1 | -1; speed?: number },
+    options?: { direction?: 1 | -1; speed?: number; lineWidth?: number },
   ) {
     this.pos = { x, y };
     this.color = color;
     this.alpha = 0.4;
-    this.size = 1;
+    const lineWidth = Number.isFinite(options?.lineWidth) ? Number(options?.lineWidth) : 1;
+    this.size = Math.max(0.1, Math.min(10, lineWidth));
     const direction = options?.direction === -1 ? -1 : 1;
     const speed = Number.isFinite(options?.speed) ? Number(options?.speed) : 1;
     this.stepSize = Math.max(0.2, Math.min(4, speed));

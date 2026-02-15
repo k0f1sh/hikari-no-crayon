@@ -25,7 +25,10 @@ export class LifeGameEffect implements Effect {
     this.delFlg = false;
     this.age = 0;
     this.generation = 0;
-    this.maxGenerations = Math.max(36, Math.min(140, this.gridSize * 2.5));
+    const configuredMaxGenerations = Number(app.penCustomParams.life_pen?.max_generations);
+    this.maxGenerations = Number.isFinite(configuredMaxGenerations)
+      ? Math.max(8, Math.min(500, Math.round(configuredMaxGenerations)))
+      : Math.max(36, Math.min(140, this.gridSize * 2.5));
 
     const area = this.gridSize * this.gridSize;
     this.liveCells = new Uint8Array(area);
