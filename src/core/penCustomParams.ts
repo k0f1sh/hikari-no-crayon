@@ -26,7 +26,23 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
   fur_pen: [],
   snow_pen: [],
   collatz_pen: [],
-  hoshi_pen: [],
+  hoshi_pen: [
+    {
+      key: "reverse_rotation",
+      label: "ぎゃくかいてん",
+      type: "boolean",
+      defaultValue: false,
+    },
+    {
+      key: "rotation_speed",
+      label: "かいてんそくど",
+      type: "number",
+      defaultValue: 1,
+      min: 0.2,
+      max: 4,
+      step: 0.1,
+    },
+  ],
   life_pen: [
     {
       key: "snap_to_grid",
@@ -35,7 +51,23 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       defaultValue: false,
     },
   ],
-  hane_pen: [],
+  hane_pen: [
+    {
+      key: "reverse_rotation",
+      label: "ぎゃくかいてん",
+      type: "boolean",
+      defaultValue: false,
+    },
+    {
+      key: "rotation_speed",
+      label: "かいてんそくど",
+      type: "number",
+      defaultValue: 1,
+      min: 0.2,
+      max: 4,
+      step: 0.1,
+    },
+  ],
   nami_pen: [],
   spray_pen: [],
   bubble_pen: [],
