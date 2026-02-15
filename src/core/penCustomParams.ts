@@ -50,6 +50,12 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       type: "boolean",
       defaultValue: false,
     },
+    {
+      key: "circle_cells",
+      label: "まるでかく",
+      type: "boolean",
+      defaultValue: false,
+    },
   ],
   hane_pen: [
     {

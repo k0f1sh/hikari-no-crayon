@@ -125,6 +125,7 @@ export class LifeGameEffect implements Effect {
 
   render(): void {
     const c = requireMainContext();
+    const circleCells = app.penCustomParams.life_pen?.circle_cells === true;
 
     for (let gy = 0; gy < this.gridSize; gy += 1) {
       for (let gx = 0; gx < this.gridSize; gx += 1) {
@@ -134,13 +135,26 @@ export class LifeGameEffect implements Effect {
         }
 
         const ageAlpha = Math.min(1, 0.45 + this.cellAges[idx] * 0.08);
-        c.fillStyle = colorToString(this.color, this.alpha * ageAlpha);
-        c.fillRect(
-          this.originX + gx * this.cellSize,
-          this.originY + gy * this.cellSize,
-          Math.max(1, this.cellSize - 1),
-          Math.max(1, this.cellSize - 1),
-        );
+        const cellAlpha = this.alpha * ageAlpha;
+        const cellX = this.originX + gx * this.cellSize;
+        const cellY = this.originY + gy * this.cellSize;
+
+        if (circleCells) {
+          const centerX = cellX + this.cellSize / 2;
+          const centerY = cellY + this.cellSize / 2;
+          const radius = Math.max(1, this.cellSize * 0.75);
+          const grad = c.createRadialGradient(centerX, centerY, 0.5, centerX, centerY, radius);
+          grad.addColorStop(0.2, colorToString(this.color, cellAlpha));
+          grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          c.fillStyle = grad;
+          c.beginPath();
+          c.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+          c.fill();
+          continue;
+        }
+
+        c.fillStyle = colorToString(this.color, cellAlpha);
+        c.fillRect(cellX, cellY, Math.max(1, this.cellSize - 1), Math.max(1, this.cellSize - 1));
       }
     }
   }
