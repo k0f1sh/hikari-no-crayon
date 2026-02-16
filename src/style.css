@@ -43,6 +43,23 @@ body {
   background-blend-mode: screen, screen, normal, overlay;
 }
 
+/* 誤操作でのテキスト選択を抑止 */
+body,
+body * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 入力系は通常どおり選択可能にしておく */
+input,
+textarea,
+select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 #wrapper,
 #contentWrapper,
 #canvasField {
