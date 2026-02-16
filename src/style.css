@@ -218,7 +218,10 @@ body {
 }
 
 .simple_settings_dialog {
-  width: min(760px, calc(100vw - 24px));
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   border: 1px solid rgba(162, 193, 255, 0.34);
   background: linear-gradient(165deg, rgba(16, 28, 56, 0.94), rgba(8, 15, 32, 0.96));
   box-shadow: var(--shadow);
@@ -1058,7 +1061,7 @@ select:focus-visible,
   }
 
   .simple_settings_dialog {
-    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
   }
 
   .simple_preset_button {
