@@ -1,7 +1,8 @@
 import { app } from "../core/state";
 import { hexToRgb, hsvToRgb, colorToString } from "../core/color";
 import { getDrawCompositeOperation } from "../core/draw";
-import type { Color, Effect, PenTool } from "../types";
+import { sampleSvgPathPoints, fitPointsToCanvas } from "../core/svgPathTrace";
+import type { Color, Effect, Point, PenTool } from "../types";
 
 export type SimplePresetConfig = {
   pen: string;
@@ -28,6 +29,8 @@ interface PreviewState {
   ctx: CanvasRenderingContext2D;
   effects: Effect[];
   count: number;
+  pathPoints: Point[] | null;
+  pathIndex: number;
 }
 
 type AppSnapshot = {
@@ -116,6 +119,17 @@ function restoreAppState(snapshot: AppSnapshot): void {
 const PREVIEW_SIZE = 80;
 const REFERENCE_SIZE = 800;
 const MAX_EFFECTS = 200;
+const S_CURVE_PATH = "M 10,90 C 30,10 70,10 50,50 C 30,90 70,90 90,10";
+
+let cachedPathPoints: Point[] | null = null;
+
+function getPathPoints(): Point[] {
+  if (!cachedPathPoints) {
+    const raw = sampleSvgPathPoints(S_CURVE_PATH, 2);
+    cachedPathPoints = fitPointsToCanvas(raw, PREVIEW_SIZE, PREVIEW_SIZE, 8);
+  }
+  return cachedPathPoints;
+}
 
 function renderPreviewFrame(
   config: SimplePresetConfig,
@@ -178,10 +192,28 @@ function renderPreviewFrame(
     // Composite operation
     app.c!.globalCompositeOperation = getDrawCompositeOperation();
 
-    // Auto-draw
+    // Draw
     if (app.penTool) {
-      const x = Math.floor(Math.random() * PREVIEW_SIZE);
-      const y = Math.floor(Math.random() * PREVIEW_SIZE);
+      let x: number;
+      let y: number;
+
+      if (config.autoMode && preview.pathPoints) {
+        // Auto-mode presets: random positions
+        x = Math.floor(Math.random() * PREVIEW_SIZE);
+        y = Math.floor(Math.random() * PREVIEW_SIZE);
+      } else if (preview.pathPoints) {
+        // Non-auto presets: trace S-curve path, shift x each loop
+        const len = preview.pathPoints.length;
+        const loop = Math.floor(preview.pathIndex / len);
+        const pt = preview.pathPoints[preview.pathIndex % len];
+        const xOffset = (loop * 12) % PREVIEW_SIZE;
+        x = (pt.x + xOffset) % PREVIEW_SIZE;
+        y = pt.y;
+        preview.pathIndex += 1;
+      } else {
+        x = Math.floor(Math.random() * PREVIEW_SIZE);
+        y = Math.floor(Math.random() * PREVIEW_SIZE);
+      }
 
       if (!config.symmetryMode) {
         app.penTool.draw(x, y);
@@ -256,6 +288,8 @@ export function startPreviewAnimations(
       ctx,
       effects: [],
       count: 0,
+      pathPoints: config.autoMode ? null : getPathPoints(),
+      pathIndex: 0,
     });
   }
 
