@@ -174,9 +174,13 @@ export function bindUiEvents(): void {
   const sizeRange = byId<HTMLInputElement>("dock_size_range");
   const sizeDockValue = byId<HTMLElement>("size_dock_value");
   const penDockValue = byId<HTMLElement>("pen_dock_value");
-  const modeDockValue = byId<HTMLElement>("mode_dock_value");
+  const rainbowDockValue = byId<HTMLElement>("rainbow_dock_value");
+  const fadeDockValue = byId<HTMLElement>("fade_dock_value");
+  const autoDockValue = byId<HTMLElement>("auto_dock_value");
   const yamiDockValue = byId<HTMLElement>("yami_dock_value");
   const symmetryDockValue = byId<HTMLElement>("symmetry_dock_value");
+  const dockFadeToggleButton = byId<HTMLButtonElement>("dock_fade_toggle_button");
+  const dockAutoToggleButton = byId<HTMLButtonElement>("dock_auto_toggle_button");
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
@@ -467,18 +471,12 @@ export function bindUiEvents(): void {
   };
 
   const updateModeDockValue = () => {
-    const activeModes: string[] = [];
-    if (app.isRainbowMode) {
-      activeModes.push("R");
-    }
-    if (app.isFadeMode) {
-      activeModes.push("F");
-    }
-    if (app.isAutoMode) {
-      activeModes.push("A");
-    }
-    modeDockValue.textContent = activeModes.length > 0 ? activeModes.join("+") : "OFF";
-    modeDockButton?.classList.toggle("is-on-state", activeModes.length > 0);
+    rainbowDockValue.textContent = app.isRainbowMode ? "ON" : "OFF";
+    modeDockButton?.classList.toggle("is-on-state", app.isRainbowMode);
+    fadeDockValue.textContent = app.isFadeMode ? "ON" : "OFF";
+    dockFadeToggleButton.classList.toggle("is-on-state", app.isFadeMode);
+    autoDockValue.textContent = app.isAutoMode ? "ON" : "OFF";
+    dockAutoToggleButton.classList.toggle("is-on-state", app.isAutoMode);
   };
 
   const updateYamiDockValue = () => {
@@ -950,6 +948,20 @@ export function bindUiEvents(): void {
 
   autoMode.addEventListener("change", (event) => {
     app.isAutoMode = (event.currentTarget as HTMLInputElement).checked;
+    updateModeDockValue();
+    persist();
+  });
+
+  dockFadeToggleButton.addEventListener("click", () => {
+    app.isFadeMode = !app.isFadeMode;
+    fadeMode.checked = app.isFadeMode;
+    updateModeDockValue();
+    persist();
+  });
+
+  dockAutoToggleButton.addEventListener("click", () => {
+    app.isAutoMode = !app.isAutoMode;
+    autoMode.checked = app.isAutoMode;
     updateModeDockValue();
     persist();
   });
