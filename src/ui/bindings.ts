@@ -165,6 +165,9 @@ export function bindUiEvents(): void {
   ensurePenOptions();
 
   const dockShowButton = byId<HTMLButtonElement>("dock_show_button");
+  const simpleSettingsButton = byId<HTMLButtonElement>("simple_settings_button");
+  const simpleSettingsModal = byId<HTMLElement>("simple_settings_modal");
+  const simpleSettingsCloseButton = byId<HTMLButtonElement>("simple_settings_close_button");
   const dockHideButton = byId<HTMLButtonElement>("dock_hide_button");
   const menu = byId<HTMLElement>("menu");
   const dock = byId<HTMLElement>("bottom_dock");
@@ -216,6 +219,9 @@ export function bindUiEvents(): void {
   const recordFrameHud = byId<HTMLElement>("record_frame_hud");
   const recordFrameHudLabel = byId<HTMLElement>("record_frame_hud_label");
   const penCustomControls = byId<HTMLElement>(PEN_CUSTOM_CONTROLS_ID);
+  const simplePresetButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>(".simple_preset_button"),
+  );
   let shouldPersist = true;
 
   const ensurePenCustomValue = (penName: string, definition: PenCustomParamDefinition) => {
@@ -510,6 +516,143 @@ export function bindUiEvents(): void {
     persist();
   };
 
+  type SimplePresetKey = "nijiiro" | "mangekyo" | "lifegame";
+  type SimplePresetConfig = {
+    pen: string;
+    size: number;
+    colorHex: string;
+    rainbowMode: boolean;
+    rainbowSaturation: number;
+    rainbowBrightness: number;
+    fadeMode: boolean;
+    autoMode: boolean;
+    yamiMode: boolean;
+    yamiStrength: number;
+    symmetryMode: boolean;
+    symmetryHud: boolean;
+    symmetryType: "rotate" | "mirror";
+    symmetryCount: number;
+    symmetryOriginX: number;
+    symmetryOriginY: number;
+  };
+
+  const simplePresetConfigs: Record<SimplePresetKey, SimplePresetConfig> = {
+    nijiiro: {
+      pen: "normal_pen",
+      size: 100,
+      colorHex: "#56b1ff",
+      rainbowMode: true,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
+      autoMode: false,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    mangekyo: {
+      pen: "snow_pen",
+      size: 64,
+      colorHex: "#56b1ff",
+      rainbowMode: true,
+      rainbowSaturation: 160,
+      rainbowBrightness: 100,
+      fadeMode: true,
+      autoMode: false,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: true,
+      symmetryHud: true,
+      symmetryType: "rotate",
+      symmetryCount: 8,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    lifegame: {
+      pen: "life_pen",
+      size: 160,
+      colorHex: "#56b1ff",
+      rainbowMode: true,
+      rainbowSaturation: 160,
+      rainbowBrightness: 60,
+      fadeMode: true,
+      autoMode: true,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+  };
+
+  const isSimplePresetKey = (value: string): value is SimplePresetKey =>
+    value === "nijiiro" || value === "mangekyo" || value === "lifegame";
+
+  const closeSimpleSettingsModal = () => {
+    simpleSettingsModal.classList.remove("is-open");
+    simpleSettingsModal.setAttribute("aria-hidden", "true");
+  };
+
+  const openSimpleSettingsModal = () => {
+    simpleSettingsModal.classList.add("is-open");
+    simpleSettingsModal.setAttribute("aria-hidden", "false");
+  };
+
+  const applySimplePreset = (key: SimplePresetKey) => {
+    const preset = simplePresetConfigs[key];
+    if (!preset) {
+      return;
+    }
+
+    penGroup.selectByValue(preset.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
+    applySize(preset.size);
+    applyColor(preset.colorHex);
+
+    rainbowMode.checked = preset.rainbowMode;
+    app.isRainbowMode = preset.rainbowMode;
+    applyRainbowSaturation(preset.rainbowSaturation);
+    applyRainbowBrightness(preset.rainbowBrightness);
+    updateRainbowControlsState();
+
+    fadeMode.checked = preset.fadeMode;
+    app.isFadeMode = preset.fadeMode;
+
+    autoMode.checked = preset.autoMode;
+    app.isAutoMode = preset.autoMode;
+
+    yamiMode.checked = preset.yamiMode;
+    app.isYamiMode = preset.yamiMode;
+    applyYamiStrength(preset.yamiStrength);
+    updateYamiControlsState();
+
+    symmetryMode.checked = preset.symmetryMode;
+    app.isSymmetryMode = preset.symmetryMode;
+    symmetryHud.checked = preset.symmetryHud;
+    app.isSymmetryHudVisible = preset.symmetryHud;
+    symmetryType.value = preset.symmetryType;
+    app.symmetryType = preset.symmetryType;
+    symmetryCount.value = String(preset.symmetryCount);
+    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(preset.symmetryCount) ? preset.symmetryCount : 4;
+    applySymmetryOriginX(preset.symmetryOriginX);
+    applySymmetryOriginY(preset.symmetryOriginY);
+    updateSymmetryControlsState();
+
+    applyDrawCompositeOperation();
+    updateModeDockValue();
+    updateYamiDockValue();
+    updateSymmetryDockValue();
+    persist();
+    closeSimpleSettingsModal();
+  };
+
   const dockButtons = Array.from(dock.querySelectorAll<HTMLButtonElement>(".dock_btn"));
   const modeDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="ml"]');
   const yamiDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="yh"]');
@@ -611,6 +754,36 @@ export function bindUiEvents(): void {
 
   dockShowButton.addEventListener("click", () => {
     applyDockVisibility(true);
+  });
+
+  simpleSettingsButton.addEventListener("click", () => {
+    openSimpleSettingsModal();
+  });
+
+  simpleSettingsCloseButton.addEventListener("click", () => {
+    closeSimpleSettingsModal();
+  });
+
+  simpleSettingsModal.addEventListener("pointerdown", (event) => {
+    if (event.target === simpleSettingsModal) {
+      closeSimpleSettingsModal();
+    }
+  });
+
+  simplePresetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.simplePreset;
+      if (!key || !isSimplePresetKey(key)) {
+        return;
+      }
+      applySimplePreset(key);
+    });
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && simpleSettingsModal.classList.contains("is-open")) {
+      closeSimpleSettingsModal();
+    }
   });
 
   const penGroup = setupRadioGroup("pen", (value) => {

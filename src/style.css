@@ -140,6 +140,80 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
+#simple_settings_button {
+  position: fixed;
+  right: 12px;
+  top: calc(12px + env(safe-area-inset-top));
+  z-index: 30;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  min-height: 34px;
+  padding: 6px 10px;
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(16, 28, 52, 0.92), rgba(8, 14, 30, 0.96));
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.simple_settings_modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 8, 16, 0.56);
+}
+
+.simple_settings_modal.is-open {
+  display: grid;
+}
+
+.simple_settings_dialog {
+  width: min(360px, calc(100vw - 24px));
+  border: 1px solid rgba(162, 193, 255, 0.34);
+  background: linear-gradient(165deg, rgba(16, 28, 56, 0.94), rgba(8, 15, 32, 0.96));
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.simple_settings_dialog h2 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+
+.simple_settings_help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.simple_settings_actions {
+  display: grid;
+  gap: 8px;
+}
+
+.simple_preset_button {
+  min-height: 40px;
+  border: 1px solid rgba(162, 193, 255, 0.3);
+  border-radius: 0;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.simple_preset_button:hover {
+  border-color: rgba(162, 193, 255, 0.56);
+  background: rgba(162, 193, 255, 0.13);
+}
+
 #menu {
   position: fixed;
   left: 50%;
@@ -780,6 +854,11 @@ select:focus-visible,
 }
 
 @media (max-width: 820px) {
+  #simple_settings_button {
+    right: 8px;
+    top: calc(8px + env(safe-area-inset-top));
+  }
+
   #menu {
     left: 50%;
     transform: translateX(-50%);
