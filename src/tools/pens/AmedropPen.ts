@@ -8,6 +8,10 @@ export class AmedropPen implements PenTool {
 
   draw(x: number, y: number): void {
     const radius = Math.max(4, app.penSize * 3.0);
+    if (AmedropEffect.getRemainingCapacity() <= 0) {
+      return;
+    }
+
     const rawDropCount = Number(app.penCustomParams.amedrop_pen?.spawn_count);
     const dropCount = Number.isFinite(rawDropCount)
       ? Math.max(1, Math.min(5, Math.round(rawDropCount)))
@@ -22,7 +26,8 @@ export class AmedropPen implements PenTool {
       : 180;
 
     const emitAt = (emitX: number, emitY: number) => {
-      for (let i = 0; i < dropCount; i += 1) {
+      const emitCount = Math.min(dropCount, AmedropEffect.getRemainingCapacity());
+      for (let i = 0; i < emitCount; i += 1) {
         app.effects.push(
           new AmedropEffect(emitX, emitY, app.penColor, radius, gravityDirection, {
             lifetime,
@@ -42,9 +47,15 @@ export class AmedropPen implements PenTool {
       const dx = x - this.previousPoint.x;
       const dy = y - this.previousPoint.y;
       const distance = Math.hypot(dx, dy);
-      const step = Math.max(0.35, Math.min(1.5, radius * 0.12));
+      // 速く動くほど補間間隔を広げて過剰生成を抑える
+      const baseStep = Math.max(0.8, Math.min(6, radius * 0.18));
+      const speedBoost = Math.min(4, distance * 0.12);
+      const step = Math.max(0.8, Math.min(10, baseStep + speedBoost));
       const segments = Math.max(1, Math.ceil(distance / step));
       for (let i = 1; i <= segments; i += 1) {
+        if (AmedropEffect.getRemainingCapacity() <= 0) {
+          break;
+        }
         const t = i / segments;
         emitAt(this.previousPoint.x + dx * t, this.previousPoint.y + dy * t);
       }

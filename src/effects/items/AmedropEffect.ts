@@ -9,6 +9,13 @@ interface AmedropEffectOptions {
 }
 
 export class AmedropEffect implements Effect {
+  static readonly MAX_ACTIVE = 900;
+  static activeCount = 0;
+
+  static getRemainingCapacity(): number {
+    return Math.max(0, AmedropEffect.MAX_ACTIVE - AmedropEffect.activeCount);
+  }
+
   pos: Point;
   prevPos: Point;
   color: Color;
@@ -29,6 +36,7 @@ export class AmedropEffect implements Effect {
   maxBounces: number;
   age: number;
   maxAge: number;
+  released: boolean;
 
   constructor(
     x: number,
@@ -58,6 +66,7 @@ export class AmedropEffect implements Effect {
     this.color = color;
     this.alpha = 0.38;
     this.delFlg = false;
+    this.released = false;
     this.size = Math.max(1.6, app.penSize / 24 + Math.random() * 1.8);
     this.velocityX = gravityX * baseAlong + tangentX * sideJitter;
     this.velocityY = gravityY * baseAlong + tangentY * sideJitter;
@@ -77,6 +86,8 @@ export class AmedropEffect implements Effect {
     this.maxAge = Number.isFinite(configuredLifetime)
       ? Math.max(30, Math.min(600, Math.round(configuredLifetime)))
       : Math.max(90, Math.min(320, Math.round(app.penSize * 2.8)));
+
+    AmedropEffect.activeCount += 1;
   }
 
   move(): void {
@@ -124,6 +135,11 @@ export class AmedropEffect implements Effect {
   }
 
   render(): void {
+    const renderInterval = this.age < 20 ? 1 : this.age < this.maxAge * 0.5 ? 2 : 3;
+    if (this.age % renderInterval !== 0) {
+      return;
+    }
+
     drawLineColor(
       this.prevPos,
       this.pos,
@@ -135,6 +151,11 @@ export class AmedropEffect implements Effect {
   }
 
   delete(): void {
+    if (this.released) {
+      return;
+    }
+    this.released = true;
+    AmedropEffect.activeCount = Math.max(0, AmedropEffect.activeCount - 1);
     this.delFlg = true;
   }
 }
