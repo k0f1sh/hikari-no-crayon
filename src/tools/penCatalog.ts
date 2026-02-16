@@ -1,6 +1,7 @@
 import type { PenTool } from "../types";
 import { BloodPen } from "./pens/BloodPen";
 import { BubblePen } from "./pens/BubblePen";
+import { AmedropPen } from "./pens/AmedropPen";
 import { DegiPen } from "./pens/DegiPen";
 import { FractalBloomPen } from "./pens/FractalBloomPen";
 import { FurPen } from "./pens/FurPen";
@@ -37,4 +38,5 @@ export const PEN_CATALOG: PenCatalogEntry[] = [
   { value: "fractal_bloom_pen", icon: "渦", name: "ふらくたるぶるーむ", create: () => new FractalBloomPen() },
   { value: "degi_pen", icon: "電", name: "でじたるぺん", create: () => new DegiPen() },
   { value: "shinmyaku_pen", icon: "脈", name: "しんみゃくぺん", create: () => new ShinmyakuPen() },
+  { value: "amedrop_pen", icon: "雨", name: "あめどろっぷ", create: () => new AmedropPen() },
 ];

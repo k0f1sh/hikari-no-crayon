@@ -99,6 +99,35 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
   fractal_bloom_pen: [],
   degi_pen: [],
   shinmyaku_pen: [],
+  amedrop_pen: [
+    {
+      key: "gravity_direction",
+      label: "じゅうりょくほうこう",
+      type: "number",
+      defaultValue: 90,
+      min: 0,
+      max: 359,
+      step: 1,
+    },
+    {
+      key: "spawn_count",
+      label: "しずくのかず",
+      type: "number",
+      defaultValue: 1,
+      min: 1,
+      max: 5,
+      step: 1,
+    },
+    {
+      key: "lifetime",
+      label: "きえるまで",
+      type: "number",
+      defaultValue: 180,
+      min: 30,
+      max: 600,
+      step: 1,
+    },
+  ],
 };
 
 function clamp(value: number, min: number, max: number): number {
