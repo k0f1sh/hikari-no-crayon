@@ -72,9 +72,6 @@
               <label class="pen_option"><input type="radio" name="pen" value="snow_pen" /><span class="pen_icon">雪</span><span class="pen_name">ゆきぱすてる</span></label>
             </li>
             <li>
-              <label class="pen_option"><input type="radio" name="pen" value="collatz_pen" /><span class="pen_icon">∞</span><span class="pen_name">こらっつすたんぷ</span></label>
-            </li>
-            <li>
               <label class="pen_option"><input type="radio" name="pen" value="hoshi_pen" /><span class="pen_icon">星</span><span class="pen_name">ほしわいやー</span></label>
             </li>
             <li>
@@ -300,9 +297,46 @@
           <div class="simple_settings_dialog" role="dialog" aria-modal="true" aria-labelledby="simple_settings_title">
             <h2 id="simple_settings_title">ぷりせっとをえらぶ</h2>
             <div class="simple_settings_actions">
-              <button type="button" class="simple_preset_button" data-simple-preset="nijiiro">にじいろ</button>
-              <button type="button" class="simple_preset_button" data-simple-preset="mangekyo">まんげきょう</button>
-              <button type="button" class="simple_preset_button" data-simple-preset="lifegame">らいふげーむ</button>
+              <button type="button" class="simple_preset_button" data-simple-preset="nijiiro">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">にじいろ</span>
+                <span class="simple_preset_desc">ひかり + れいんぼー</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="mangekyo">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">まんげきょう</span>
+                <span class="simple_preset_desc">8ぶんかつ たいしょう</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="lifegame">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">らいふげーむ</span>
+                <span class="simple_preset_desc">おーと + ふぇーど</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="futsu">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">ふつう</span>
+                <span class="simple_preset_desc">べーしっくせってい</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="bukimi">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">ぶきみ</span>
+                <span class="simple_preset_desc">あか + おーともーど</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="hane">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">はね</span>
+                <span class="simple_preset_desc">はねぺん + 100px</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="yamispray">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">やみすぷれー</span>
+                <span class="simple_preset_desc">やみ + 140px</span>
+              </button>
+              <button type="button" class="simple_preset_button" data-simple-preset="yamikeshi">
+                <span class="simple_preset_icon" aria-hidden="true"></span>
+                <span class="simple_preset_name">やみけしごむ</span>
+                <span class="simple_preset_desc">やみ + 80px</span>
+              </button>
             </div>
             <button type="button" id="simple_settings_close_button" class="btn btn-secondary">とじる</button>
           </div>

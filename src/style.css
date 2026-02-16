@@ -193,7 +193,7 @@ body {
 }
 
 .simple_settings_dialog {
-  width: min(360px, calc(100vw - 24px));
+  width: min(760px, calc(100vw - 24px));
   border: 1px solid rgba(162, 193, 255, 0.34);
   background: linear-gradient(165deg, rgba(16, 28, 56, 0.94), rgba(8, 15, 32, 0.96));
   box-shadow: var(--shadow);
@@ -215,24 +215,89 @@ body {
 }
 
 .simple_settings_actions {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
 }
 
 .simple_preset_button {
-  min-height: 40px;
+  flex: 0 0 calc((100% - 24px) / 4);
+  aspect-ratio: 1 / 1;
   border: 1px solid rgba(162, 193, 255, 0.3);
   border-radius: 0;
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.simple_preset_icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  border: 1px solid rgba(162, 193, 255, 0.55);
+  background: linear-gradient(135deg, rgba(86, 177, 255, 0.38), rgba(118, 246, 208, 0.2));
+}
+
+.simple_preset_name {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.simple_preset_desc {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--muted);
 }
 
 .simple_preset_button:hover {
   border-color: rgba(162, 193, 255, 0.56);
   background: rgba(162, 193, 255, 0.13);
+}
+
+.simple_preset_button[data-simple-preset="nijiiro"] .simple_preset_icon {
+  background: linear-gradient(135deg, #ff6a5f, #ffc46b 35%, #5fd9ff 65%, #7f5bff);
+}
+
+.simple_preset_button[data-simple-preset="mangekyo"] .simple_preset_icon {
+  background: linear-gradient(135deg, #5fdaff, #7f5bff);
+}
+
+.simple_preset_button[data-simple-preset="lifegame"] .simple_preset_icon {
+  background: linear-gradient(135deg, #79ff9e, #54b6ff);
+}
+
+.simple_preset_button[data-simple-preset="futsu"] .simple_preset_icon {
+  background: linear-gradient(135deg, #7aa6ff, #c4d4ff);
+}
+
+.simple_preset_button[data-simple-preset="bukimi"] .simple_preset_icon {
+  background: linear-gradient(135deg, #ff2f45, #ff8a3d);
+}
+
+.simple_preset_button[data-simple-preset="hane"] .simple_preset_icon {
+  background: linear-gradient(135deg, #0f172f, #2e3d62);
+}
+
+.simple_preset_button[data-simple-preset="yamispray"] .simple_preset_icon {
+  background: linear-gradient(135deg, #1b1f2b, #4f78ff);
+}
+
+.simple_preset_button[data-simple-preset="yamikeshi"] .simple_preset_icon {
+  background: linear-gradient(135deg, #151820, #3f4f7a);
+}
+
+#simple_settings_close_button {
+  justify-self: center;
 }
 
 #menu {
@@ -881,6 +946,15 @@ select:focus-visible,
     top: auto;
     width: calc(100vw - 16px);
     max-height: min(78vh, calc(100vh - var(--dock-offset) - 8px));
+  }
+
+  .simple_settings_dialog {
+    width: calc(100vw - 16px);
+  }
+
+  .simple_preset_button {
+    flex: 0 0 calc((100% - 8px) / 2);
+    aspect-ratio: 1 / 1;
   }
 
   .pen_list {

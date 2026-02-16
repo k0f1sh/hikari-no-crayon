@@ -109,7 +109,7 @@ const PEN_CATALOG = [
   { value: "blood_pen", icon: "血", name: "けっかんぺんしる" },
   { value: "fur_pen", icon: "毛", name: "ふぁーえんぴつ" },
   { value: "snow_pen", icon: "雪", name: "ゆきぱすてる" },
-  { value: "collatz_pen", icon: "∞", name: "こらっつすたんぷ" },
+  // 設定によっては激しく点滅してあぶないので廃止
   { value: "hoshi_pen", icon: "星", name: "ほしわいやー" },
   { value: "life_pen", icon: "生", name: "らいふげーむぺん" },
   { value: "hane_pen", icon: "羽", name: "はねぺん" },
@@ -516,7 +516,25 @@ export function bindUiEvents(): void {
     persist();
   };
 
-  type SimplePresetKey = "nijiiro" | "mangekyo" | "lifegame";
+  const syncDockColorPreview = () => {
+    if (!app.isRainbowMode) {
+      return;
+    }
+    const currentHex = rgbToHex(app.penColor);
+    if (colorPicker.value !== currentHex) {
+      colorPicker.value = currentHex;
+    }
+  };
+
+  type SimplePresetKey =
+    "nijiiro"
+    | "mangekyo"
+    | "lifegame"
+    | "futsu"
+    | "bukimi"
+    | "hane"
+    | "yamispray"
+    | "yamikeshi";
   type SimplePresetConfig = {
     pen: string;
     size: number;
@@ -534,6 +552,7 @@ export function bindUiEvents(): void {
     symmetryCount: number;
     symmetryOriginX: number;
     symmetryOriginY: number;
+    lifeSnapToGrid?: boolean;
   };
 
   const simplePresetConfigs: Record<SimplePresetKey, SimplePresetConfig> = {
@@ -581,8 +600,99 @@ export function bindUiEvents(): void {
       rainbowSaturation: 160,
       rainbowBrightness: 60,
       fadeMode: true,
+      autoMode: false,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+      lifeSnapToGrid: false,
+    },
+    futsu: {
+      pen: "normal_pen",
+      size: 64,
+      colorHex: "#56b1ff",
+      rainbowMode: false,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
+      autoMode: false,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    bukimi: {
+      pen: "blood_pen",
+      size: 64,
+      colorHex: "#ff3b4f",
+      rainbowMode: false,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
       autoMode: true,
       yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    hane: {
+      pen: "hane_pen",
+      size: 100,
+      colorHex: "#0f172f",
+      rainbowMode: false,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
+      autoMode: false,
+      yamiMode: false,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    yamispray: {
+      pen: "spray_pen",
+      size: 140,
+      colorHex: "#56b1ff",
+      rainbowMode: false,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
+      autoMode: false,
+      yamiMode: true,
+      yamiStrength: 100,
+      symmetryMode: false,
+      symmetryHud: false,
+      symmetryType: "rotate",
+      symmetryCount: 4,
+      symmetryOriginX: 50,
+      symmetryOriginY: 50,
+    },
+    yamikeshi: {
+      pen: "normal_pen",
+      size: 80,
+      colorHex: "#56b1ff",
+      rainbowMode: false,
+      rainbowSaturation: 200,
+      rainbowBrightness: 200,
+      fadeMode: false,
+      autoMode: false,
+      yamiMode: true,
       yamiStrength: 100,
       symmetryMode: false,
       symmetryHud: false,
@@ -594,7 +704,8 @@ export function bindUiEvents(): void {
   };
 
   const isSimplePresetKey = (value: string): value is SimplePresetKey =>
-    value === "nijiiro" || value === "mangekyo" || value === "lifegame";
+    value === "nijiiro" || value === "mangekyo" || value === "lifegame" || value === "futsu"
+    || value === "bukimi" || value === "hane" || value === "yamispray" || value === "yamikeshi";
 
   const closeSimpleSettingsModal = () => {
     simpleSettingsModal.classList.remove("is-open");
@@ -644,6 +755,17 @@ export function bindUiEvents(): void {
     applySymmetryOriginX(preset.symmetryOriginX);
     applySymmetryOriginY(preset.symmetryOriginY);
     updateSymmetryControlsState();
+
+    if (typeof preset.lifeSnapToGrid === "boolean") {
+      const lifePenParams = app.penCustomParams.life_pen;
+      app.penCustomParams.life_pen = {
+        ...(typeof lifePenParams === "object" && lifePenParams ? lifePenParams : {}),
+        snap_to_grid: preset.lifeSnapToGrid,
+      };
+      if (app.selectedPenName === "life_pen") {
+        renderPenCustomControls("life_pen");
+      }
+    }
 
     applyDrawCompositeOperation();
     updateModeDockValue();
@@ -1483,6 +1605,12 @@ export function bindUiEvents(): void {
   const canvas = requireCanvas();
   canvas.style.touchAction = "none";
   window.addEventListener("resize", updateRecordFrameHud);
+
+  const previewLoop = () => {
+    syncDockColorPreview();
+    window.requestAnimationFrame(previewLoop);
+  };
+  window.requestAnimationFrame(previewLoop);
 
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
