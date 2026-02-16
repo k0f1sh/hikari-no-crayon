@@ -415,8 +415,42 @@ body {
 }
 
 .dock_size_inline input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: #66bcff;
+  height: 6px;
+  border-radius: 3px;
+  border: none;
+  background: linear-gradient(90deg, rgba(86, 177, 255, 0.25), rgba(127, 91, 255, 0.25));
+  outline: none;
+}
+
+.dock_size_inline input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff) border-box;
+  box-shadow: 0 0 8px rgba(127, 91, 255, 0.4), 0 0 8px rgba(86, 177, 255, 0.3);
+  cursor: pointer;
+}
+
+.dock_size_inline input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff);
+  box-shadow: 0 0 8px rgba(127, 91, 255, 0.4), 0 0 8px rgba(86, 177, 255, 0.3);
+  cursor: pointer;
+}
+
+.dock_size_inline input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(86, 177, 255, 0.25), rgba(127, 91, 255, 0.25));
 }
 
 .dock_color_inline {
