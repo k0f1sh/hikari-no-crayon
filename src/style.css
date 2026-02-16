@@ -383,6 +383,7 @@ body {
   z-index: 25;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: stretch;
   gap: 6px;
   width: calc(100vw - 24px);
