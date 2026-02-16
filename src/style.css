@@ -141,7 +141,7 @@ body {
 }
 
 #simple_settings_button {
-  flex: 0 0 74px;
+  flex: 0 1 74px;
   border-color: rgba(255, 196, 86, 0.75);
   background:
     linear-gradient(140deg, rgba(255, 196, 86, 0.26), rgba(255, 86, 160, 0.12)),
@@ -382,9 +382,10 @@ body {
   bottom: 0;
   z-index: 25;
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 6px;
-  width: min(980px, calc(100vw - 24px));
+  width: calc(100vw - 24px);
   padding: 8px 8px calc(9px + env(safe-area-inset-bottom));
   border: 0;
   background: transparent;
@@ -406,6 +407,7 @@ body {
 .dock_size_inline {
   flex: 1 1 auto;
   min-width: 100px;
+  max-width: 200px;
   aspect-ratio: auto;
 }
 
@@ -415,7 +417,7 @@ body {
 }
 
 .dock_color_inline {
-  flex: 0 0 74px;
+  flex: 0 1 74px;
   justify-items: center;
 }
 
@@ -431,7 +433,7 @@ body {
   display: grid;
   place-items: center;
   gap: 2px;
-  flex: 0 0 74px;
+  flex: 0 1 74px;
   aspect-ratio: 1 / 1;
   border: 1px solid rgba(162, 193, 255, 0.25);
   border-radius: 0;
@@ -444,11 +446,11 @@ body {
 }
 
 .dock_toggle_btn {
-  flex: 0 0 74px;
+  flex: 0 1 74px;
 }
 
 .dock_mode_toggle {
-  flex: 0 0 74px;
+  flex: 0 1 74px;
 }
 
 .dock_mode_toggle .dock_main {
@@ -483,7 +485,7 @@ body {
 }
 
 .dock_action_tile {
-  flex: 0 0 74px;
+  flex: 0 1 74px;
   aspect-ratio: 1 / 1;
   min-height: 44px;
   border: 1px solid rgba(162, 193, 255, 0.25);
@@ -1037,25 +1039,22 @@ select:focus-visible,
 
   .dock_size_inline {
     grid-column: span 4;
+    max-width: none;
     aspect-ratio: auto;
   }
 
-  .dock_color_inline {
-    aspect-ratio: 1 / 1;
+  .dock_inline {
+    aspect-ratio: auto;
   }
 
   .dock_btn {
     flex: none;
-    aspect-ratio: 1 / 1;
-  }
-
-  #simple_settings_button {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: auto;
   }
 
   .dock_action_tile {
     flex: none;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: auto;
   }
 
   #dock_show_button {
