@@ -23,7 +23,35 @@ export type PenCustomParamDefinition = PenCustomBooleanParamDefinition | PenCust
 export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> = {
   normal_pen: [],
   blood_pen: [],
-  fur_pen: [],
+  fur_pen: [
+    {
+      key: "line_count",
+      label: "けのほんすう",
+      type: "number",
+      defaultValue: 120,
+      min: 20,
+      max: 320,
+      step: 5,
+    },
+    {
+      key: "scatter_radius",
+      label: "ちりばり",
+      type: "number",
+      defaultValue: 10,
+      min: 2,
+      max: 60,
+      step: 1,
+    },
+    {
+      key: "line_width",
+      label: "けのふとさ",
+      type: "number",
+      defaultValue: 0.1,
+      min: 0.05,
+      max: 2,
+      step: 0.05,
+    },
+  ],
   snow_pen: [],
   collatz_pen: [],
   hoshi_pen: [
