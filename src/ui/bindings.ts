@@ -27,6 +27,7 @@ import {
   type PenCustomParamDefinition,
 } from "../core/penCustomParams";
 import { exportPng } from "../core/export";
+import { PEN_CATALOG } from "../tools/penCatalog";
 import { startPreviewAnimations, stopPreviewAnimations } from "./presetPreview";
 
 function byId<T extends HTMLElement>(id: string): T {
@@ -104,24 +105,6 @@ function setPointerPosition(event: PointerEvent): void {
   app.mouse.x = event.pageX;
   app.mouse.y = event.pageY;
 }
-
-const PEN_CATALOG = [
-  { value: "normal_pen", icon: "光", name: "ひかりのくれよん" },
-  { value: "blood_pen", icon: "血", name: "けっかんぺんしる" },
-  { value: "fur_pen", icon: "毛", name: "ふぁーえんぴつ" },
-  { value: "snow_pen", icon: "雪", name: "ゆきぱすてる" },
-  // 設定によっては激しく点滅してあぶないので廃止
-  { value: "hoshi_pen", icon: "星", name: "ほしわいやー" },
-  { value: "life_pen", icon: "生", name: "らいふげーむぺん" },
-  { value: "hane_pen", icon: "羽", name: "はねぺん" },
-  { value: "nami_pen", icon: "波", name: "なみふで" },
-  { value: "spray_pen", icon: "霧", name: "すぷれーかん" },
-  { value: "bubble_pen", icon: "泡", name: "あわすぷれー" },
-  { value: "orbit_pen", icon: "彗", name: "おーびっとぺん" },
-  { value: "fractal_bloom_pen", icon: "渦", name: "ふらくたるぶるーむ" },
-  { value: "degi_pen", icon: "電", name: "でじたるぺん" },
-  { value: "shinmyaku_pen", icon: "脈", name: "しんみゃくぺん" },
-] as const;
 
 const PEN_CUSTOM_CONTROLS_ID = "pen_custom_controls";
 
