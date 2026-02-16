@@ -142,13 +142,13 @@ body {
 
 #simple_settings_button {
   flex: 0 1 74px;
-  border-color: rgba(255, 196, 86, 0.75);
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff, #ff5f6d) 1;
   background:
-    linear-gradient(140deg, rgba(255, 196, 86, 0.26), rgba(255, 86, 160, 0.12)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 0 16px rgba(255, 140, 82, 0.26);
+    linear-gradient(140deg, rgba(255, 95, 109, 0.18), rgba(255, 195, 113, 0.14), rgba(95, 218, 255, 0.14), rgba(127, 91, 255, 0.18)),
+    rgba(11, 19, 36, 0.28);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 14px rgba(127, 91, 255, 0.25), 0 0 14px rgba(255, 140, 82, 0.2);
   grid-template-columns: 16px 1fr;
   gap: 6px;
   align-content: center;
@@ -157,10 +157,10 @@ body {
 }
 
 #simple_settings_button:hover {
-  border-color: rgba(255, 211, 120, 0.95);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    0 0 18px rgba(255, 140, 82, 0.34);
+  background:
+    linear-gradient(140deg, rgba(255, 95, 109, 0.26), rgba(255, 195, 113, 0.2), rgba(95, 218, 255, 0.2), rgba(127, 91, 255, 0.26)),
+    rgba(11, 19, 36, 0.32);
+  box-shadow: 0 0 18px rgba(127, 91, 255, 0.35), 0 0 18px rgba(255, 140, 82, 0.28);
 }
 
 .simple_settings_icon {
@@ -400,8 +400,10 @@ body {
   gap: 2px;
   min-height: 44px;
   padding: 4px 8px;
-  border: 1px solid rgba(162, 193, 255, 0.25);
-  background: #0b1324;
+  border: 1px solid rgba(162, 193, 255, 0.18);
+  background: rgba(11, 19, 36, 0.28);
+  backdrop-filter: blur(12px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   aspect-ratio: 1 / 1;
 }
 
@@ -436,10 +438,12 @@ body {
   gap: 2px;
   flex: 0 1 74px;
   aspect-ratio: 1 / 1;
-  border: 1px solid rgba(162, 193, 255, 0.25);
+  border: 1px solid rgba(162, 193, 255, 0.18);
   border-radius: 0;
-  background: #0b1324;
+  background: rgba(11, 19, 36, 0.28);
+  backdrop-filter: blur(12px);
   color: var(--text);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   min-height: 44px;
   font-size: 11px;
   letter-spacing: 0.02em;
@@ -460,38 +464,30 @@ body {
 }
 
 .dock_btn.is-active {
-  border-color: rgba(162, 193, 255, 0.85);
-  background: #163055;
+  border-color: rgba(162, 193, 255, 0.65);
+  background: rgba(22, 48, 85, 0.38);
 }
 
 .dock_btn.is-on-state {
-  border-color: rgba(118, 246, 208, 0.95);
-  box-shadow: inset 0 0 0 1px rgba(118, 246, 208, 0.42), 0 0 14px rgba(118, 246, 208, 0.32);
-}
-
-.dock_btn[data-panel="yh"].is-on-state {
-  border-color: rgba(255, 115, 115, 0.95);
-  background: linear-gradient(140deg, rgba(255, 110, 110, 0.34), rgba(255, 206, 84, 0.16));
-  box-shadow: inset 0 0 0 1px rgba(255, 132, 132, 0.45), 0 0 16px rgba(255, 98, 98, 0.36);
-}
-
-.dock_btn[data-panel="sy"].is-on-state {
-  border-color: rgba(111, 229, 255, 0.95);
-  background: linear-gradient(140deg, rgba(87, 186, 255, 0.34), rgba(111, 229, 255, 0.2));
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff, #ff5f6d) 1;
+  box-shadow: 0 0 12px rgba(127, 91, 255, 0.3), 0 0 12px rgba(86, 177, 255, 0.2);
 }
 
 .dock_btn:hover {
-  border-color: rgba(162, 193, 255, 0.6);
-  background: #13203a;
+  border-color: rgba(162, 193, 255, 0.45);
+  background: rgba(19, 32, 58, 0.38);
 }
 
 .dock_action_tile {
   flex: 0 1 74px;
   aspect-ratio: 1 / 1;
   min-height: 44px;
-  border: 1px solid rgba(162, 193, 255, 0.25);
+  border: 1px solid rgba(162, 193, 255, 0.18);
   border-radius: 0;
-  background: #0b1324;
+  background: rgba(11, 19, 36, 0.28);
+  backdrop-filter: blur(12px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 2px;
@@ -505,9 +501,9 @@ body {
 }
 
 .dock_action_btn {
-  border: 1px solid rgba(162, 193, 255, 0.28);
+  border: 1px solid rgba(162, 193, 255, 0.18);
   border-radius: 0;
-  background: #111a2f;
+  background: rgba(17, 26, 47, 0.28);
   color: var(--text);
   font-size: 9px;
   line-height: 1;
@@ -517,8 +513,8 @@ body {
 }
 
 .dock_action_btn:hover {
-  border-color: rgba(162, 193, 255, 0.6);
-  background: #1a2b4d;
+  border-color: rgba(162, 193, 255, 0.45);
+  background: rgba(26, 43, 77, 0.38);
 }
 
 .dock_action_clear {
