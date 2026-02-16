@@ -283,6 +283,9 @@ export function stopPreviewAnimations(): void {
   if (previewStates) {
     for (const preview of previewStates.values()) {
       preview.effects = [];
+      preview.count = 0;
+      preview.ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
     }
   }
+  previewStates = null;
 }
