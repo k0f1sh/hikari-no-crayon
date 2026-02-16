@@ -1,9 +1,14 @@
 # Hikari-no-Crayon
 
-An additive blending painter originally created as a single-file web app, now being modernized.
+キラッと光る線を重ねて描ける、加算合成ペイントツールです。  
+クレヨンのやさしい描き心地に、ネオンみたいな発光エフェクトをミックス。  
+ブラウザでサクッと遊べて、描くだけで作品がパッと映えるのがポイントです。
 
 ## Demo
 - https://k0f1sh.github.io/hikari-no-crayon/index.html
+
+## Screenshot
+![Hikari-no-Crayon demo](./demo.png)
 
 ## Development
 1. Install dependencies:
