@@ -503,7 +503,7 @@ export function bindUiEvents(): void {
   };
 
   const applySize = (value: number) => {
-    app.penSize = Math.max(5, Math.min(400, value));
+    app.penSize = Math.max(3, Math.min(300, value));
     sizeRange.value = String(app.penSize);
     sizeDockValue.textContent = `${app.penSize}px`;
     persist();
