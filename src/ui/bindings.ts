@@ -27,6 +27,7 @@ import {
   type PenCustomParamDefinition,
 } from "../core/penCustomParams";
 import { exportPng } from "../core/export";
+import { startPreviewAnimations, stopPreviewAnimations } from "./presetPreview";
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id) as T | null;
@@ -712,11 +713,13 @@ export function bindUiEvents(): void {
   const closeSimpleSettingsModal = () => {
     simpleSettingsModal.classList.remove("is-open");
     simpleSettingsModal.setAttribute("aria-hidden", "true");
+    stopPreviewAnimations();
   };
 
   const openSimpleSettingsModal = () => {
     simpleSettingsModal.classList.add("is-open");
     simpleSettingsModal.setAttribute("aria-hidden", "false");
+    startPreviewAnimations(simplePresetButtons, simplePresetConfigs);
   };
 
   const applySimplePreset = (key: SimplePresetKey) => {
