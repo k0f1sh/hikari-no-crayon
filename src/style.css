@@ -227,7 +227,9 @@ select {
   display: none;
   place-items: center;
   padding: 20px;
-  background: rgba(4, 8, 16, 0.56);
+  background: rgba(6, 12, 24, 0.34);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
 }
 
 .simple_settings_modal.is-open {
