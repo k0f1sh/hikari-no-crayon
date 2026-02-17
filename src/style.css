@@ -158,7 +158,9 @@ select {
 }
 
 #simple_settings_button {
-  flex: 0 1 74px;
+  flex: 0 1 116px;
+  min-width: 116px;
+  aspect-ratio: auto;
   border: 2px solid transparent;
   border-image: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff, #ff5f6d) 1;
   background:
@@ -166,11 +168,11 @@ select {
     rgba(11, 19, 36, 0.28);
   backdrop-filter: blur(12px);
   box-shadow: 0 0 14px rgba(127, 91, 255, 0.25), 0 0 14px rgba(255, 140, 82, 0.2);
-  grid-template-columns: 16px 1fr;
-  gap: 6px;
+  grid-template-columns: 1fr;
+  gap: 0;
   align-content: center;
-  justify-items: start;
-  padding-inline: 10px;
+  justify-items: center;
+  padding-inline: 12px;
 }
 
 #simple_settings_button:hover {
@@ -181,7 +183,7 @@ select {
 }
 
 .simple_settings_icon {
-  display: block;
+  display: none;
   flex: 0 0 auto;
   place-self: center;
   position: relative;
@@ -214,10 +216,11 @@ select {
 }
 
 .simple_settings_label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 16.5px;
+  font-weight: 800;
   line-height: 1;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .simple_settings_modal {
@@ -536,7 +539,7 @@ select {
 }
 
 .dock_mode_toggle .dock_main {
-  font-size: 10px;
+  font-size: 15px;
   letter-spacing: 0;
 }
 
@@ -611,8 +614,8 @@ select {
 }
 
 .dock_main {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .dock_sub {
@@ -1124,6 +1127,12 @@ select:focus-visible,
   .dock_btn {
     flex: none;
     aspect-ratio: auto;
+  }
+
+  #simple_settings_button {
+    grid-column: span 2;
+    min-width: 0;
+    width: 100%;
   }
 
   .dock_action_tile {
