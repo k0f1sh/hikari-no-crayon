@@ -761,7 +761,7 @@ select {
 }
 
 .dock_group_actions {
-  grid-template-columns: auto auto auto minmax(0, 1fr);
+  grid-template-columns: auto auto auto auto minmax(0, 1fr);
 }
 
 .dock_group .dock_btn {
@@ -1567,7 +1567,7 @@ select:focus-visible,
 
   .dock_group_actions {
     grid-column: span 4;
-    grid-template-columns: auto auto auto minmax(0, 1fr);
+    grid-template-columns: auto auto auto auto minmax(0, 1fr);
   }
 
   .dock_group {
@@ -1617,5 +1617,154 @@ select:focus-visible,
   .dock_hide_fab {
     right: 8px;
     bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Turtle Graphics Modal */
+.turtle_modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(6, 12, 24, 0.34);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
+}
+
+.turtle_modal.is-open {
+  display: grid;
+}
+
+.turtle_dialog {
+  width: 100%;
+  max-width: 800px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border: 1px solid rgba(162, 193, 255, 0.34);
+  background: linear-gradient(165deg, rgba(16, 28, 56, 0.94), rgba(8, 15, 32, 0.96));
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.turtle_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.turtle_header h2 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+
+.turtle_close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(162, 193, 255, 0.35);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.turtle_body {
+  display: grid;
+  gap: 10px;
+}
+
+.turtle_label {
+  display: grid;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.turtle_label_inline {
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+#turtle_code_input {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid rgba(162, 193, 255, 0.35);
+  border-radius: 0;
+  background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
+  color: var(--text);
+  padding: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#turtle_speed {
+  min-height: 32px;
+  border: 1px solid rgba(162, 193, 255, 0.35);
+  border-radius: 0;
+  background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
+  color: var(--text);
+  padding: 6px 8px;
+}
+
+#turtle_speed option {
+  color: #0b1224;
+  background: #f2f7ff;
+}
+
+.turtle_controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.turtle_controls .btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 120px;
+}
+
+.turtle_help {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.turtle_help summary {
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.turtle_help_table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.turtle_help_table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(162, 193, 255, 0.15);
+}
+
+.turtle_help_table code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--accent);
+}
+
+@media (max-width: 820px) {
+  .turtle_dialog {
+    max-width: calc(100vw - 16px);
   }
 }

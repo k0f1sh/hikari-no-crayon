@@ -241,6 +241,62 @@
           </div>
         </div>
 
+        <div id="turtle_modal" class="turtle_modal" aria-hidden="true">
+          <div class="turtle_dialog" role="dialog" aria-modal="true" aria-labelledby="turtle_title">
+            <div class="turtle_header">
+              <h2 id="turtle_title">🐢 たーとるぐらふぃっくす</h2>
+              <button type="button" class="turtle_close" id="turtle_close_button" aria-label="とじる">×</button>
+            </div>
+            <div class="turtle_body">
+              <label class="turtle_label turtle_label_inline">
+                <span>さんぷる</span>
+                <select id="turtle_sample">
+                  <option value="">じゆうにかく</option>
+                  <option value="square">しかく</option>
+                  <option value="triangle">さんかく</option>
+                  <option value="star">ほし</option>
+                  <option value="circle">まる</option>
+                  <option value="flower">おはな</option>
+                  <option value="spiral">うずまき</option>
+                  <option value="snowflake">ゆきのけっしょう</option>
+                  <option value="galaxy">ぎんが</option>
+                  <option value="tree">き</option>
+                  <option value="hexweb">はちのすもよう</option>
+                </select>
+              </label>
+              <label class="turtle_label">
+                <span>LOGO こーど</span>
+                <textarea id="turtle_code_input" rows="12"
+                  placeholder="repeat 4 [ fd 100 rt 90 ]"></textarea>
+              </label>
+              <div class="turtle_controls">
+                <label class="turtle_label turtle_label_inline">
+                  <span>なぞりそくど</span>
+                  <select id="turtle_speed">
+                    <option value="1">ゆっくり</option>
+                    <option value="2" selected>ふつう</option>
+                    <option value="4">はやめ</option>
+                    <option value="8">とてもはやい</option>
+                  </select>
+                </label>
+                <button type="button" class="btn btn-primary btn-large" id="turtle_run_button">じっこう</button>
+              </div>
+              <details class="turtle_help">
+                <summary>つかいかた</summary>
+                <table class="turtle_help_table">
+                  <tr><td><code>fd 100</code></td><td>まえにすすむ</td></tr>
+                  <tr><td><code>bk 50</code></td><td>うしろにすすむ</td></tr>
+                  <tr><td><code>rt 90</code></td><td>みぎにまがる</td></tr>
+                  <tr><td><code>lt 45</code></td><td>ひだりにまがる</td></tr>
+                  <tr><td><code>pu</code></td><td>ぺんをあげる</td></tr>
+                  <tr><td><code>pd</code></td><td>ぺんをおろす</td></tr>
+                  <tr><td><code>repeat 4 [ ... ]</code></td><td>くりかえす</td></tr>
+                </table>
+              </details>
+            </div>
+          </div>
+        </div>
+
         <div id="simple_settings_modal" class="simple_settings_modal" aria-hidden="true">
           <div class="simple_settings_dialog" role="dialog" aria-modal="true" aria-labelledby="simple_settings_title">
             <h2 id="simple_settings_title">ぷりせっとをえらぶ</h2>
@@ -363,6 +419,7 @@
               <button type="button" class="dock_btn dock_quick_btn" id="dock_undo_button">もどる</button>
               <button type="button" class="dock_btn dock_quick_btn" id="dock_redo_button">すすむ</button>
               <button type="button" class="dock_btn dock_quick_btn dock_quick_clear" id="dock_clear_button">けす</button>
+              <button type="button" class="dock_btn dock_quick_btn" id="turtle_open_button">🐢</button>
               <button type="button" class="dock_btn" data-panel="etc">
                 <span class="dock_main">そのた</span>
                 <span class="dock_sub">ほぞん/ろくが</span>

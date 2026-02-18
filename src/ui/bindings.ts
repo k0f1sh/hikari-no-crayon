@@ -6,6 +6,8 @@ import {
   fitPointsToCanvas,
   sampleSvgPathPoints,
 } from "../core/svgPathTrace";
+import { parseTurtleProgram } from "../core/turtleParse";
+import { executeTurtleProgram } from "../core/turtleExecute";
 import {
   canRedo,
   canUndo,
@@ -1197,6 +1199,140 @@ export function bindUiEvents(): void {
   svgPathDrawButton.addEventListener("click", (event) => {
     event.preventDefault();
     void runSvgTrace();
+  });
+
+  // Turtle Graphics
+  const turtleModal = byId<HTMLElement>("turtle_modal");
+  const turtleCloseButton = byId<HTMLButtonElement>("turtle_close_button");
+  const turtleOpenButton = byId<HTMLButtonElement>("turtle_open_button");
+  const turtleCodeInput = byId<HTMLTextAreaElement>("turtle_code_input");
+  const turtleSpeedInput = byId<HTMLSelectElement>("turtle_speed");
+  const turtleRunButton = byId<HTMLButtonElement>("turtle_run_button");
+  const turtleSampleSelect = byId<HTMLSelectElement>("turtle_sample");
+
+  const turtleSamples: Record<string, string> = {
+    square: "repeat 4 [ fd 100 rt 90 ]",
+    triangle: "repeat 3 [ fd 120 rt 120 ]",
+    star: "repeat 5 [ fd 120 rt 144 ]",
+    circle: "repeat 36 [ fd 10 rt 10 ]",
+    flower: "repeat 12 [ repeat 36 [ fd 4 rt 10 ] rt 30 ]",
+    spiral: "repeat 60 [ fd 2 rt 2 fd 4 rt 2 fd 6 rt 2 fd 8 rt 2 ]",
+    snowflake: [
+      "repeat 6 [",
+      "  fd 60",
+      "  repeat 6 [ bk 20 rt 60 fd 20 lt 60 ]",
+      "  bk 60",
+      "  rt 60",
+      "]",
+    ].join("\n"),
+    galaxy: [
+      "repeat 6 [",
+      "  repeat 60 [ fd 3 rt 3 ]",
+      "  pu fd 30 pd",
+      "  rt 60",
+      "]",
+    ].join("\n"),
+    tree: [
+      "repeat 4 [",
+      "  repeat 3 [",
+      "    repeat 4 [ fd 20 rt 90 ]",
+      "    fd 20",
+      "  ]",
+      "  pu bk 60 lt 90 pd",
+      "]",
+    ].join("\n"),
+    hexweb: [
+      "repeat 6 [",
+      "  repeat 6 [ fd 30 rt 60 ]",
+      "  fd 30 rt 60",
+      "]",
+    ].join("\n"),
+  };
+
+  turtleSampleSelect.addEventListener("change", () => {
+    const key = turtleSampleSelect.value;
+    if (key && turtleSamples[key]) {
+      turtleCodeInput.value = turtleSamples[key];
+    }
+  });
+
+  const openTurtleModal = () => {
+    turtleModal.classList.add("is-open");
+    turtleModal.setAttribute("aria-hidden", "false");
+  };
+
+  const closeTurtleModal = () => {
+    turtleModal.classList.remove("is-open");
+    turtleModal.setAttribute("aria-hidden", "true");
+  };
+
+  turtleOpenButton.addEventListener("click", () => {
+    openTurtleModal();
+  });
+
+  turtleCloseButton.addEventListener("click", () => {
+    closeTurtleModal();
+  });
+
+  turtleModal.addEventListener("pointerdown", (event) => {
+    if (event.target === turtleModal) {
+      closeTurtleModal();
+    }
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && turtleModal.classList.contains("is-open")) {
+      closeTurtleModal();
+    }
+  });
+
+  const runTurtle = async () => {
+    if (turtleRunButton.disabled) {
+      return;
+    }
+    const source = turtleCodeInput.value.trim();
+    if (!source) {
+      window.alert("こーどをにゅうりょくしてください");
+      return;
+    }
+
+    turtleRunButton.disabled = true;
+    const originalText = turtleRunButton.textContent;
+    turtleRunButton.textContent = "じっこうちゅう...";
+
+    try {
+      const program = parseTurtleProgram(source);
+      const startX = app.width / 2;
+      const startY = app.height / 2;
+      const segments = executeTurtleProgram(program, { startX, startY });
+
+      if (segments.length === 0 || segments.every((s) => s.length === 0)) {
+        window.alert("びょうがする てんが ありません");
+        return;
+      }
+
+      const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
+      const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
+
+      closeTurtleModal();
+      await animateSvgTrace(segments, pointsPerFrame);
+
+      const didDraw = segments.some((s) => s.length > 0);
+      if (didDraw) {
+        commitHistory();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "たーとるの じっこうに しっぱいしました";
+      window.alert(message);
+    } finally {
+      turtleRunButton.disabled = false;
+      turtleRunButton.textContent = originalText;
+    }
+  };
+
+  turtleRunButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    void runTurtle();
   });
 
   let isRecording = false;
