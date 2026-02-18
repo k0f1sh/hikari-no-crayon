@@ -970,6 +970,10 @@ export function bindUiEvents(): void {
 
   rainbowMenuButton.addEventListener("click", (event) => {
     event.stopPropagation();
+    if (activePanelId === "ml") {
+      closePanels();
+      return;
+    }
     setActivePanel("ml");
   });
 
@@ -990,6 +994,10 @@ export function bindUiEvents(): void {
 
   yamiMenuButton.addEventListener("click", (event) => {
     event.stopPropagation();
+    if (activePanelId === "yh") {
+      closePanels();
+      return;
+    }
     setActivePanel("yh");
   });
 
@@ -1006,6 +1014,10 @@ export function bindUiEvents(): void {
 
   symmetryMenuButton.addEventListener("click", (event) => {
     event.stopPropagation();
+    if (activePanelId === "sy") {
+      closePanels();
+      return;
+    }
     setActivePanel("sy");
   });
 
