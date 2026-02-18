@@ -445,6 +445,30 @@ select {
   gap: 6px;
 }
 
+.dock_row_bottom .dock_btn,
+.dock_row_bottom .dock_mode_item,
+.dock_row_bottom .dock_mode_menu_button,
+.dock_row_bottom .dock_action_tile {
+  min-height: 36px;
+  height: 36px;
+}
+
+.dock_row_bottom .dock_group_modes > .dock_btn,
+.dock_row_bottom .dock_mode_item,
+.dock_row_bottom .dock_mode_menu_button {
+  min-height: 38px;
+  height: 38px;
+}
+
+.dock_row_bottom .dock_btn,
+.dock_row_bottom .dock_action_tile {
+  aspect-ratio: auto;
+}
+
+.dock_row_bottom .dock_main {
+  font-size: 13px;
+}
+
 .dock_inline {
   display: grid;
   align-content: center;
@@ -657,8 +681,7 @@ select {
 }
 
 .dock_group_modes .dock_sub {
-  font-size: 18px;
-  line-height: 1;
+  display: none;
 }
 
 .dock_mode_item {
@@ -676,7 +699,8 @@ select {
 .dock_mode_item .dock_btn {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 44px;
+  min-height: 0;
+  height: 100%;
   border: 0;
   background: transparent;
   backdrop-filter: none;
@@ -722,6 +746,67 @@ select {
   border-color: rgba(162, 193, 255, 0.75);
   background: rgba(22, 48, 85, 0.42);
   box-shadow: 0 0 10px rgba(86, 177, 255, 0.22);
+}
+
+/* Mode-specific ON styles */
+.dock_mode_item:has(> .dock_btn[data-panel="ml"].is-on-state) {
+  border-color: rgba(255, 214, 117, 0.75);
+  background:
+    linear-gradient(
+      120deg,
+      rgba(255, 107, 107, 0.34),
+      rgba(255, 201, 90, 0.34) 22%,
+      rgba(123, 214, 108, 0.34) 42%,
+      rgba(99, 186, 255, 0.34) 62%,
+      rgba(139, 122, 255, 0.34) 82%,
+      rgba(255, 107, 203, 0.32)
+    );
+  box-shadow: 0 0 12px rgba(255, 196, 115, 0.28);
+}
+
+#dock_auto_toggle_button.is-on-state {
+  border-color: rgba(137, 236, 211, 0.72);
+  background:
+    linear-gradient(145deg, rgba(56, 205, 169, 0.26), rgba(41, 123, 255, 0.22)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(137, 236, 211, 0.14) 0 6px,
+      rgba(41, 123, 255, 0.1) 6px 12px
+    );
+  box-shadow: 0 0 12px rgba(95, 208, 185, 0.24);
+}
+
+#dock_fade_toggle_button.is-on-state {
+  border-color: rgba(157, 208, 255, 0.72);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(168, 221, 255, 0.46) 0%,
+      rgba(128, 188, 255, 0.2) 40%,
+      rgba(57, 96, 150, 0.06) 72%,
+      rgba(57, 96, 150, 0) 100%
+    );
+  box-shadow: 0 0 10px rgba(120, 188, 255, 0.26);
+}
+
+.dock_mode_item:has(> .dock_btn[data-panel="yh"].is-on-state) {
+  border-color: rgba(255, 108, 108, 0.72);
+  background:
+    linear-gradient(145deg, rgba(255, 72, 72, 0.28), rgba(76, 10, 10, 0.38)),
+    radial-gradient(circle at 25% 30%, rgba(255, 134, 134, 0.18), rgba(0, 0, 0, 0) 60%);
+  box-shadow: 0 0 12px rgba(255, 94, 94, 0.2);
+}
+
+.dock_mode_item:has(> .dock_btn[data-panel="sy"].is-on-state) {
+  border-color: rgba(164, 188, 255, 0.72);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.42) 0%, rgba(129, 165, 255, 0.22) 30%, rgba(70, 102, 181, 0.08) 58%, rgba(25, 39, 72, 0) 78%),
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      rgba(158, 188, 255, 0.24) 0deg 14deg,
+      rgba(100, 126, 204, 0.08) 14deg 28deg
+    );
+  box-shadow: 0 0 12px rgba(126, 162, 255, 0.24);
 }
 
 .dock_main {
