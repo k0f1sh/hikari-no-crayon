@@ -671,9 +671,69 @@ select {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.dock_group_tools {
+  grid-template-columns: 176px auto 1.5fr 1fr;
+}
+
 .dock_group .dock_btn {
   min-height: 44px;
   flex: none;
+}
+
+.dock_group_tools .dock_inline,
+.dock_group_tools .dock_btn {
+  min-width: 0;
+  min-height: 44px;
+  aspect-ratio: auto;
+  border-radius: 10px;
+}
+
+.dock_group_tools .dock_size_inline,
+.dock_group_tools .dock_color_inline {
+  flex: none;
+  max-width: none;
+}
+
+.dock_group_tools .dock_icon_only_btn {
+  min-width: 52px;
+  width: 52px;
+  justify-self: center;
+}
+
+.dock_group_tools .dock_btn[data-panel="pl"] {
+  width: 176px;
+  min-width: 176px;
+}
+
+.dock_group_tools .dock_btn[data-panel="pl"] .dock_main {
+  white-space: nowrap;
+}
+
+.dock_pen_label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dock_pen_icon_text {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(162, 193, 255, 0.6);
+  background: linear-gradient(140deg, rgba(86, 177, 255, 0.28), rgba(118, 246, 208, 0.1));
+  font-size: 12px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.dock_pen_name_text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dock_group_modes > .dock_btn {
@@ -1338,6 +1398,11 @@ select:focus-visible,
 
   .dock_group_modes {
     grid-column: span 4;
+  }
+
+  .dock_group_tools {
+    grid-column: span 4;
+    grid-template-columns: 176px auto 1.4fr 1fr;
   }
 
   .dock_action_tile {

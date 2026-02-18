@@ -894,6 +894,27 @@ export function bindUiEvents(): void {
     }
   });
 
+  const renderPenDockValue = (value: string): void => {
+    const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
+    const label = selectedPenInput?.closest("label");
+    const icon = label?.querySelector<HTMLElement>(".pen_icon")?.textContent?.trim();
+    const name = label?.querySelector<HTMLElement>(".pen_name")?.textContent?.trim() ?? value;
+    penDockValue.classList.add("dock_pen_label");
+    penDockValue.replaceChildren();
+
+    if (icon) {
+      const iconEl = document.createElement("span");
+      iconEl.className = "dock_pen_icon_text";
+      iconEl.textContent = icon;
+      penDockValue.appendChild(iconEl);
+    }
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "dock_pen_name_text";
+    nameEl.textContent = name;
+    penDockValue.appendChild(nameEl);
+  };
+
   const penGroup = setupRadioGroup("pen", (value) => {
     app.selectedPenName = value;
     app.penTool = app.penTools[value]
@@ -901,10 +922,7 @@ export function bindUiEvents(): void {
       ?? Object.values(app.penTools)[0]
       ?? null;
     renderPenCustomControls(value);
-    const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
-    const selectedPenName = selectedPenInput?.closest("label")?.querySelector<HTMLElement>(".pen_name")
-      ?.textContent;
-    penDockValue.textContent = selectedPenName ?? value;
+    renderPenDockValue(value);
     closePanels();
     persist();
   });
