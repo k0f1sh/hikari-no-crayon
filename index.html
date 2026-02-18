@@ -18,7 +18,7 @@
           <div id="record_status" aria-live="polite">● 録画中 10s</div>
         </div>
 
-        <button type="button" id="dock_show_button">めにゅーをひょうじ</button>
+        <button type="button" id="dock_show_button" aria-label="めにゅーをひょうじ">⌃</button>
         <div id="menu">
           <h1 id="plh">ぺんのしゅるい</h1>
           <ul id="pl" class="pen_list">
@@ -298,13 +298,14 @@
         </div>
 
         <div id="bottom_dock">
+          <button type="button" class="dock_hide_fab" id="dock_hide_button" aria-label="めにゅーをかくす">⌄</button>
           <div class="dock_row dock_row_top">
-            <button type="button" class="dock_btn" id="simple_settings_button">
-              <span class="simple_settings_icon" aria-hidden="true"></span>
-              <span class="simple_settings_label">ぷりせっと</span>
-            </button>
             <div class="dock_group dock_group_tools" aria-label="ぺんせっていぐるーぷ">
               <span class="dock_group_title">ぺん</span>
+              <button type="button" class="dock_btn" id="simple_settings_button">
+                <span class="simple_settings_icon" aria-hidden="true"></span>
+                <span class="simple_settings_label">ぷりせっと</span>
+              </button>
               <button type="button" class="dock_btn" data-panel="pl">
                 <span class="dock_main dock_pen_label" id="pen_dock_value"><span class="dock_pen_icon_text">光</span><span class="dock_pen_name_text">ひかりのくれよん</span></span>
               </button>
@@ -356,18 +357,16 @@
                 <button type="button" class="dock_mode_menu_button" id="symmetry_menu_button" aria-label="たいしょうせっていをひらく">⚙</button>
               </div>
             </div>
-            <div class="dock_action_tile" aria-label="くいっくそうさ">
-              <div class="dock_action_top">
-                <button type="button" class="dock_action_btn" id="dock_undo_button">もどる</button>
-                <button type="button" class="dock_action_btn" id="dock_redo_button">すすむ</button>
-              </div>
-              <button type="button" class="dock_action_btn dock_action_clear" id="dock_clear_button">けす</button>
+            <div class="dock_group dock_group_actions" aria-label="そのたぐるーぷ">
+              <span class="dock_group_title">そのた</span>
+              <button type="button" class="dock_btn dock_quick_btn" id="dock_undo_button">もどる</button>
+              <button type="button" class="dock_btn dock_quick_btn" id="dock_redo_button">すすむ</button>
+              <button type="button" class="dock_btn dock_quick_btn dock_quick_clear" id="dock_clear_button">けす</button>
+              <button type="button" class="dock_btn" data-panel="etc">
+                <span class="dock_main">そのた</span>
+                <span class="dock_sub">ほぞん/ろくが</span>
+              </button>
             </div>
-            <button type="button" class="dock_btn" data-panel="etc">
-              <span class="dock_main">そのた</span>
-              <span class="dock_sub">ほぞん/ろくが</span>
-            </button>
-            <button type="button" class="dock_btn dock_toggle_btn" id="dock_hide_button">めにゅーをかくす</button>
           </div>
         </div>
       </div>
