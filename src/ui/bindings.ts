@@ -1,4 +1,4 @@
-import { app, requireCanvas } from "../core/state";
+import { app, requireCanvas, requireHudContext } from "../core/state";
 import { applyDrawCompositeOperation, clear, reverseImage } from "../core/draw";
 import { rgbToHex } from "../core/color";
 import {
@@ -1208,7 +1208,14 @@ export function bindUiEvents(): void {
   const turtleCodeInput = byId<HTMLTextAreaElement>("turtle_code_input");
   const turtleSpeedInput = byId<HTMLSelectElement>("turtle_speed");
   const turtleRunButton = byId<HTMLButtonElement>("turtle_run_button");
+  const turtleShowCursor = byId<HTMLInputElement>("turtle_show_cursor");
+  const turtleDensity = byId<HTMLInputElement>("turtle_density");
+  const turtleDensityValue = byId<HTMLElement>("turtle_density_value");
   const turtleSampleSelect = byId<HTMLSelectElement>("turtle_sample");
+
+  turtleDensity.addEventListener("input", () => {
+    turtleDensityValue.textContent = turtleDensity.value;
+  });
 
   const turtleSamples: Record<string, string> = {
     square: "repeat 4 [ fd 100 rt 90 ]",
@@ -1267,6 +1274,10 @@ export function bindUiEvents(): void {
   };
 
   turtleOpenButton.addEventListener("click", () => {
+    if (isTurtleRunning) {
+      stopTurtle();
+      return;
+    }
     openTurtleModal();
   });
 
@@ -1286,8 +1297,146 @@ export function bindUiEvents(): void {
     }
   });
 
+  const drawTurtleCursor = (x: number, y: number, angleDeg: number) => {
+    const hud = requireHudContext();
+    hud.clearRect(0, 0, app.width, app.height);
+    hud.save();
+    hud.translate(x, y);
+    hud.rotate((angleDeg * Math.PI) / 180);
+
+    const s = 12;
+
+    // shell
+    hud.beginPath();
+    hud.ellipse(0, 0, s * 0.7, s * 0.85, 0, 0, Math.PI * 2);
+    hud.fillStyle = "rgba(80, 180, 100, 0.7)";
+    hud.fill();
+    hud.strokeStyle = "rgba(220, 255, 220, 0.9)";
+    hud.lineWidth = 1.5;
+    hud.stroke();
+
+    // shell pattern
+    hud.beginPath();
+    hud.moveTo(-s * 0.35, s * 0.3);
+    hud.lineTo(0, -s * 0.5);
+    hud.lineTo(s * 0.35, s * 0.3);
+    hud.strokeStyle = "rgba(40, 120, 60, 0.5)";
+    hud.lineWidth = 1;
+    hud.stroke();
+
+    // head (forward = up in turtle space, which is -y before rotation)
+    hud.beginPath();
+    hud.arc(0, -s * 1.1, s * 0.35, 0, Math.PI * 2);
+    hud.fillStyle = "rgba(100, 200, 120, 0.8)";
+    hud.fill();
+    hud.strokeStyle = "rgba(220, 255, 220, 0.9)";
+    hud.lineWidth = 1.5;
+    hud.stroke();
+
+    // eyes
+    hud.fillStyle = "rgba(20, 20, 20, 0.9)";
+    hud.beginPath();
+    hud.arc(-s * 0.12, -s * 1.2, 1.5, 0, Math.PI * 2);
+    hud.fill();
+    hud.beginPath();
+    hud.arc(s * 0.12, -s * 1.2, 1.5, 0, Math.PI * 2);
+    hud.fill();
+
+    // legs
+    const legPositions = [
+      { lx: -s * 0.65, ly: -s * 0.4 },
+      { lx: s * 0.65, ly: -s * 0.4 },
+      { lx: -s * 0.65, ly: s * 0.4 },
+      { lx: s * 0.65, ly: s * 0.4 },
+    ];
+    hud.fillStyle = "rgba(100, 200, 120, 0.7)";
+    for (const leg of legPositions) {
+      hud.beginPath();
+      hud.ellipse(leg.lx, leg.ly, s * 0.2, s * 0.25, 0, 0, Math.PI * 2);
+      hud.fill();
+    }
+
+    hud.restore();
+  };
+
+  const clearTurtleCursor = () => {
+    const hud = requireHudContext();
+    hud.clearRect(0, 0, app.width, app.height);
+  };
+
+  let turtleAbortController: AbortController | null = null;
+  let isTurtleRunning = false;
+
+  const setTurtleRunning = (running: boolean) => {
+    isTurtleRunning = running;
+    turtleOpenButton.classList.toggle("is-turtle-running", running);
+  };
+
+  const animateTurtleTrace = (
+    groups: Array<Array<{ x: number; y: number; angle?: number }>>,
+    pointsPerFrame: number,
+    showCursor: boolean,
+    signal: AbortSignal,
+  ): Promise<void> =>
+    new Promise((resolve) => {
+      let groupIndex = 0;
+      let pointIndex = 0;
+
+      const drawFrame = () => {
+        if (signal.aborted) {
+          if (showCursor) {
+            clearTurtleCursor();
+          }
+          resolve();
+          return;
+        }
+
+        applyDrawCompositeOperation();
+        let frameRemaining = pointsPerFrame;
+        let lastPoint: { x: number; y: number; angle?: number } | null = null;
+
+        while (groupIndex < groups.length && frameRemaining > 0) {
+          const group = groups[groupIndex];
+          if (!group || pointIndex >= group.length) {
+            groupIndex += 1;
+            pointIndex = 0;
+            continue;
+          }
+
+          const point = group[pointIndex];
+          drawWithSymmetry(point.x, point.y);
+          lastPoint = point;
+          pointIndex += 1;
+          frameRemaining -= 1;
+        }
+
+        if (showCursor && lastPoint) {
+          drawTurtleCursor(lastPoint.x, lastPoint.y, lastPoint.angle ?? 0);
+        }
+
+        if (groupIndex >= groups.length) {
+          if (showCursor) {
+            clearTurtleCursor();
+          }
+          resolve();
+          return;
+        }
+        window.requestAnimationFrame(drawFrame);
+      };
+
+      window.requestAnimationFrame(drawFrame);
+    });
+
+  const stopTurtle = () => {
+    if (turtleAbortController) {
+      turtleAbortController.abort();
+      turtleAbortController = null;
+    }
+  };
+
   const runTurtle = async () => {
-    if (turtleRunButton.disabled) {
+    if (isTurtleRunning) {
+      stopTurtle();
       return;
     }
     const source = turtleCodeInput.value.trim();
@@ -1296,15 +1445,18 @@ export function bindUiEvents(): void {
       return;
     }
 
-    turtleRunButton.disabled = true;
-    const originalText = turtleRunButton.textContent;
-    turtleRunButton.textContent = "じっこうちゅう...";
+    turtleRunButton.textContent = "とめる";
+    setTurtleRunning(true);
+    turtleAbortController = new AbortController();
+    const { signal } = turtleAbortController;
 
     try {
       const program = parseTurtleProgram(source);
       const startX = app.width / 2;
       const startY = app.height / 2;
-      const segments = executeTurtleProgram(program, { startX, startY });
+      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
+      const stepSize = 31 - densityValue;
+      const segments = executeTurtleProgram(program, { startX, startY, stepSize });
 
       if (segments.length === 0 || segments.every((s) => s.length === 0)) {
         window.alert("びょうがする てんが ありません");
@@ -1313,9 +1465,10 @@ export function bindUiEvents(): void {
 
       const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
       const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
+      const showCursor = turtleShowCursor.checked;
 
       closeTurtleModal();
-      await animateSvgTrace(segments, pointsPerFrame);
+      await animateTurtleTrace(segments, pointsPerFrame, showCursor, signal);
 
       const didDraw = segments.some((s) => s.length > 0);
       if (didDraw) {
@@ -1325,8 +1478,9 @@ export function bindUiEvents(): void {
       const message = error instanceof Error ? error.message : "たーとるの じっこうに しっぱいしました";
       window.alert(message);
     } finally {
-      turtleRunButton.disabled = false;
-      turtleRunButton.textContent = originalText;
+      turtleAbortController = null;
+      turtleRunButton.textContent = "じっこう";
+      setTurtleRunning(false);
     }
   };
 

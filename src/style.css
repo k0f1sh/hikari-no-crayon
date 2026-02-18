@@ -1620,6 +1620,25 @@ select:focus-visible,
   }
 }
 
+/* Turtle dock button running state */
+#turtle_open_button.is-turtle-running {
+  border-color: rgba(118, 246, 208, 0.85);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(80, 220, 140, 0.4), rgba(40, 160, 100, 0.15) 60%, transparent 80%),
+    rgba(11, 19, 36, 0.28);
+  box-shadow: 0 0 12px rgba(80, 220, 140, 0.5), 0 0 24px rgba(80, 220, 140, 0.2);
+  animation: turtle-glow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes turtle-glow {
+  from {
+    box-shadow: 0 0 8px rgba(80, 220, 140, 0.4), 0 0 16px rgba(80, 220, 140, 0.15);
+  }
+  to {
+    box-shadow: 0 0 14px rgba(80, 220, 140, 0.7), 0 0 28px rgba(80, 220, 140, 0.3);
+  }
+}
+
 /* Turtle Graphics Modal */
 .turtle_modal {
   position: fixed;
@@ -1734,6 +1753,31 @@ select:focus-visible,
   flex: 0 0 auto;
   width: auto;
   min-width: 120px;
+}
+
+.turtle_checkbox_label {
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.turtle_checkbox_label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #66bcff;
+}
+
+#turtle_density {
+  width: 80px;
+  accent-color: #66bcff;
+}
+
+#turtle_density_value {
+  color: var(--text);
+  font-size: 12px;
+  min-width: 18px;
+  text-align: center;
 }
 
 .turtle_help {

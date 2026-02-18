@@ -3,6 +3,7 @@ import type { TurtleCommand } from "./turtleParse";
 export interface Point {
   x: number;
   y: number;
+  angle?: number;
 }
 
 interface TurtleState {
@@ -28,7 +29,7 @@ export function executeTurtleProgram(
   };
 
   const segments: Point[][] = [];
-  let currentSegment: Point[] = [{ x: state.x, y: state.y }];
+  let currentSegment: Point[] = [{ x: state.x, y: state.y, angle: state.angle }];
   let totalPoints = 1;
 
   const checkPointLimit = () => {
@@ -51,7 +52,7 @@ export function executeTurtleProgram(
         checkPointLimit();
         state.x += dx * stepDist;
         state.y += dy * stepDist;
-        currentSegment.push({ x: state.x, y: state.y });
+        currentSegment.push({ x: state.x, y: state.y, angle: state.angle });
         totalPoints += 1;
       }
     } else {
@@ -88,7 +89,7 @@ export function executeTurtleProgram(
           break;
         case "pd":
           state.penDown = true;
-          currentSegment = [{ x: state.x, y: state.y }];
+          currentSegment = [{ x: state.x, y: state.y, angle: state.angle }];
           totalPoints += 1;
           break;
         case "repeat":
