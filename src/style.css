@@ -427,10 +427,7 @@ select {
   transform: translateX(-50%);
   bottom: 0;
   z-index: 25;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
+  display: grid;
   gap: 6px;
   width: calc(100vw - 24px);
   padding: 8px 8px calc(9px + env(safe-area-inset-bottom));
@@ -440,17 +437,26 @@ select {
   box-shadow: none;
 }
 
+.dock_row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 6px;
+}
+
 .dock_inline {
   display: grid;
   align-content: center;
   gap: 2px;
   min-height: 44px;
+  min-width: 96px;
   padding: 4px 8px;
   border: 1px solid rgba(162, 193, 255, 0.18);
   background: rgba(11, 19, 36, 0.28);
   backdrop-filter: blur(12px);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
 }
 
 .dock_size_inline {
@@ -500,7 +506,7 @@ select {
 }
 
 .dock_color_inline {
-  flex: 0 1 74px;
+  flex: 0 1 96px;
   justify-items: center;
 }
 
@@ -516,8 +522,9 @@ select {
   display: grid;
   place-items: center;
   gap: 2px;
-  flex: 0 1 74px;
-  aspect-ratio: 1 / 1;
+  flex: 0 1 96px;
+  min-width: 96px;
+  aspect-ratio: 2 / 1;
   border: 1px solid rgba(162, 193, 255, 0.18);
   border-radius: 0;
   background: rgba(11, 19, 36, 0.28);
@@ -531,11 +538,11 @@ select {
 }
 
 .dock_toggle_btn {
-  flex: 0 1 74px;
+  flex: 0 1 96px;
 }
 
 .dock_mode_toggle {
-  flex: 0 1 74px;
+  flex: 0 1 96px;
 }
 
 .dock_mode_toggle .dock_main {
@@ -549,9 +556,9 @@ select {
 }
 
 .dock_btn.is-on-state {
-  border: 2px solid transparent;
-  border-image: linear-gradient(135deg, #ff5f6d, #ffc371, #5fdaff, #7f5bff, #ff5f6d) 1;
-  box-shadow: 0 0 12px rgba(127, 91, 255, 0.3), 0 0 12px rgba(86, 177, 255, 0.2);
+  border-color: rgba(162, 193, 255, 0.75);
+  background: rgba(22, 48, 85, 0.42);
+  box-shadow: 0 0 10px rgba(86, 177, 255, 0.22);
 }
 
 .dock_btn:hover {
@@ -560,8 +567,9 @@ select {
 }
 
 .dock_action_tile {
-  flex: 0 1 74px;
-  aspect-ratio: 1 / 1;
+  flex: 0 1 96px;
+  min-width: 96px;
+  aspect-ratio: 2 / 1;
   min-height: 44px;
   border: 1px solid rgba(162, 193, 255, 0.18);
   border-radius: 0;
@@ -611,6 +619,109 @@ select {
   opacity: 0.45;
   pointer-events: none;
   filter: grayscale(0.25);
+}
+
+.dock_group {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 18px 3px 3px;
+  border: 1px solid rgba(162, 193, 255, 0.22);
+  background: rgba(7, 12, 25, 0.42);
+  backdrop-filter: blur(12px);
+}
+
+.dock_group_title {
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.dock_group_modes {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.dock_group .dock_btn {
+  min-height: 44px;
+  flex: none;
+}
+
+.dock_group_modes > .dock_btn {
+  border-radius: 10px;
+}
+
+.dock_group_modes .dock_sub {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.dock_mode_item {
+  display: flex;
+  align-items: stretch;
+  min-height: 44px;
+  border: 1px solid rgba(162, 193, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(11, 19, 36, 0.28);
+  backdrop-filter: blur(12px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.dock_mode_item .dock_btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.dock_mode_item .dock_btn:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.dock_mode_item .dock_btn.is-on-state {
+  border: 0;
+  border-image: none;
+  box-shadow: none;
+}
+
+.dock_mode_menu_button {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 600;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.dock_mode_menu_button:hover {
+  color: rgba(162, 193, 255, 0.95);
+  background: rgba(18, 30, 52, 0.22);
+}
+
+.dock_mode_item:hover {
+  border-color: rgba(162, 193, 255, 0.45);
+  background: rgba(19, 32, 58, 0.38);
+}
+
+.dock_mode_item:has(.dock_btn.is-on-state) {
+  border-color: rgba(162, 193, 255, 0.75);
+  background: rgba(22, 48, 85, 0.42);
+  box-shadow: 0 0 10px rgba(86, 177, 255, 0.22);
 }
 
 .dock_main {
@@ -1111,6 +1222,11 @@ select:focus-visible,
     transform: translateX(-50%);
     width: calc(100vw - 16px);
     display: grid;
+    gap: 6px;
+  }
+
+  .dock_row {
+    display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
@@ -1133,6 +1249,10 @@ select:focus-visible,
     grid-column: span 2;
     min-width: 0;
     width: 100%;
+  }
+
+  .dock_group_modes {
+    grid-column: span 4;
   }
 
   .dock_action_tile {

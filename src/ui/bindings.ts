@@ -152,6 +152,9 @@ export function bindUiEvents(): void {
   const simpleSettingsButton = byId<HTMLButtonElement>("simple_settings_button");
   const simpleSettingsModal = byId<HTMLElement>("simple_settings_modal");
   const simpleSettingsCloseButton = byId<HTMLButtonElement>("simple_settings_close_button");
+  const rainbowMenuButton = byId<HTMLButtonElement>("rainbow_menu_button");
+  const yamiMenuButton = byId<HTMLButtonElement>("yami_menu_button");
+  const symmetryMenuButton = byId<HTMLButtonElement>("symmetry_menu_button");
   const dockHideButton = byId<HTMLButtonElement>("dock_hide_button");
   const menu = byId<HTMLElement>("menu");
   const dock = byId<HTMLElement>("bottom_dock");
@@ -171,14 +174,11 @@ export function bindUiEvents(): void {
   const dockUndoButton = byId<HTMLButtonElement>("dock_undo_button");
   const dockRedoButton = byId<HTMLButtonElement>("dock_redo_button");
   const dockClearButton = byId<HTMLButtonElement>("dock_clear_button");
-  const rainbowMode = byId<HTMLInputElement>("rainbow_mode");
-  const rainbowModeLabel = byId<HTMLElement>("rainbow_mode_label");
   const rainbowSaturation = byId<HTMLInputElement>("rainbow_saturation");
   const rainbowSaturationValue = byId<HTMLElement>("rainbow_saturation_value");
   const rainbowBrightness = byId<HTMLInputElement>("rainbow_brightness");
   const rainbowBrightnessValue = byId<HTMLElement>("rainbow_brightness_value");
   const symmetryMode = byId<HTMLInputElement>("symmetry_mode");
-  const symmetryModeLabel = byId<HTMLElement>("symmetry_mode_label");
   const symmetryHud = byId<HTMLInputElement>("symmetry_hud");
   const symmetryType = byId<HTMLSelectElement>("symmetry_type");
   const symmetryCount = byId<HTMLSelectElement>("symmetry_count");
@@ -188,8 +188,6 @@ export function bindUiEvents(): void {
   const symmetryOriginYValue = byId<HTMLElement>("symmetry_origin_y_value");
   const symmetryOriginXReset = byId<HTMLButtonElement>("symmetry_origin_x_reset");
   const symmetryOriginYReset = byId<HTMLButtonElement>("symmetry_origin_y_reset");
-  const yamiMode = byId<HTMLInputElement>("yami_mode");
-  const yamiModeLabel = byId<HTMLElement>("yami_mode_label");
   const yamiStrength = byId<HTMLInputElement>("yami_strength");
   const yamiStrengthValue = byId<HTMLElement>("yami_strength_value");
   const recordPresetInput = byId<HTMLSelectElement>("record_preset");
@@ -398,7 +396,6 @@ export function bindUiEvents(): void {
     symmetryCount.closest("label")?.classList.toggle("is-disabled", disabled);
     symmetryOriginX.closest("label")?.classList.toggle("is-disabled", disabled);
     symmetryOriginY.closest("label")?.classList.toggle("is-disabled", disabled);
-    symmetryModeLabel.textContent = app.isSymmetryMode ? "OFFにする" : "ONにする";
   };
 
   const applySymmetryOriginX = (value: number) => {
@@ -430,7 +427,6 @@ export function bindUiEvents(): void {
     const disabled = !app.isYamiMode;
     yamiStrength.disabled = disabled;
     yamiStrength.closest("label")?.classList.toggle("is-disabled", disabled);
-    yamiModeLabel.textContent = app.isYamiMode ? "OFFにする" : "ONにする";
   };
 
   const updateRainbowControlsState = () => {
@@ -439,7 +435,6 @@ export function bindUiEvents(): void {
     rainbowBrightness.disabled = disabled;
     rainbowSaturation.closest("label")?.classList.toggle("is-disabled", disabled);
     rainbowBrightness.closest("label")?.classList.toggle("is-disabled", disabled);
-    rainbowModeLabel.textContent = app.isRainbowMode ? "OFFにする" : "ONにする";
   };
 
   const applyRainbowSaturation = (value: number) => {
@@ -459,16 +454,16 @@ export function bindUiEvents(): void {
   };
 
   const updateModeDockValue = () => {
-    rainbowDockValue.textContent = app.isRainbowMode ? "ON" : "OFF";
+    rainbowDockValue.textContent = app.isRainbowMode ? "🌈" : "◻";
     modeDockButton?.classList.toggle("is-on-state", app.isRainbowMode);
-    fadeDockValue.textContent = app.isFadeMode ? "ON" : "OFF";
+    fadeDockValue.textContent = app.isFadeMode ? "🌫️" : "◻";
     dockFadeToggleButton.classList.toggle("is-on-state", app.isFadeMode);
-    autoDockValue.textContent = app.isAutoMode ? "ON" : "OFF";
+    autoDockValue.textContent = app.isAutoMode ? "🤖" : "◻";
     dockAutoToggleButton.classList.toggle("is-on-state", app.isAutoMode);
   };
 
   const updateYamiDockValue = () => {
-    yamiDockValue.textContent = app.isYamiMode ? `ON ${app.yamiStrength}` : "OFF";
+    yamiDockValue.textContent = app.isYamiMode ? "🌑" : "◻";
     yamiDockButton?.classList.toggle("is-on-state", app.isYamiMode);
   };
 
@@ -715,7 +710,6 @@ export function bindUiEvents(): void {
     applySize(preset.size);
     applyColor(preset.colorHex);
 
-    rainbowMode.checked = preset.rainbowMode;
     app.isRainbowMode = preset.rainbowMode;
     applyRainbowSaturation(preset.rainbowSaturation);
     applyRainbowBrightness(preset.rainbowBrightness);
@@ -724,7 +718,6 @@ export function bindUiEvents(): void {
     app.isFadeMode = preset.fadeMode;
     app.isAutoMode = preset.autoMode;
 
-    yamiMode.checked = preset.yamiMode;
     app.isYamiMode = preset.yamiMode;
     applyYamiStrength(preset.yamiStrength);
     updateYamiControlsState();
@@ -800,7 +793,12 @@ export function bindUiEvents(): void {
     });
   };
 
-  dockButtons.forEach((button) => {
+  const panelDockButtons = dockButtons.filter((button) => {
+    const panelId = button.dataset.panel;
+    return panelId && panelId !== "ml" && panelId !== "yh" && panelId !== "sy";
+  });
+
+  panelDockButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const panelId = button.dataset.panel;
       if (!panelId || !panels[panelId]) {
@@ -921,13 +919,6 @@ export function bindUiEvents(): void {
     applyColor(value);
   });
 
-  rainbowMode.addEventListener("change", (event) => {
-    app.isRainbowMode = (event.currentTarget as HTMLInputElement).checked;
-    updateRainbowControlsState();
-    updateModeDockValue();
-    persist();
-  });
-
   rainbowSaturation.addEventListener("input", (event) => {
     applyRainbowSaturation(Number((event.currentTarget as HTMLInputElement).value));
   });
@@ -936,6 +927,16 @@ export function bindUiEvents(): void {
     applyRainbowBrightness(Number((event.currentTarget as HTMLInputElement).value));
   });
 
+
+  modeDockButton?.addEventListener("click", () => {
+    app.isRainbowMode = !app.isRainbowMode;
+    updateRainbowControlsState();
+    updateModeDockValue();
+    if (!app.isRainbowMode && activePanelId === "ml") {
+      closePanels();
+    }
+    persist();
+  });
 
   dockFadeToggleButton.addEventListener("click", () => {
     app.isFadeMode = !app.isFadeMode;
@@ -949,16 +950,45 @@ export function bindUiEvents(): void {
     persist();
   });
 
-  yamiMode.addEventListener("change", (event) => {
-    app.isYamiMode = (event.currentTarget as HTMLInputElement).checked;
+  rainbowMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setActivePanel("ml");
+  });
+
+  yamiDockButton?.addEventListener("click", () => {
+    app.isYamiMode = !app.isYamiMode;
     updateYamiControlsState();
     updateYamiDockValue();
+    if (!app.isYamiMode && activePanelId === "yh") {
+      closePanels();
+    }
     applyDrawCompositeOperation();
     persist();
   });
 
   yamiStrength.addEventListener("input", (event) => {
     applyYamiStrength(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  yamiMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setActivePanel("yh");
+  });
+
+  symmetryDockButton?.addEventListener("click", () => {
+    app.isSymmetryMode = !app.isSymmetryMode;
+    symmetryMode.checked = app.isSymmetryMode;
+    updateSymmetryControlsState();
+    updateSymmetryDockValue();
+    if (!app.isSymmetryMode && activePanelId === "sy") {
+      closePanels();
+    }
+    persist();
+  });
+
+  symmetryMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setActivePanel("sy");
   });
 
   symmetryMode.addEventListener("change", (event) => {
@@ -1645,7 +1675,6 @@ export function bindUiEvents(): void {
       applySize(settings.size);
       applyColor(settings.colorHex);
 
-      rainbowMode.checked = settings.rainbowMode;
       app.isRainbowMode = settings.rainbowMode;
       applyRainbowSaturation(settings.rainbowSaturation);
       applyRainbowBrightness(settings.rainbowBrightness);
@@ -1654,7 +1683,6 @@ export function bindUiEvents(): void {
       app.isFadeMode = settings.fadeMode;
       app.isAutoMode = settings.autoMode;
 
-      yamiMode.checked = settings.yamiMode;
       app.isYamiMode = settings.yamiMode;
       applyYamiStrength(settings.yamiStrength);
       updateYamiControlsState();
