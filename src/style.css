@@ -1496,12 +1496,14 @@ select:focus-visible,
     transform: translateX(-50%);
     width: calc(100vw - 16px);
     display: grid;
-    gap: 6px;
+    gap: 4px;
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
   }
 
   .dock_row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .dock_row > .dock_size_inline {
@@ -1527,6 +1529,7 @@ select:focus-visible,
 
   .dock_group_modes {
     grid-column: span 4;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .dock_group_brand {
@@ -1536,16 +1539,69 @@ select:focus-visible,
 
   .dock_group_tools {
     grid-column: span 4;
-    grid-template-columns: 1fr 176px auto 1.4fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(34px, auto);
   }
 
   .dock_group_tools #simple_settings_button {
+    grid-column: 1 / -1;
+  }
+
+  .dock_group_tools .dock_btn[data-panel="pl"] {
+    grid-column: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .dock_group_tools .dock_icon_only_btn {
+    grid-column: 2;
+    width: auto;
+    min-width: 0;
+    justify-self: stretch;
+  }
+
+  .dock_group_tools .dock_size_inline,
+  .dock_group_tools .dock_color_inline {
     grid-column: auto;
   }
 
   .dock_group_actions {
     grid-column: span 4;
     grid-template-columns: auto auto auto minmax(0, 1fr);
+  }
+
+  .dock_group {
+    gap: 3px;
+    padding: 15px 2px 2px;
+  }
+
+  #bottom_dock .dock_main {
+    font-size: 11px;
+  }
+
+  #bottom_dock .dock_sub {
+    font-size: 8px;
+  }
+
+  #bottom_dock .simple_settings_label {
+    font-size: 13px;
+  }
+
+  #bottom_dock .dock_pen_name_text {
+    font-size: 10px;
+  }
+
+  #bottom_dock .dock_quick_btn {
+    font-size: 10px;
+  }
+
+  .dock_row_bottom .dock_btn,
+  .dock_row_bottom .dock_mode_item,
+  .dock_row_bottom .dock_mode_menu_button,
+  .dock_row_bottom .dock_action_tile,
+  .dock_row_bottom .dock_group_modes > .dock_btn {
+    min-height: 34px;
+    height: 34px;
   }
 
   .dock_action_tile {
