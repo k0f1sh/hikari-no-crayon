@@ -809,8 +809,21 @@ select {
   grid-template-columns: 1fr 176px auto 1.5fr 1fr;
 }
 
+.dock_group_turtle {
+  grid-template-columns: 1fr;
+  align-content: stretch;
+}
+
+.dock_group_turtle #turtle_open_button {
+  min-width: 74px;
+  width: 74px;
+  min-height: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
 .dock_group_actions {
-  grid-template-columns: auto auto auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto auto minmax(0, 1fr) auto;
 }
 
 .dock_group .dock_btn {
@@ -1599,9 +1612,19 @@ select:focus-visible,
   }
 
   .dock_group_tools {
-    grid-column: span 4;
+    grid-column: span 3;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: minmax(34px, auto);
+  }
+
+  .dock_group_turtle {
+    grid-column: span 1;
+    grid-template-columns: 1fr;
+  }
+
+  .dock_group_turtle #turtle_open_button {
+    min-width: 0;
+    width: 100%;
   }
 
   .dock_group_tools #simple_settings_button {
@@ -1628,7 +1651,7 @@ select:focus-visible,
 
   .dock_group_actions {
     grid-column: span 4;
-    grid-template-columns: auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-columns: auto auto auto minmax(0, 1fr) auto;
   }
 
   .dock_group {
