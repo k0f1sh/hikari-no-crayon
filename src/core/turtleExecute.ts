@@ -6,6 +6,10 @@ export interface Point {
   angle?: number;
 }
 
+export interface TracePoint extends Point {
+  draw: boolean;
+}
+
 interface TurtleState {
   x: number;
   y: number;
@@ -20,8 +24,7 @@ interface TurtleProcedure {
 
 type EvalScope = Record<string, number>;
 
-const MAX_POINTS = 500_000;
-const MAX_DEPTH = 40;
+const MAX_DEPTH = 5000;
 
 function parseExprTokens(expr: string): string[] {
   const compact = expr.replace(/\s+/g, "");
@@ -117,10 +120,10 @@ function evaluateExpression(expr: string, scope: EvalScope): number {
   return value;
 }
 
-export function executeTurtleProgram(
+export function* iterateTurtleProgram(
   program: TurtleCommand[],
   options: { startX: number; startY: number; startAngle?: number; stepSize?: number },
-): Point[][] {
+): Generator<TracePoint, void, void> {
   const stepSize = options.stepSize ?? 2;
   const state: TurtleState = {
     x: options.startX,
@@ -128,19 +131,11 @@ export function executeTurtleProgram(
     angle: options.startAngle ?? 0,
     penDown: true,
   };
-
   const procedures = new Map<string, TurtleProcedure>();
-  const segments: Point[][] = [];
-  let currentSegment: Point[] = [{ x: state.x, y: state.y, angle: state.angle }];
-  let totalPoints = 1;
 
-  const checkPointLimit = () => {
-    if (totalPoints >= MAX_POINTS) {
-      throw new Error(`てんすうが おおすぎます（さいだい${MAX_POINTS}てん）`);
-    }
-  };
+  const evaluate = (expr: string, scope: EvalScope): number => evaluateExpression(expr, scope);
 
-  const moveTo = (distance: number) => {
+  function* moveTo(distance: number): Generator<TracePoint, void, void> {
     const rad = (state.angle * Math.PI) / 180;
     const dx = Math.sin(rad);
     const dy = -Math.cos(rad);
@@ -150,32 +145,30 @@ export function executeTurtleProgram(
       const steps = Math.max(1, Math.ceil(totalDist / stepSize));
       const stepDist = distance / steps;
       for (let i = 0; i < steps; i++) {
-        checkPointLimit();
         state.x += dx * stepDist;
         state.y += dy * stepDist;
-        currentSegment.push({ x: state.x, y: state.y, angle: state.angle });
-        totalPoints += 1;
+        yield { x: state.x, y: state.y, angle: state.angle, draw: true };
       }
-    } else {
-      state.x += dx * distance;
-      state.y += dy * distance;
+      return;
     }
-  };
 
-  const evaluate = (expr: string, scope: EvalScope): number => evaluateExpression(expr, scope);
+    state.x += dx * distance;
+    state.y += dy * distance;
+    yield { x: state.x, y: state.y, angle: state.angle, draw: false };
+  }
 
-  const execute = (commands: TurtleCommand[], depth: number, scope: EvalScope) => {
+  function* execute(commands: TurtleCommand[], depth: number, scope: EvalScope): Generator<TracePoint, void, void> {
     if (depth > MAX_DEPTH) {
-      throw new Error("さいきが ふかすぎます（さいだい40だん）");
+      throw new Error(`さいきが ふかすぎます（さいだい${MAX_DEPTH}だん）`);
     }
 
     for (const cmd of commands) {
       switch (cmd.type) {
         case "fd":
-          moveTo(evaluate(cmd.distanceExpr, scope));
+          yield* moveTo(evaluate(cmd.distanceExpr, scope));
           break;
         case "bk":
-          moveTo(-evaluate(cmd.distanceExpr, scope));
+          yield* moveTo(-evaluate(cmd.distanceExpr, scope));
           break;
         case "rt":
           state.angle += evaluate(cmd.angleExpr, scope);
@@ -185,15 +178,10 @@ export function executeTurtleProgram(
           break;
         case "pu":
           state.penDown = false;
-          if (currentSegment.length > 0) {
-            segments.push(currentSegment);
-            currentSegment = [];
-          }
           break;
         case "pd":
           state.penDown = true;
-          currentSegment = [{ x: state.x, y: state.y, angle: state.angle }];
-          totalPoints += 1;
+          yield { x: state.x, y: state.y, angle: state.angle, draw: false };
           break;
         case "repeat": {
           const count = evaluate(cmd.countExpr, scope);
@@ -201,16 +189,16 @@ export function executeTurtleProgram(
             throw new Error("repeat のかいすうは 0いじょうの せいすうにしてください");
           }
           for (let i = 0; i < count; i++) {
-            execute(cmd.body, depth + 1, scope);
+            yield* execute(cmd.body, depth + 1, scope);
           }
           break;
         }
         case "if": {
           const condition = evaluate(cmd.conditionExpr, scope);
           if (condition !== 0) {
-            execute(cmd.thenBody, depth + 1, scope);
+            yield* execute(cmd.thenBody, depth + 1, scope);
           } else {
-            execute(cmd.elseBody, depth + 1, scope);
+            yield* execute(cmd.elseBody, depth + 1, scope);
           }
           break;
         }
@@ -231,14 +219,40 @@ export function executeTurtleProgram(
           for (let i = 0; i < proc.params.length; i++) {
             childScope[proc.params[i]] = evaluate(cmd.args[i], scope);
           }
-          execute(proc.body, depth + 1, childScope);
+          yield* execute(proc.body, depth + 1, childScope);
           break;
         }
       }
     }
-  };
+  }
 
-  execute(program, 0, {});
+  yield { x: state.x, y: state.y, angle: state.angle, draw: false };
+  yield* execute(program, 0, {});
+}
+
+export function executeTurtleProgram(
+  program: TurtleCommand[],
+  options: { startX: number; startY: number; startAngle?: number; stepSize?: number },
+): Point[][] {
+  const segments: Point[][] = [];
+  let currentSegment: Point[] = [];
+  let lastPoint: Point | null = null;
+
+  for (const point of iterateTurtleProgram(program, options)) {
+    const cursor: Point = { x: point.x, y: point.y, angle: point.angle };
+    if (point.draw) {
+      if (currentSegment.length === 0 && lastPoint) {
+        currentSegment.push(lastPoint);
+      } else if (currentSegment.length === 0) {
+        currentSegment.push(cursor);
+      }
+      currentSegment.push(cursor);
+    } else if (currentSegment.length > 0) {
+      segments.push(currentSegment);
+      currentSegment = [];
+    }
+    lastPoint = cursor;
+  }
 
   if (currentSegment.length > 0) {
     segments.push(currentSegment);

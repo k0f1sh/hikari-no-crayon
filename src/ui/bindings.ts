@@ -7,7 +7,7 @@ import {
   sampleSvgPathPoints,
 } from "../core/svgPathTrace";
 import { parseTurtleProgram } from "../core/turtleParse";
-import { executeTurtleProgram } from "../core/turtleExecute";
+import { iterateTurtleProgram } from "../core/turtleExecute";
 import {
   canRedo,
   canUndo,
@@ -1251,6 +1251,24 @@ export function bindUiEvents(): void {
       const petalStep = Math.max(2, Math.round(min * 0.008));
       return `repeat 12 [ repeat 36 [ fd ${petalStep} rt 10 ] rt 30 ]`;
     },
+    spiral: ({ min }) => {
+      const turns = Math.min(900, Math.max(180, Math.round(min * 0.65)));
+      const startLen = 1;
+      const delta = Math.max(0.6, Math.round(min * 0.003 * 10) / 10);
+      return [
+        "to spiral [n len d] [",
+        "  if n [",
+        "    fd len",
+        "    lt 59",
+        "    call spiral [n-1 len+d d]",
+        "  ] [",
+        "    pu",
+        "  ]",
+        "]",
+        "",
+        `call spiral [${turns} ${startLen} ${delta}]`,
+      ].join("\n");
+    },
     snowflake: ({ min }) => {
       const arm = Math.max(36, Math.round(min * 0.14));
       const branch = Math.max(12, Math.round(arm / 3));
@@ -1427,52 +1445,74 @@ export function bindUiEvents(): void {
   };
 
   const animateTurtleTrace = (
-    groups: Array<Array<{ x: number; y: number; angle?: number }>>,
+    traceIterator: Generator<{ x: number; y: number; angle?: number; draw: boolean }, void, void>,
     pointsPerFrame: number,
     showCursor: boolean,
     signal: AbortSignal,
-  ): Promise<void> =>
+  ): Promise<boolean> =>
     new Promise((resolve) => {
-      let groupIndex = 0;
-      let pointIndex = 0;
+      let prevPoint: { x: number; y: number; angle?: number } | null = null;
+      let hasAnyPoint = false;
+      let finished = false;
+      let hasDrawnPoint = false;
 
       const drawFrame = () => {
         if (signal.aborted) {
           if (showCursor) {
             clearTurtleCursor();
           }
-          resolve();
+          resolve(hasDrawnPoint);
           return;
         }
 
         applyDrawCompositeOperation();
-        let frameRemaining = pointsPerFrame;
+        const normalizeFastSpeed = pointsPerFrame >= 8;
+        let frameRemaining = normalizeFastSpeed ? 2000 : pointsPerFrame;
+        const distanceBudgetPerFrame = 120;
+        let remainingDistance = distanceBudgetPerFrame;
+        let drewInFrame = false;
         let lastPoint: { x: number; y: number; angle?: number } | null = null;
 
-        while (groupIndex < groups.length && frameRemaining > 0) {
-          const group = groups[groupIndex];
-          if (!group || pointIndex >= group.length) {
-            groupIndex += 1;
-            pointIndex = 0;
-            continue;
+        while (!finished && frameRemaining > 0) {
+          const next = traceIterator.next();
+          if (next.done) {
+            finished = true;
+            break;
+          }
+          hasAnyPoint = true;
+          const point = next.value;
+          const distanceCost = prevPoint
+            ? Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y)
+            : 0;
+          if (normalizeFastSpeed && drewInFrame && distanceCost > remainingDistance) {
+            break;
           }
 
-          const point = group[pointIndex];
-          drawWithSymmetry(point.x, point.y);
+          if (point.draw) {
+            drawWithSymmetry(point.x, point.y);
+            hasDrawnPoint = true;
+          }
           lastPoint = point;
-          pointIndex += 1;
+          prevPoint = point;
           frameRemaining -= 1;
+          drewInFrame = true;
+          if (normalizeFastSpeed) {
+            remainingDistance -= distanceCost;
+          }
         }
 
         if (showCursor && lastPoint) {
           drawTurtleCursor(lastPoint.x, lastPoint.y, lastPoint.angle ?? 0);
         }
 
-        if (groupIndex >= groups.length) {
+        if (finished) {
           if (showCursor) {
             clearTurtleCursor();
           }
-          resolve();
+          if (!hasAnyPoint) {
+            window.alert("びょうがする てんが ありません");
+          }
+          resolve(hasDrawnPoint);
           return;
         }
         window.requestAnimationFrame(drawFrame);
@@ -1508,23 +1548,16 @@ export function bindUiEvents(): void {
       const program = parseTurtleProgram(source);
       const startX = app.width / 2;
       const startY = app.height / 2;
-      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
-      const stepSize = 31 - densityValue;
-      const segments = executeTurtleProgram(program, { startX, startY, stepSize });
-
-      if (segments.length === 0 || segments.every((s) => s.length === 0)) {
-        window.alert("びょうがする てんが ありません");
-        return;
-      }
-
       const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
       const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
+      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
+      const stepSize = 31 - densityValue;
+      const traceIterator = iterateTurtleProgram(program, { startX, startY, stepSize });
+
       const showCursor = turtleShowCursor.checked;
 
       closeTurtleModal();
-      await animateTurtleTrace(segments, pointsPerFrame, showCursor, signal);
-
-      const didDraw = segments.some((s) => s.length > 0);
+      const didDraw = await animateTurtleTrace(traceIterator, pointsPerFrame, showCursor, signal);
       if (didDraw) {
         commitHistory();
       }

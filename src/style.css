@@ -1478,6 +1478,47 @@ select {
   padding: 6px 8px;
 }
 
+#symmetry_type,
+#symmetry_count,
+#svg_path_speed,
+#record_preset,
+#record_resolution,
+#record_quality,
+#turtle_sample,
+#turtle_speed {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgba(162, 193, 255, 0.42);
+  border-radius: 8px;
+  background:
+    linear-gradient(140deg, rgba(20, 36, 64, 0.9), rgba(9, 16, 30, 0.95)) padding-box,
+    linear-gradient(140deg, rgba(110, 190, 255, 0.28), rgba(118, 246, 208, 0.14)) border-box,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' fill='none' stroke='%23d9ecff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 10px center / 12px 12px;
+  color: #f4f9ff;
+  padding: 6px 34px 6px 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(200, 228, 255, 0.1),
+    0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+#symmetry_type:hover,
+#symmetry_count:hover,
+#svg_path_speed:hover,
+#record_preset:hover,
+#record_resolution:hover,
+#record_quality:hover,
+#turtle_sample:hover,
+#turtle_speed:hover {
+  border-color: rgba(162, 193, 255, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(200, 228, 255, 0.14),
+    0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
 #svg_path_input {
   min-height: 84px;
   resize: vertical;
@@ -1487,7 +1528,12 @@ select {
 
 #record_preset option,
 #record_resolution option,
-#record_quality option {
+#record_quality option,
+#symmetry_type option,
+#symmetry_count option,
+#svg_path_speed option,
+#turtle_sample option,
+#turtle_speed option {
   color: #0b1224;
   background: #f2f7ff;
 }
@@ -1814,20 +1860,6 @@ select:focus-visible,
   line-height: 1.5;
   -webkit-user-select: text;
   user-select: text;
-}
-
-#turtle_speed {
-  min-height: 32px;
-  border: 1px solid rgba(162, 193, 255, 0.35);
-  border-radius: 0;
-  background: linear-gradient(140deg, rgba(10, 18, 35, 0.75), rgba(7, 12, 24, 0.88));
-  color: var(--text);
-  padding: 6px 8px;
-}
-
-#turtle_speed option {
-  color: #0b1224;
-  background: #f2f7ff;
 }
 
 .turtle_controls {
