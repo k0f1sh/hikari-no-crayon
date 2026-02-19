@@ -1,13 +1,13 @@
 import { app, requireCanvas } from "../core/state";
 import { applyDrawCompositeOperation, clear, reverseImage } from "../core/draw";
-import { rgbToHex } from "../core/color";
+import { hlsToRgb, rgbToHex } from "../core/color";
 import {
   extractSvgPathDataList,
   fitPointsToCanvas,
   sampleSvgPathPoints,
 } from "../core/svgPathTrace";
 import { parseTurtleProgram } from "../core/turtleParse";
-import { iterateTurtleProgram } from "../core/turtleExecute";
+import { iterateTurtleProgram, type TurtleTraceEvent } from "../core/turtleExecute";
 import {
   canRedo,
   canUndo,
@@ -1256,18 +1256,20 @@ export function bindUiEvents(): void {
       const turns = Math.min(120, Math.max(90, Math.round(min * 0.08)));
       const startLen = 1;
       const delta = Math.max(0.6, Math.round(min * 0.003 * 10) / 10);
+      const startSize = 3;
       return [
-        "to spiral [n len d] [",
+        "to spiral [n len d p] [",
         "  if n [",
+        "    size p",
         "    fd len",
         "    lt 59",
-        "    call spiral [n-1 len+d d]",
+        "    call spiral [n-1 len+d d p+0.03]",
         "  ] [",
         "    pu",
         "  ]",
         "]",
         "",
-        `call spiral [${turns} ${startLen} ${delta}]`,
+        `call spiral [${turns} ${startLen} ${delta} ${startSize}]`,
       ].join("\n");
     },
     snowflake: ({ min }) => {
@@ -1335,6 +1337,60 @@ export function bindUiEvents(): void {
         `pu bk ${offset} lt 90 fd ${Math.round(offset * 0.55)} rt 90 pd`,
         `call sier [${depth} ${length}]`,
       ].join("\n");
+    },
+    pen_zigzag: ({ width, height, min }) => {
+      const rowWidth = Math.max(120, Math.round(Math.min(width * 0.72, min * 0.9)));
+      const pens = PEN_CATALOG.map((pen) => pen.value);
+      const rowCount = Math.max(1, pens.length);
+      const baseGap = Math.max(18, Math.round(min * 0.045));
+      const fitGap = Math.max(14, Math.floor((height * 0.72) / Math.max(1, rowCount - 1)));
+      const rowGap = Math.min(baseGap, fitGap);
+      const baseSize = 24;
+      const sizeMultiplierByPen: Record<string, number> = {
+        blood_pen: 0.5,      // けっかん
+        degi_pen: 0.5,       // でじたる
+        amedrop_pen: 0.5,    // あめ
+        snow_pen: 1.3,       // ゆき
+        fur_pen: 1.3,        // ふぁー
+        shinmyaku_pen: 0.3,  // しんみゃく
+      };
+      const totalHeight = Math.max(0, (rowCount - 1) * rowGap);
+      const startX = Math.max(30, Math.round(rowWidth / 2));
+      const startYBase = Math.max(30, Math.round(totalHeight / 2));
+      const startY = Math.min(
+        Math.max(30, Math.round(startYBase + min * 0.08)),
+        Math.max(30, Math.floor(height * 0.45)),
+      );
+
+      const lines: string[] = [
+        `pu lt 90 fd ${startX} rt 90 fd ${startY} rt 90 pd`,
+      ];
+
+      for (let i = 0; i < rowCount; i++) {
+        const pen = pens[i % pens.length];
+        const scale = sizeMultiplierByPen[pen] ?? 1;
+        const rowSize = Math.max(3, Math.min(300, Math.round(baseSize * scale * 100) / 100));
+        lines.push(`pen ${pen}`);
+        lines.push(`size ${rowSize}`);
+        lines.push(`fd ${rowWidth}`);
+
+        if (i < rowCount - 1) {
+          lines.push("pen none");
+          if (i % 2 === 0) {
+            // みぎを2かいまわって したへおりる（→ から ← へ）
+            lines.push(`rt 90`);
+            lines.push(`fd ${rowGap}`);
+            lines.push(`rt 90`);
+          } else {
+            // ひだりを2かいまわって したへおりる（← から → へ）
+            lines.push(`lt 90`);
+            lines.push(`fd ${rowGap}`);
+            lines.push(`lt 90`);
+          }
+        }
+      }
+
+      return lines.join("\n");
     },
     tree: ({ min }) => {
       const trunk = Math.max(48, Math.round(min * 0.16));
@@ -1413,7 +1469,7 @@ export function bindUiEvents(): void {
   };
 
   const animateTurtleTrace = (
-    traceIterator: Generator<{ x: number; y: number; angle?: number; draw: boolean }, void, void>,
+    traceIterator: Generator<TurtleTraceEvent, void, void>,
     pointsPerFrame: number,
     frameIntervalMs: number,
     showCursor: boolean,
@@ -1459,7 +1515,39 @@ export function bindUiEvents(): void {
             break;
           }
           hasAnyPoint = true;
-          const point = next.value;
+          const event = next.value;
+          if (event.kind === "set_size") {
+            const size = Math.max(3, Math.min(300, Number.isFinite(event.size) ? event.size : 30));
+            app.penSize = size;
+            sizeRange.value = String(Math.round(size));
+            sizeDockValue.textContent = `${Math.round(size)}px`;
+            updateSizeRangeTrack();
+            continue;
+          }
+          if (event.kind === "set_hls") {
+            app.penColor = hlsToRgb(event.h, event.l, event.s);
+            colorPicker.value = rgbToHex(app.penColor);
+            continue;
+          }
+          if (event.kind === "set_pen") {
+            const name = event.penName.trim();
+            if (name.toLowerCase() === "none") {
+              app.selectedPenName = "none";
+              app.penTool = null;
+              penDockValue.classList.add("dock_pen_label");
+              penDockValue.textContent = "ぺんなし";
+            } else {
+              const nextPen = app.penTools[name];
+              if (!nextPen) {
+                throw new Error(`ぺんが みつかりません: ${name}`);
+              }
+              app.selectedPenName = name;
+              app.penTool = nextPen;
+              renderPenDockValue(name);
+            }
+            continue;
+          }
+          const point = event.point;
           if (turtleLastCursorPoint) {
             movedDistanceInFrame += Math.hypot(
               point.x - turtleLastCursorPoint.x,
@@ -1546,7 +1634,7 @@ export function bindUiEvents(): void {
       const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
       const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
       const frameIntervalMs = speedValue === 1 ? 80 : speedValue === 2 ? 40 : 16;
-      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
+      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 10));
       const stepSize = 31 - densityValue;
       const traceIterator = iterateTurtleProgram(program, { startX, startY, stepSize });
 

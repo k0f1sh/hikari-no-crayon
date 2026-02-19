@@ -3,6 +3,9 @@ export type TurtleCommand =
   | { type: "bk"; distanceExpr: string }
   | { type: "rt"; angleExpr: string }
   | { type: "lt"; angleExpr: string }
+  | { type: "size"; sizeExpr: string }
+  | { type: "hls"; hExpr: string; lExpr: string; sExpr: string }
+  | { type: "pen"; penName: string }
   | { type: "pu" }
   | { type: "pd" }
   | { type: "repeat"; countExpr: string; body: TurtleCommand[] }
@@ -28,6 +31,7 @@ const COMMAND_ALIASES: Record<string, string> = {
   left: "lt",
   penup: "pu",
   pendown: "pd",
+  color: "hls",
 };
 
 function normalizeCommand(token: string): string {
@@ -101,6 +105,19 @@ function parseCommands(tokens: string[], pos: { index: number }, depth: number):
         break;
       case "pd":
         commands.push({ type: "pd" });
+        break;
+      case "size":
+        commands.push({ type: "size", sizeExpr: readToken(tokens, pos, "size") });
+        break;
+      case "hls": {
+        const hExpr = readToken(tokens, pos, "hls");
+        const lExpr = readToken(tokens, pos, "hls");
+        const sExpr = readToken(tokens, pos, "hls");
+        commands.push({ type: "hls", hExpr, lExpr, sExpr });
+        break;
+      }
+      case "pen":
+        commands.push({ type: "pen", penName: readToken(tokens, pos, "pen") });
         break;
       case "repeat": {
         const countExpr = readToken(tokens, pos, "repeat");

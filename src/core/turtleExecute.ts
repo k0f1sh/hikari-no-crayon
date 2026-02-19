@@ -10,6 +10,12 @@ export interface TracePoint extends Point {
   draw: boolean;
 }
 
+export type TurtleTraceEvent =
+  | { kind: "point"; point: TracePoint }
+  | { kind: "set_size"; size: number }
+  | { kind: "set_hls"; h: number; l: number; s: number }
+  | { kind: "set_pen"; penName: string };
+
 interface TurtleState {
   x: number;
   y: number;
@@ -123,7 +129,7 @@ function evaluateExpression(expr: string, scope: EvalScope): number {
 export function* iterateTurtleProgram(
   program: TurtleCommand[],
   options: { startX: number; startY: number; startAngle?: number; stepSize?: number },
-): Generator<TracePoint, void, void> {
+): Generator<TurtleTraceEvent, void, void> {
   const stepSize = options.stepSize ?? 2;
   const state: TurtleState = {
     x: options.startX,
@@ -135,7 +141,7 @@ export function* iterateTurtleProgram(
 
   const evaluate = (expr: string, scope: EvalScope): number => evaluateExpression(expr, scope);
 
-  function* moveTo(distance: number): Generator<TracePoint, void, void> {
+  function* moveTo(distance: number): Generator<TurtleTraceEvent, void, void> {
     const rad = (state.angle * Math.PI) / 180;
     const dx = Math.sin(rad);
     const dy = -Math.cos(rad);
@@ -147,17 +153,17 @@ export function* iterateTurtleProgram(
       for (let i = 0; i < steps; i++) {
         state.x += dx * stepDist;
         state.y += dy * stepDist;
-        yield { x: state.x, y: state.y, angle: state.angle, draw: true };
+        yield { kind: "point", point: { x: state.x, y: state.y, angle: state.angle, draw: true } };
       }
       return;
     }
 
     state.x += dx * distance;
     state.y += dy * distance;
-    yield { x: state.x, y: state.y, angle: state.angle, draw: false };
+    yield { kind: "point", point: { x: state.x, y: state.y, angle: state.angle, draw: false } };
   }
 
-  function* execute(commands: TurtleCommand[], depth: number, scope: EvalScope): Generator<TracePoint, void, void> {
+  function* execute(commands: TurtleCommand[], depth: number, scope: EvalScope): Generator<TurtleTraceEvent, void, void> {
     if (depth > MAX_DEPTH) {
       throw new Error(`さいきが ふかすぎます（さいだい${MAX_DEPTH}だん）`);
     }
@@ -176,12 +182,26 @@ export function* iterateTurtleProgram(
         case "lt":
           state.angle -= evaluate(cmd.angleExpr, scope);
           break;
+        case "size":
+          yield { kind: "set_size", size: evaluate(cmd.sizeExpr, scope) };
+          break;
+        case "hls":
+          yield {
+            kind: "set_hls",
+            h: evaluate(cmd.hExpr, scope),
+            l: evaluate(cmd.lExpr, scope),
+            s: evaluate(cmd.sExpr, scope),
+          };
+          break;
+        case "pen":
+          yield { kind: "set_pen", penName: cmd.penName };
+          break;
         case "pu":
           state.penDown = false;
           break;
         case "pd":
           state.penDown = true;
-          yield { x: state.x, y: state.y, angle: state.angle, draw: false };
+          yield { kind: "point", point: { x: state.x, y: state.y, angle: state.angle, draw: false } };
           break;
         case "repeat": {
           const count = evaluate(cmd.countExpr, scope);
@@ -226,7 +246,7 @@ export function* iterateTurtleProgram(
     }
   }
 
-  yield { x: state.x, y: state.y, angle: state.angle, draw: false };
+  yield { kind: "point", point: { x: state.x, y: state.y, angle: state.angle, draw: false } };
   yield* execute(program, 0, {});
 }
 
@@ -238,7 +258,11 @@ export function executeTurtleProgram(
   let currentSegment: Point[] = [];
   let lastPoint: Point | null = null;
 
-  for (const point of iterateTurtleProgram(program, options)) {
+  for (const event of iterateTurtleProgram(program, options)) {
+    if (event.kind !== "point") {
+      continue;
+    }
+    const point = event.point;
     const cursor: Point = { x: point.x, y: point.y, angle: point.angle };
     if (point.draw) {
       if (currentSegment.length === 0 && lastPoint) {

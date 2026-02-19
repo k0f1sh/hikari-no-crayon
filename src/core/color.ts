@@ -78,6 +78,54 @@ export function hsvToRgb(h: number, s: number, v: number): Color {
   return { r: Math.round(r), g: Math.round(g), b: Math.round(b) };
 }
 
+export function hlsToRgb(h: number, l: number, s: number): Color {
+  while (h < 0) {
+    h += 360;
+  }
+  h %= 360;
+
+  const lNorm = l > 1 ? Math.max(0, Math.min(1, l / 100)) : Math.max(0, Math.min(1, l));
+  const sNorm = s > 1 ? Math.max(0, Math.min(1, s / 100)) : Math.max(0, Math.min(1, s));
+
+  if (sNorm === 0) {
+    const v = Math.round(lNorm * 255);
+    return { r: v, g: v, b: v };
+  }
+
+  const c = (1 - Math.abs(2 * lNorm - 1)) * sNorm;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = lNorm - c / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (h < 60) {
+    r = c;
+    g = x;
+  } else if (h < 120) {
+    r = x;
+    g = c;
+  } else if (h < 180) {
+    g = c;
+    b = x;
+  } else if (h < 240) {
+    g = x;
+    b = c;
+  } else if (h < 300) {
+    r = x;
+    b = c;
+  } else {
+    r = c;
+    b = x;
+  }
+
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255),
+  };
+}
+
 export function rgbToHex(color: Color): string {
   const toHex = (value: number) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
   return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;

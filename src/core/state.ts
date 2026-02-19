@@ -31,7 +31,7 @@ export const app = {
   penTool: null as PenTool | null,
   selectedPenName: "normal_pen",
   penCustomParams: getDefaultPenCustomParams(),
-  penSize: 30,
+  penSize: 10,
   penColor: { r: 200, g: 200, b: 200 } as Color,
   historyStack: [] as ImageData[],
   historyIndex: -1,
