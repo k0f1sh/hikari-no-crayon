@@ -841,7 +841,7 @@ export function bindUiEvents(): void {
   const applyDockVisibility = (visible: boolean) => {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
-    dockShowButton.style.display = visible ? "none" : "block";
+    dockShowButton.style.display = visible ? "none" : "grid";
     updateDockOffset();
     if (!visible) {
       closePanels();
