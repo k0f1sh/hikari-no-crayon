@@ -6,6 +6,8 @@ import {
   fitPointsToCanvas,
   sampleSvgPathPoints,
 } from "../core/svgPathTrace";
+import { parseTurtleProgram } from "../core/turtleParse";
+import { iterateTurtleProgram } from "../core/turtleExecute";
 import {
   canRedo,
   canUndo,
@@ -29,6 +31,7 @@ import {
 import { exportPng } from "../core/export";
 import { PEN_CATALOG } from "../tools/penCatalog";
 import { startPreviewAnimations, stopPreviewAnimations } from "./presetPreview";
+import { setHudTurtleCursor } from "../core/hud";
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id) as T | null;
@@ -483,10 +486,24 @@ export function bindUiEvents(): void {
     refreshUndoRedoButtons();
   };
 
+  const updateSizeRangeTrack = () => {
+    const min = Number(sizeRange.min);
+    const max = Number(sizeRange.max);
+    const value = Number(sizeRange.value);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(value)) {
+      sizeRange.style.setProperty("--size-range-progress", "0%");
+      return;
+    }
+    const clamped = Math.max(min, Math.min(max, value));
+    const progress = ((clamped - min) / (max - min)) * 100;
+    sizeRange.style.setProperty("--size-range-progress", `${progress}%`);
+  };
+
   const applySize = (value: number) => {
     app.penSize = Math.max(3, Math.min(300, value));
     sizeRange.value = String(app.penSize);
     sizeDockValue.textContent = `${app.penSize}px`;
+    updateSizeRangeTrack();
     persist();
   };
 
@@ -839,7 +856,7 @@ export function bindUiEvents(): void {
   const applyDockVisibility = (visible: boolean) => {
     isDockVisible = visible;
     dock.style.display = visible ? "" : "none";
-    dockShowButton.style.display = visible ? "none" : "block";
+    dockShowButton.style.display = visible ? "none" : "grid";
     updateDockOffset();
     if (!visible) {
       closePanels();
@@ -1197,6 +1214,362 @@ export function bindUiEvents(): void {
   svgPathDrawButton.addEventListener("click", (event) => {
     event.preventDefault();
     void runSvgTrace();
+  });
+
+  // Turtle Graphics
+  const turtleModal = byId<HTMLElement>("turtle_modal");
+  const turtleCloseButton = byId<HTMLButtonElement>("turtle_close_button");
+  const turtleOpenButton = byId<HTMLButtonElement>("turtle_open_button");
+  const turtleCodeInput = byId<HTMLTextAreaElement>("turtle_code_input");
+  const turtleSpeedInput = byId<HTMLSelectElement>("turtle_speed");
+  const turtleRunButton = byId<HTMLButtonElement>("turtle_run_button");
+  const turtleShowCursor = byId<HTMLInputElement>("turtle_show_cursor");
+  const turtleDensity = byId<HTMLInputElement>("turtle_density");
+  const turtleDensityValue = byId<HTMLElement>("turtle_density_value");
+  const turtleSampleSelect = byId<HTMLSelectElement>("turtle_sample");
+
+  turtleDensity.addEventListener("input", () => {
+    turtleDensityValue.textContent = turtleDensity.value;
+  });
+
+  const getTurtleSampleDimensions = () => {
+    const width = Math.max(1, app.width || window.innerWidth || 1);
+    const height = Math.max(1, app.height || window.innerHeight || 1);
+    const min = Math.min(width, height);
+    return { width, height, min };
+  };
+
+  const turtleSamples: Record<string, (dims: { width: number; height: number; min: number }) => string> = {
+    square: ({ min }) => {
+      const side = Math.max(40, Math.round(min * 0.22));
+      return `repeat 4 [ fd ${side} rt 90 ]`;
+    },
+    circle: ({ min }) => {
+      const step = Math.max(4, Math.round(min * 0.02));
+      return `repeat 36 [ fd ${step} rt 10 ]`;
+    },
+    flower: ({ min }) => {
+      const petalStep = Math.max(2, Math.round(min * 0.008));
+      return `repeat 12 [ repeat 36 [ fd ${petalStep} rt 10 ] rt 30 ]`;
+    },
+    spiral: ({ min }) => {
+      const turns = Math.min(120, Math.max(90, Math.round(min * 0.08)));
+      const startLen = 1;
+      const delta = Math.max(0.6, Math.round(min * 0.003 * 10) / 10);
+      return [
+        "to spiral [n len d] [",
+        "  if n [",
+        "    fd len",
+        "    lt 59",
+        "    call spiral [n-1 len+d d]",
+        "  ] [",
+        "    pu",
+        "  ]",
+        "]",
+        "",
+        `call spiral [${turns} ${startLen} ${delta}]`,
+      ].join("\n");
+    },
+    snowflake: ({ min }) => {
+      const arm = Math.max(36, Math.round(min * 0.14));
+      const branch = Math.max(12, Math.round(arm / 3));
+      return [
+        "repeat 6 [",
+        `  fd ${arm}`,
+        `  repeat 6 [ bk ${branch} rt 60 fd ${branch} lt 60 ]`,
+        `  bk ${arm}`,
+        "  rt 60",
+        "]",
+      ].join("\n");
+    },
+    koch_recursive: ({ min }) => {
+      const length = Math.max(90, Math.round(min * 0.38));
+      return [
+        "to koch [n len] [",
+        "  if n [",
+        "    call koch [n-1 len/3]",
+        "    rt 60",
+        "    call koch [n-1 len/3]",
+        "    lt 120",
+        "    call koch [n-1 len/3]",
+        "    rt 60",
+        "    call koch [n-1 len/3]",
+        "  ] [",
+        "    fd len",
+        "  ]",
+        "]",
+        "",
+        "repeat 3 [",
+        `  call koch [4 ${length}]`,
+        "  rt 120",
+        "]",
+      ].join("\n");
+    },
+    sierpinski: ({ min }) => {
+      const depth = 5;
+      const length = Math.max(120, Math.round(min * 0.58));
+      const offset = Math.max(80, Math.round(min * 0.26));
+      return [
+        "to tri [len] [",
+        "  repeat 3 [ fd len rt 120 ]",
+        "]",
+        "",
+        "to sier [n len] [",
+        "  if n [",
+        "    call sier [n-1 len/2]",
+        "    fd len/2",
+        "    call sier [n-1 len/2]",
+        "    bk len/2",
+        "    rt 60",
+        "    fd len/2",
+        "    lt 60",
+        "    call sier [n-1 len/2]",
+        "    rt 60",
+        "    bk len/2",
+        "    lt 60",
+        "  ] [",
+        "    call tri [len]",
+        "  ]",
+        "]",
+        "",
+        `pu bk ${offset} lt 90 fd ${Math.round(offset * 0.55)} rt 90 pd`,
+        `call sier [${depth} ${length}]`,
+      ].join("\n");
+    },
+    tree: ({ min }) => {
+      const trunk = Math.max(48, Math.round(min * 0.16));
+      const offset = Math.max(40, Math.round(min * 0.24));
+      const depth = 5;
+      return [
+        "to tree [n len] [",
+        "  if n [",
+        "    fd len",
+        "    rt 20",
+        "    call tree [n-1 len*0.8]",
+        "    lt 40",
+        "    call tree [n-1 len*0.8]",
+        "    rt 20",
+        "    bk len",
+        "  ] [",
+        "  ]",
+        "]",
+        "",
+        `pu bk ${offset} pd`,
+        `call tree [${depth} ${trunk}]`,
+      ].join("\n");
+    },
+  };
+
+  turtleSampleSelect.addEventListener("change", () => {
+    const key = turtleSampleSelect.value;
+    if (turtleSamples[key]) {
+      turtleCodeInput.value = turtleSamples[key](getTurtleSampleDimensions());
+    }
+  });
+
+  const openTurtleModal = () => {
+    turtleModal.classList.add("is-open");
+    turtleModal.setAttribute("aria-hidden", "false");
+  };
+
+  const closeTurtleModal = () => {
+    turtleModal.classList.remove("is-open");
+    turtleModal.setAttribute("aria-hidden", "true");
+  };
+
+  turtleOpenButton.addEventListener("click", () => {
+    if (isTurtleRunning) {
+      stopTurtle();
+      return;
+    }
+    openTurtleModal();
+  });
+
+  turtleCloseButton.addEventListener("click", () => {
+    closeTurtleModal();
+  });
+
+  turtleModal.addEventListener("pointerdown", (event) => {
+    if (event.target === turtleModal) {
+      closeTurtleModal();
+    }
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && turtleModal.classList.contains("is-open")) {
+      closeTurtleModal();
+    }
+  });
+
+  let turtleAbortController: AbortController | null = null;
+  let isTurtleRunning = false;
+  let turtleWalkPhase = 0;
+  let turtleLastCursorPoint: { x: number; y: number } | null = null;
+  let turtleCursorState: { x: number; y: number; angle: number } | null = null;
+
+  const setTurtleRunning = (running: boolean) => {
+    isTurtleRunning = running;
+    turtleOpenButton.classList.toggle("is-turtle-running", running);
+  };
+
+  const animateTurtleTrace = (
+    traceIterator: Generator<{ x: number; y: number; angle?: number; draw: boolean }, void, void>,
+    pointsPerFrame: number,
+    frameIntervalMs: number,
+    showCursor: boolean,
+    signal: AbortSignal,
+  ): Promise<boolean> =>
+    new Promise((resolve) => {
+      let hasAnyPoint = false;
+      let finished = false;
+      let hasDrawnPoint = false;
+      let lastFrameTime = 0;
+
+      const drawFrame = (timestamp: number) => {
+        if (signal.aborted) {
+          setHudTurtleCursor(null);
+          resolve(hasDrawnPoint);
+          return;
+        }
+
+        if (timestamp - lastFrameTime < frameIntervalMs) {
+          if (showCursor && turtleCursorState) {
+            setHudTurtleCursor({
+              x: turtleCursorState.x,
+              y: turtleCursorState.y,
+              angle: turtleCursorState.angle,
+              walkPhase: turtleWalkPhase,
+              isMoving: false,
+            });
+          }
+          window.requestAnimationFrame(drawFrame);
+          return;
+        }
+        lastFrameTime = timestamp;
+
+        applyDrawCompositeOperation();
+        let frameRemaining = pointsPerFrame;
+        let lastPoint: { x: number; y: number; angle?: number } | null = null;
+        let movedDistanceInFrame = 0;
+
+        while (!finished && frameRemaining > 0) {
+          const next = traceIterator.next();
+          if (next.done) {
+            finished = true;
+            break;
+          }
+          hasAnyPoint = true;
+          const point = next.value;
+          if (turtleLastCursorPoint) {
+            movedDistanceInFrame += Math.hypot(
+              point.x - turtleLastCursorPoint.x,
+              point.y - turtleLastCursorPoint.y,
+            );
+          }
+          turtleLastCursorPoint = { x: point.x, y: point.y };
+          if (point.draw) {
+            drawWithSymmetry(point.x, point.y);
+            hasDrawnPoint = true;
+          }
+          lastPoint = point;
+          frameRemaining -= 1;
+        }
+
+        if (showCursor && lastPoint) {
+          if (movedDistanceInFrame > 0) {
+            turtleWalkPhase += movedDistanceInFrame * 0.18;
+          }
+          turtleCursorState = {
+            x: lastPoint.x,
+            y: lastPoint.y,
+            angle: lastPoint.angle ?? 0,
+          };
+          setHudTurtleCursor({
+            x: lastPoint.x,
+            y: lastPoint.y,
+            angle: lastPoint.angle ?? 0,
+            walkPhase: turtleWalkPhase,
+            isMoving: movedDistanceInFrame > 0,
+          });
+        } else if (!showCursor) {
+          setHudTurtleCursor(null);
+        }
+
+        if (finished) {
+          setHudTurtleCursor(null);
+          if (!hasAnyPoint) {
+            window.alert("びょうがする てんが ありません");
+          }
+          resolve(hasDrawnPoint);
+          return;
+        }
+        window.requestAnimationFrame(drawFrame);
+      };
+
+      window.requestAnimationFrame(drawFrame);
+    });
+
+  const stopTurtle = () => {
+    if (turtleAbortController) {
+      turtleAbortController.abort();
+      turtleAbortController = null;
+    }
+    turtleLastCursorPoint = null;
+    turtleCursorState = null;
+    setHudTurtleCursor(null);
+  };
+
+  const runTurtle = async () => {
+    if (isTurtleRunning) {
+      stopTurtle();
+      return;
+    }
+    const source = turtleCodeInput.value.trim();
+    if (!source) {
+      window.alert("こーどをにゅうりょくしてください");
+      return;
+    }
+
+    turtleRunButton.textContent = "とめる";
+    setTurtleRunning(true);
+    turtleWalkPhase = 0;
+    turtleLastCursorPoint = null;
+    turtleCursorState = null;
+    setHudTurtleCursor(null);
+    turtleAbortController = new AbortController();
+    const { signal } = turtleAbortController;
+
+    try {
+      const program = parseTurtleProgram(source);
+      const startX = app.width / 2;
+      const startY = app.height / 2;
+      const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
+      const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
+      const frameIntervalMs = speedValue === 1 ? 80 : speedValue === 2 ? 40 : 16;
+      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
+      const stepSize = 31 - densityValue;
+      const traceIterator = iterateTurtleProgram(program, { startX, startY, stepSize });
+
+      const showCursor = turtleShowCursor.checked;
+
+      closeTurtleModal();
+      const didDraw = await animateTurtleTrace(traceIterator, pointsPerFrame, frameIntervalMs, showCursor, signal);
+      if (didDraw) {
+        commitHistory();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "たーとるの じっこうに しっぱいしました";
+      window.alert(message);
+    } finally {
+      turtleAbortController = null;
+      turtleRunButton.textContent = "じっこう";
+      setTurtleRunning(false);
+    }
+  };
+
+  turtleRunButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    void runTurtle();
   });
 
   let isRecording = false;
