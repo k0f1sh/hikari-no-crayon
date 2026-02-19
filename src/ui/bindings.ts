@@ -1231,49 +1231,89 @@ export function bindUiEvents(): void {
     turtleDensityValue.textContent = turtleDensity.value;
   });
 
-  const turtleSamples: Record<string, string> = {
-    square: "repeat 4 [ fd 100 rt 90 ]",
-    triangle: "repeat 3 [ fd 120 rt 120 ]",
-    star: "repeat 5 [ fd 120 rt 144 ]",
-    circle: "repeat 36 [ fd 10 rt 10 ]",
-    flower: "repeat 12 [ repeat 36 [ fd 4 rt 10 ] rt 30 ]",
-    spiral: "repeat 60 [ fd 2 rt 2 fd 4 rt 2 fd 6 rt 2 fd 8 rt 2 ]",
-    snowflake: [
-      "repeat 6 [",
-      "  fd 60",
-      "  repeat 6 [ bk 20 rt 60 fd 20 lt 60 ]",
-      "  bk 60",
-      "  rt 60",
-      "]",
-    ].join("\n"),
-    galaxy: [
-      "repeat 6 [",
-      "  repeat 60 [ fd 3 rt 3 ]",
-      "  pu fd 30 pd",
-      "  rt 60",
-      "]",
-    ].join("\n"),
-    tree: [
-      "repeat 4 [",
-      "  repeat 3 [",
-      "    repeat 4 [ fd 20 rt 90 ]",
-      "    fd 20",
-      "  ]",
-      "  pu bk 60 lt 90 pd",
-      "]",
-    ].join("\n"),
-    hexweb: [
-      "repeat 6 [",
-      "  repeat 6 [ fd 30 rt 60 ]",
-      "  fd 30 rt 60",
-      "]",
-    ].join("\n"),
+  const getTurtleSampleDimensions = () => {
+    const width = Math.max(1, app.width || window.innerWidth || 1);
+    const height = Math.max(1, app.height || window.innerHeight || 1);
+    const min = Math.min(width, height);
+    return { width, height, min };
+  };
+
+  const turtleSamples: Record<string, (dims: { width: number; height: number; min: number }) => string> = {
+    square: ({ min }) => {
+      const side = Math.max(40, Math.round(min * 0.22));
+      return `repeat 4 [ fd ${side} rt 90 ]`;
+    },
+    circle: ({ min }) => {
+      const step = Math.max(4, Math.round(min * 0.02));
+      return `repeat 36 [ fd ${step} rt 10 ]`;
+    },
+    flower: ({ min }) => {
+      const petalStep = Math.max(2, Math.round(min * 0.008));
+      return `repeat 12 [ repeat 36 [ fd ${petalStep} rt 10 ] rt 30 ]`;
+    },
+    snowflake: ({ min }) => {
+      const arm = Math.max(36, Math.round(min * 0.14));
+      const branch = Math.max(12, Math.round(arm / 3));
+      return [
+        "repeat 6 [",
+        `  fd ${arm}`,
+        `  repeat 6 [ bk ${branch} rt 60 fd ${branch} lt 60 ]`,
+        `  bk ${arm}`,
+        "  rt 60",
+        "]",
+      ].join("\n");
+    },
+    koch_recursive: ({ min }) => {
+      const length = Math.max(90, Math.round(min * 0.38));
+      return [
+        "to koch [n len] [",
+        "  if n [",
+        "    call koch [n-1 len/3]",
+        "    rt 60",
+        "    call koch [n-1 len/3]",
+        "    lt 120",
+        "    call koch [n-1 len/3]",
+        "    rt 60",
+        "    call koch [n-1 len/3]",
+        "  ] [",
+        "    fd len",
+        "  ]",
+        "]",
+        "",
+        "repeat 3 [",
+        `  call koch [4 ${length}]`,
+        "  rt 120",
+        "]",
+      ].join("\n");
+    },
+    tree: ({ min }) => {
+      const trunk = Math.max(48, Math.round(min * 0.16));
+      const offset = Math.max(40, Math.round(min * 0.24));
+      const depth = 5;
+      return [
+        "to tree [n len] [",
+        "  if n [",
+        "    fd len",
+        "    rt 20",
+        "    call tree [n-1 len*0.8]",
+        "    lt 40",
+        "    call tree [n-1 len*0.8]",
+        "    rt 20",
+        "    bk len",
+        "  ] [",
+        "  ]",
+        "]",
+        "",
+        `pu bk ${offset} pd`,
+        `call tree [${depth} ${trunk}]`,
+      ].join("\n");
+    },
   };
 
   turtleSampleSelect.addEventListener("change", () => {
     const key = turtleSampleSelect.value;
     if (key && turtleSamples[key]) {
-      turtleCodeInput.value = turtleSamples[key];
+      turtleCodeInput.value = turtleSamples[key](getTurtleSampleDimensions());
     }
   });
 

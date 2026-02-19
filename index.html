@@ -253,15 +253,11 @@
                 <select id="turtle_sample">
                   <option value="">じゆうにかく</option>
                   <option value="square">しかく</option>
-                  <option value="triangle">さんかく</option>
-                  <option value="star">ほし</option>
                   <option value="circle">まる</option>
                   <option value="flower">おはな</option>
-                  <option value="spiral">うずまき</option>
                   <option value="snowflake">ゆきのけっしょう</option>
-                  <option value="galaxy">ぎんが</option>
+                  <option value="koch_recursive">こっほきょくせん（さいき）</option>
                   <option value="tree">き</option>
-                  <option value="hexweb">はちのすもよう</option>
                 </select>
               </label>
               <label class="turtle_label">
@@ -300,6 +296,10 @@
                   <tr><td><code>pu</code></td><td>ぺんをあげる</td></tr>
                   <tr><td><code>pd</code></td><td>ぺんをおろす</td></tr>
                   <tr><td><code>repeat 4 [ ... ]</code></td><td>くりかえす</td></tr>
+                  <tr><td><code>to koch [n len] [ ... ]</code></td><td>ぷろしーじゃをていぎ</td></tr>
+                  <tr><td><code>call koch [4 180]</code></td><td>ぷろしーじゃをよぶ</td></tr>
+                  <tr><td><code>if n [ ... ] [ ... ]</code></td><td>ぶんき（0なら うしろ）</td></tr>
+                  <tr><td><code>len/3, n-1, (n+2)*5</code></td><td>かんたんな しきがつかえる</td></tr>
                 </table>
               </details>
             </div>

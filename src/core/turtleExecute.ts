@@ -13,8 +13,109 @@ interface TurtleState {
   penDown: boolean;
 }
 
+interface TurtleProcedure {
+  params: string[];
+  body: TurtleCommand[];
+}
+
+type EvalScope = Record<string, number>;
+
 const MAX_POINTS = 500_000;
-const MAX_DEPTH = 20;
+const MAX_DEPTH = 40;
+
+function parseExprTokens(expr: string): string[] {
+  const compact = expr.replace(/\s+/g, "");
+  if (!compact) {
+    throw new Error("しきが からです");
+  }
+  const tokens = compact.match(/[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?|[()+\-*/]/g);
+  if (!tokens || tokens.join("") !== compact) {
+    throw new Error(`しきが よみとれません: ${expr}`);
+  }
+  return tokens;
+}
+
+function evaluateExpression(expr: string, scope: EvalScope): number {
+  const tokens = parseExprTokens(expr);
+  let index = 0;
+
+  const readExpression = (): number => {
+    let value = readTerm();
+    while (index < tokens.length) {
+      const op = tokens[index];
+      if (op !== "+" && op !== "-") {
+        break;
+      }
+      index += 1;
+      const rhs = readTerm();
+      value = op === "+" ? value + rhs : value - rhs;
+    }
+    return value;
+  };
+
+  const readTerm = (): number => {
+    let value = readFactor();
+    while (index < tokens.length) {
+      const op = tokens[index];
+      if (op !== "*" && op !== "/") {
+        break;
+      }
+      index += 1;
+      const rhs = readFactor();
+      if (op === "*") {
+        value *= rhs;
+      } else {
+        if (rhs === 0) {
+          throw new Error("0 では われません");
+        }
+        value /= rhs;
+      }
+    }
+    return value;
+  };
+
+  const readFactor = (): number => {
+    const token = tokens[index];
+    if (token === undefined) {
+      throw new Error("しきの おわりが ふせいです");
+    }
+
+    if (token === "+" || token === "-") {
+      index += 1;
+      const value = readFactor();
+      return token === "-" ? -value : value;
+    }
+
+    if (token === "(") {
+      index += 1;
+      const value = readExpression();
+      if (tokens[index] !== ")") {
+        throw new Error(") がたりません");
+      }
+      index += 1;
+      return value;
+    }
+
+    index += 1;
+    if (/^\d/.test(token)) {
+      return Number(token);
+    }
+    const variable = scope[token];
+    if (variable === undefined) {
+      throw new Error(`へんすうが みつかりません: ${token}`);
+    }
+    return variable;
+  };
+
+  const value = readExpression();
+  if (index < tokens.length) {
+    throw new Error(`しきが よみとれません: ${expr}`);
+  }
+  if (!Number.isFinite(value)) {
+    throw new Error(`しきの けっかが ふせいです: ${expr}`);
+  }
+  return value;
+}
 
 export function executeTurtleProgram(
   program: TurtleCommand[],
@@ -28,6 +129,7 @@ export function executeTurtleProgram(
     penDown: true,
   };
 
+  const procedures = new Map<string, TurtleProcedure>();
   const segments: Point[][] = [];
   let currentSegment: Point[] = [{ x: state.x, y: state.y, angle: state.angle }];
   let totalPoints = 1;
@@ -43,7 +145,6 @@ export function executeTurtleProgram(
     const dx = Math.sin(rad);
     const dy = -Math.cos(rad);
     const totalDist = Math.abs(distance);
-    const sign = distance >= 0 ? 1 : -1;
 
     if (state.penDown && totalDist > 0) {
       const steps = Math.max(1, Math.ceil(totalDist / stepSize));
@@ -61,24 +162,26 @@ export function executeTurtleProgram(
     }
   };
 
-  const execute = (commands: TurtleCommand[], depth: number) => {
+  const evaluate = (expr: string, scope: EvalScope): number => evaluateExpression(expr, scope);
+
+  const execute = (commands: TurtleCommand[], depth: number, scope: EvalScope) => {
     if (depth > MAX_DEPTH) {
-      throw new Error("くりかえしが ふかすぎます（さいだい20だん）");
+      throw new Error("さいきが ふかすぎます（さいだい40だん）");
     }
 
     for (const cmd of commands) {
       switch (cmd.type) {
         case "fd":
-          moveTo(cmd.distance);
+          moveTo(evaluate(cmd.distanceExpr, scope));
           break;
         case "bk":
-          moveTo(-cmd.distance);
+          moveTo(-evaluate(cmd.distanceExpr, scope));
           break;
         case "rt":
-          state.angle += cmd.angle;
+          state.angle += evaluate(cmd.angleExpr, scope);
           break;
         case "lt":
-          state.angle -= cmd.angle;
+          state.angle -= evaluate(cmd.angleExpr, scope);
           break;
         case "pu":
           state.penDown = false;
@@ -92,16 +195,50 @@ export function executeTurtleProgram(
           currentSegment = [{ x: state.x, y: state.y, angle: state.angle }];
           totalPoints += 1;
           break;
-        case "repeat":
-          for (let i = 0; i < cmd.count; i++) {
-            execute(cmd.body, depth + 1);
+        case "repeat": {
+          const count = evaluate(cmd.countExpr, scope);
+          if (!Number.isInteger(count) || count < 0) {
+            throw new Error("repeat のかいすうは 0いじょうの せいすうにしてください");
+          }
+          for (let i = 0; i < count; i++) {
+            execute(cmd.body, depth + 1, scope);
           }
           break;
+        }
+        case "if": {
+          const condition = evaluate(cmd.conditionExpr, scope);
+          if (condition !== 0) {
+            execute(cmd.thenBody, depth + 1, scope);
+          } else {
+            execute(cmd.elseBody, depth + 1, scope);
+          }
+          break;
+        }
+        case "to":
+          procedures.set(cmd.name, { params: cmd.params, body: cmd.body });
+          break;
+        case "call": {
+          const proc = procedures.get(cmd.name);
+          if (!proc) {
+            throw new Error(`ぷろしーじゃが みつかりません: ${cmd.name}`);
+          }
+          if (proc.params.length !== cmd.args.length) {
+            throw new Error(
+              `${cmd.name} のひきすうは ${proc.params.length}こ ひつようです（いま ${cmd.args.length}こ）`,
+            );
+          }
+          const childScope: EvalScope = { ...scope };
+          for (let i = 0; i < proc.params.length; i++) {
+            childScope[proc.params[i]] = evaluate(cmd.args[i], scope);
+          }
+          execute(proc.body, depth + 1, childScope);
+          break;
+        }
       }
     }
   };
 
-  execute(program, 0);
+  execute(program, 0, {});
 
   if (currentSegment.length > 0) {
     segments.push(currentSegment);

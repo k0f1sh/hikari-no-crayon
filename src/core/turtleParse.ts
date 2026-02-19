@@ -1,11 +1,14 @@
 export type TurtleCommand =
-  | { type: "fd"; distance: number }
-  | { type: "bk"; distance: number }
-  | { type: "rt"; angle: number }
-  | { type: "lt"; angle: number }
+  | { type: "fd"; distanceExpr: string }
+  | { type: "bk"; distanceExpr: string }
+  | { type: "rt"; angleExpr: string }
+  | { type: "lt"; angleExpr: string }
   | { type: "pu" }
   | { type: "pd" }
-  | { type: "repeat"; count: number; body: TurtleCommand[] };
+  | { type: "repeat"; countExpr: string; body: TurtleCommand[] }
+  | { type: "if"; conditionExpr: string; thenBody: TurtleCommand[]; elseBody: TurtleCommand[] }
+  | { type: "to"; name: string; params: string[]; body: TurtleCommand[] }
+  | { type: "call"; name: string; args: string[] };
 
 function tokenize(source: string): string[] {
   const tokens: string[] = [];
@@ -32,20 +35,41 @@ function normalizeCommand(token: string): string {
   return COMMAND_ALIASES[lower] ?? lower;
 }
 
-function parseNumber(token: string | undefined, label: string): number {
-  if (token === undefined) {
-    throw new Error(`「${label}」のあとに すうじが ひつようです`);
+function readToken(tokens: string[], pos: { index: number }, label: string): string {
+  const token = tokens[pos.index];
+  if (token === undefined || token === "[" || token === "]") {
+    throw new Error(`「${label}」のあとに ひつような もじが ありません`);
   }
-  const num = Number(token);
-  if (!Number.isFinite(num)) {
-    throw new Error(`「${token}」は すうじではありません`);
+  pos.index += 1;
+  return token;
+}
+
+function readBracketList(tokens: string[], pos: { index: number }, label: string): string[] {
+  if (tokens[pos.index] !== "[") {
+    throw new Error(`${label} のあとに [ が ひつようです`);
   }
-  return num;
+  pos.index += 1;
+  const list: string[] = [];
+  while (pos.index < tokens.length && tokens[pos.index] !== "]") {
+    list.push(tokens[pos.index]);
+    pos.index += 1;
+  }
+  if (tokens[pos.index] !== "]") {
+    throw new Error("] がたりません");
+  }
+  pos.index += 1;
+  return list;
+}
+
+function assertIdentifier(token: string, label: string): void {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(token)) {
+    throw new Error(`${label} は えいすうじと _ で かいてください`);
+  }
 }
 
 function parseCommands(tokens: string[], pos: { index: number }, depth: number): TurtleCommand[] {
   if (depth > 20) {
-    throw new Error("くりかえしが ふかすぎます（さいだい20だん）");
+    throw new Error("こまんどの ねすとが ふかすぎます（さいだい20だん）");
   }
 
   const commands: TurtleCommand[] = [];
@@ -60,44 +84,26 @@ function parseCommands(tokens: string[], pos: { index: number }, depth: number):
     const cmd = normalizeCommand(token);
 
     switch (cmd) {
-      case "fd": {
-        const distance = parseNumber(tokens[pos.index], "fd");
-        pos.index += 1;
-        commands.push({ type: "fd", distance });
+      case "fd":
+        commands.push({ type: "fd", distanceExpr: readToken(tokens, pos, "fd") });
         break;
-      }
-      case "bk": {
-        const distance = parseNumber(tokens[pos.index], "bk");
-        pos.index += 1;
-        commands.push({ type: "bk", distance });
+      case "bk":
+        commands.push({ type: "bk", distanceExpr: readToken(tokens, pos, "bk") });
         break;
-      }
-      case "rt": {
-        const angle = parseNumber(tokens[pos.index], "rt");
-        pos.index += 1;
-        commands.push({ type: "rt", angle });
+      case "rt":
+        commands.push({ type: "rt", angleExpr: readToken(tokens, pos, "rt") });
         break;
-      }
-      case "lt": {
-        const angle = parseNumber(tokens[pos.index], "lt");
-        pos.index += 1;
-        commands.push({ type: "lt", angle });
+      case "lt":
+        commands.push({ type: "lt", angleExpr: readToken(tokens, pos, "lt") });
         break;
-      }
-      case "pu": {
+      case "pu":
         commands.push({ type: "pu" });
         break;
-      }
-      case "pd": {
+      case "pd":
         commands.push({ type: "pd" });
         break;
-      }
       case "repeat": {
-        const count = parseNumber(tokens[pos.index], "repeat");
-        pos.index += 1;
-        if (count < 0 || !Number.isInteger(count)) {
-          throw new Error("repeat のかいすうは 0いじょうの せいすうにしてください");
-        }
+        const countExpr = readToken(tokens, pos, "repeat");
         if (tokens[pos.index] !== "[") {
           throw new Error("repeat のあとに [ が ひつようです");
         }
@@ -107,7 +113,56 @@ function parseCommands(tokens: string[], pos: { index: number }, depth: number):
           throw new Error("] がたりません");
         }
         pos.index += 1;
-        commands.push({ type: "repeat", count, body });
+        commands.push({ type: "repeat", countExpr, body });
+        break;
+      }
+      case "if": {
+        const conditionExpr = readToken(tokens, pos, "if");
+        if (tokens[pos.index] !== "[") {
+          throw new Error("if のあとに [ が ひつようです");
+        }
+        pos.index += 1;
+        const thenBody = parseCommands(tokens, pos, depth + 1);
+        if (tokens[pos.index] !== "]") {
+          throw new Error("if の 1つめの ] がたりません");
+        }
+        pos.index += 1;
+        if (tokens[pos.index] !== "[") {
+          throw new Error("if の 2つめの [ が ひつようです");
+        }
+        pos.index += 1;
+        const elseBody = parseCommands(tokens, pos, depth + 1);
+        if (tokens[pos.index] !== "]") {
+          throw new Error("if の 2つめの ] がたりません");
+        }
+        pos.index += 1;
+        commands.push({ type: "if", conditionExpr, thenBody, elseBody });
+        break;
+      }
+      case "to": {
+        const name = readToken(tokens, pos, "to");
+        assertIdentifier(name, "ぷろしーじゃめい");
+        const params = readBracketList(tokens, pos, "to");
+        for (const param of params) {
+          assertIdentifier(param, "ひきすうめい");
+        }
+        if (tokens[pos.index] !== "[") {
+          throw new Error("to のほんたいのまえに [ が ひつようです");
+        }
+        pos.index += 1;
+        const body = parseCommands(tokens, pos, depth + 1);
+        if (tokens[pos.index] !== "]") {
+          throw new Error("to のほんたいで ] がたりません");
+        }
+        pos.index += 1;
+        commands.push({ type: "to", name, params, body });
+        break;
+      }
+      case "call": {
+        const name = readToken(tokens, pos, "call");
+        assertIdentifier(name, "ぷろしーじゃめい");
+        const args = readBracketList(tokens, pos, "call");
+        commands.push({ type: "call", name, args });
         break;
       }
       default:
@@ -126,7 +181,7 @@ export function parseTurtleProgram(source: string): TurtleCommand[] {
   const pos = { index: 0 };
   const commands = parseCommands(tokens, pos, 0);
   if (pos.index < tokens.length) {
-    throw new Error(`よぶんな ] があります`);
+    throw new Error("よぶんな ] があります");
   }
   return commands;
 }
