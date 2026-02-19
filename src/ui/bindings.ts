@@ -485,10 +485,24 @@ export function bindUiEvents(): void {
     refreshUndoRedoButtons();
   };
 
+  const updateSizeRangeTrack = () => {
+    const min = Number(sizeRange.min);
+    const max = Number(sizeRange.max);
+    const value = Number(sizeRange.value);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(value)) {
+      sizeRange.style.setProperty("--size-range-progress", "0%");
+      return;
+    }
+    const clamped = Math.max(min, Math.min(max, value));
+    const progress = ((clamped - min) / (max - min)) * 100;
+    sizeRange.style.setProperty("--size-range-progress", `${progress}%`);
+  };
+
   const applySize = (value: number) => {
     app.penSize = Math.max(3, Math.min(300, value));
     sizeRange.value = String(app.penSize);
     sizeDockValue.textContent = `${app.penSize}px`;
+    updateSizeRangeTrack();
     persist();
   };
 
