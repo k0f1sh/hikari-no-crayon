@@ -1252,7 +1252,7 @@ export function bindUiEvents(): void {
       return `repeat 12 [ repeat 36 [ fd ${petalStep} rt 10 ] rt 30 ]`;
     },
     spiral: ({ min }) => {
-      const turns = Math.min(900, Math.max(180, Math.round(min * 0.65)));
+      const turns = Math.min(120, Math.max(90, Math.round(min * 0.08)));
       const startLen = 1;
       const delta = Math.max(0.6, Math.round(min * 0.003 * 10) / 10);
       return [
@@ -1369,14 +1369,22 @@ export function bindUiEvents(): void {
     }
   });
 
-  const drawTurtleCursor = (x: number, y: number, angleDeg: number) => {
+  const drawTurtleCursor = (
+    x: number,
+    y: number,
+    angleDeg: number,
+    walkPhase: number,
+    isMoving: boolean,
+  ) => {
     const hud = requireHudContext();
     hud.clearRect(0, 0, app.width, app.height);
     hud.save();
     hud.translate(x, y);
     hud.rotate((angleDeg * Math.PI) / 180);
 
-    const s = 12;
+    const s = 18;
+    const legSwing = isMoving ? Math.sin(walkPhase) * s * 0.1 : 0;
+    const legLift = isMoving ? Math.cos(walkPhase) * s * 0.05 : 0;
 
     // shell
     hud.beginPath();
@@ -1416,16 +1424,27 @@ export function bindUiEvents(): void {
 
     // legs
     const legPositions = [
-      { lx: -s * 0.65, ly: -s * 0.4 },
-      { lx: s * 0.65, ly: -s * 0.4 },
-      { lx: -s * 0.65, ly: s * 0.4 },
-      { lx: s * 0.65, ly: s * 0.4 },
+      { lx: -s * 0.68, ly: -s * 0.42, phase: 1 },
+      { lx: s * 0.68, ly: -s * 0.42, phase: -1 },
+      { lx: -s * 0.68, ly: s * 0.42, phase: -1 },
+      { lx: s * 0.68, ly: s * 0.42, phase: 1 },
     ];
-    hud.fillStyle = "rgba(100, 200, 120, 0.7)";
+    hud.fillStyle = "rgba(130, 220, 145, 0.92)";
+    hud.strokeStyle = "rgba(40, 120, 60, 0.9)";
+    hud.lineWidth = 1.2;
     for (const leg of legPositions) {
       hud.beginPath();
-      hud.ellipse(leg.lx, leg.ly, s * 0.2, s * 0.25, 0, 0, Math.PI * 2);
+      hud.ellipse(
+        leg.lx + legSwing * leg.phase,
+        leg.ly + legLift * leg.phase,
+        s * 0.24,
+        s * 0.3,
+        0,
+        0,
+        Math.PI * 2,
+      );
       hud.fill();
+      hud.stroke();
     }
 
     hud.restore();
@@ -1438,6 +1457,8 @@ export function bindUiEvents(): void {
 
   let turtleAbortController: AbortController | null = null;
   let isTurtleRunning = false;
+  let turtleWalkPhase = 0;
+  let turtleLastCursorPoint: { x: number; y: number } | null = null;
 
   const setTurtleRunning = (running: boolean) => {
     isTurtleRunning = running;
@@ -1451,7 +1472,6 @@ export function bindUiEvents(): void {
     signal: AbortSignal,
   ): Promise<boolean> =>
     new Promise((resolve) => {
-      let prevPoint: { x: number; y: number; angle?: number } | null = null;
       let hasAnyPoint = false;
       let finished = false;
       let hasDrawnPoint = false;
@@ -1466,12 +1486,9 @@ export function bindUiEvents(): void {
         }
 
         applyDrawCompositeOperation();
-        const normalizeFastSpeed = pointsPerFrame >= 8;
-        let frameRemaining = normalizeFastSpeed ? 2000 : pointsPerFrame;
-        const distanceBudgetPerFrame = 120;
-        let remainingDistance = distanceBudgetPerFrame;
-        let drewInFrame = false;
+        let frameRemaining = pointsPerFrame;
         let lastPoint: { x: number; y: number; angle?: number } | null = null;
+        let movedDistanceInFrame = 0;
 
         while (!finished && frameRemaining > 0) {
           const next = traceIterator.next();
@@ -1481,28 +1498,26 @@ export function bindUiEvents(): void {
           }
           hasAnyPoint = true;
           const point = next.value;
-          const distanceCost = prevPoint
-            ? Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y)
-            : 0;
-          if (normalizeFastSpeed && drewInFrame && distanceCost > remainingDistance) {
-            break;
+          if (turtleLastCursorPoint) {
+            movedDistanceInFrame += Math.hypot(
+              point.x - turtleLastCursorPoint.x,
+              point.y - turtleLastCursorPoint.y,
+            );
           }
-
+          turtleLastCursorPoint = { x: point.x, y: point.y };
           if (point.draw) {
             drawWithSymmetry(point.x, point.y);
             hasDrawnPoint = true;
           }
           lastPoint = point;
-          prevPoint = point;
           frameRemaining -= 1;
-          drewInFrame = true;
-          if (normalizeFastSpeed) {
-            remainingDistance -= distanceCost;
-          }
         }
 
         if (showCursor && lastPoint) {
-          drawTurtleCursor(lastPoint.x, lastPoint.y, lastPoint.angle ?? 0);
+          if (movedDistanceInFrame > 0) {
+            turtleWalkPhase += movedDistanceInFrame * 0.18;
+          }
+          drawTurtleCursor(lastPoint.x, lastPoint.y, lastPoint.angle ?? 0, turtleWalkPhase, movedDistanceInFrame > 0);
         }
 
         if (finished) {
@@ -1526,6 +1541,7 @@ export function bindUiEvents(): void {
       turtleAbortController.abort();
       turtleAbortController = null;
     }
+    turtleLastCursorPoint = null;
   };
 
   const runTurtle = async () => {
@@ -1541,6 +1557,8 @@ export function bindUiEvents(): void {
 
     turtleRunButton.textContent = "とめる";
     setTurtleRunning(true);
+    turtleWalkPhase = 0;
+    turtleLastCursorPoint = null;
     turtleAbortController = new AbortController();
     const { signal } = turtleAbortController;
 
