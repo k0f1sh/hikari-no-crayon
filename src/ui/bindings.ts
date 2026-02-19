@@ -1,4 +1,4 @@
-import { app, requireCanvas, requireHudContext } from "../core/state";
+import { app, requireCanvas } from "../core/state";
 import { applyDrawCompositeOperation, clear, reverseImage } from "../core/draw";
 import { rgbToHex } from "../core/color";
 import {
@@ -31,6 +31,7 @@ import {
 import { exportPng } from "../core/export";
 import { PEN_CATALOG } from "../tools/penCatalog";
 import { startPreviewAnimations, stopPreviewAnimations } from "./presetPreview";
+import { setHudTurtleCursor } from "../core/hud";
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id) as T | null;
@@ -1361,7 +1362,7 @@ export function bindUiEvents(): void {
 
   turtleSampleSelect.addEventListener("change", () => {
     const key = turtleSampleSelect.value;
-    if (key && turtleSamples[key]) {
+    if (turtleSamples[key]) {
       turtleCodeInput.value = turtleSamples[key](getTurtleSampleDimensions());
     }
   });
@@ -1400,96 +1401,11 @@ export function bindUiEvents(): void {
     }
   });
 
-  const drawTurtleCursor = (
-    x: number,
-    y: number,
-    angleDeg: number,
-    walkPhase: number,
-    isMoving: boolean,
-  ) => {
-    const hud = requireHudContext();
-    hud.clearRect(0, 0, app.width, app.height);
-    hud.save();
-    hud.translate(x, y);
-    hud.rotate((angleDeg * Math.PI) / 180);
-
-    const s = 18;
-    const legSwing = isMoving ? Math.sin(walkPhase) * s * 0.1 : 0;
-    const legLift = isMoving ? Math.cos(walkPhase) * s * 0.05 : 0;
-
-    // shell
-    hud.beginPath();
-    hud.ellipse(0, 0, s * 0.7, s * 0.85, 0, 0, Math.PI * 2);
-    hud.fillStyle = "rgba(80, 180, 100, 0.7)";
-    hud.fill();
-    hud.strokeStyle = "rgba(220, 255, 220, 0.9)";
-    hud.lineWidth = 1.5;
-    hud.stroke();
-
-    // shell pattern
-    hud.beginPath();
-    hud.moveTo(-s * 0.35, s * 0.3);
-    hud.lineTo(0, -s * 0.5);
-    hud.lineTo(s * 0.35, s * 0.3);
-    hud.strokeStyle = "rgba(40, 120, 60, 0.5)";
-    hud.lineWidth = 1;
-    hud.stroke();
-
-    // head (forward = up in turtle space, which is -y before rotation)
-    hud.beginPath();
-    hud.arc(0, -s * 1.1, s * 0.35, 0, Math.PI * 2);
-    hud.fillStyle = "rgba(100, 200, 120, 0.8)";
-    hud.fill();
-    hud.strokeStyle = "rgba(220, 255, 220, 0.9)";
-    hud.lineWidth = 1.5;
-    hud.stroke();
-
-    // eyes
-    hud.fillStyle = "rgba(20, 20, 20, 0.9)";
-    hud.beginPath();
-    hud.arc(-s * 0.12, -s * 1.2, 1.5, 0, Math.PI * 2);
-    hud.fill();
-    hud.beginPath();
-    hud.arc(s * 0.12, -s * 1.2, 1.5, 0, Math.PI * 2);
-    hud.fill();
-
-    // legs
-    const legPositions = [
-      { lx: -s * 0.68, ly: -s * 0.42, phase: 1 },
-      { lx: s * 0.68, ly: -s * 0.42, phase: -1 },
-      { lx: -s * 0.68, ly: s * 0.42, phase: -1 },
-      { lx: s * 0.68, ly: s * 0.42, phase: 1 },
-    ];
-    hud.fillStyle = "rgba(130, 220, 145, 0.92)";
-    hud.strokeStyle = "rgba(40, 120, 60, 0.9)";
-    hud.lineWidth = 1.2;
-    for (const leg of legPositions) {
-      hud.beginPath();
-      hud.ellipse(
-        leg.lx + legSwing * leg.phase,
-        leg.ly + legLift * leg.phase,
-        s * 0.24,
-        s * 0.3,
-        0,
-        0,
-        Math.PI * 2,
-      );
-      hud.fill();
-      hud.stroke();
-    }
-
-    hud.restore();
-  };
-
-  const clearTurtleCursor = () => {
-    const hud = requireHudContext();
-    hud.clearRect(0, 0, app.width, app.height);
-  };
-
   let turtleAbortController: AbortController | null = null;
   let isTurtleRunning = false;
   let turtleWalkPhase = 0;
   let turtleLastCursorPoint: { x: number; y: number } | null = null;
+  let turtleCursorState: { x: number; y: number; angle: number } | null = null;
 
   const setTurtleRunning = (running: boolean) => {
     isTurtleRunning = running;
@@ -1499,6 +1415,7 @@ export function bindUiEvents(): void {
   const animateTurtleTrace = (
     traceIterator: Generator<{ x: number; y: number; angle?: number; draw: boolean }, void, void>,
     pointsPerFrame: number,
+    frameIntervalMs: number,
     showCursor: boolean,
     signal: AbortSignal,
   ): Promise<boolean> =>
@@ -1506,15 +1423,29 @@ export function bindUiEvents(): void {
       let hasAnyPoint = false;
       let finished = false;
       let hasDrawnPoint = false;
+      let lastFrameTime = 0;
 
-      const drawFrame = () => {
+      const drawFrame = (timestamp: number) => {
         if (signal.aborted) {
-          if (showCursor) {
-            clearTurtleCursor();
-          }
+          setHudTurtleCursor(null);
           resolve(hasDrawnPoint);
           return;
         }
+
+        if (timestamp - lastFrameTime < frameIntervalMs) {
+          if (showCursor && turtleCursorState) {
+            setHudTurtleCursor({
+              x: turtleCursorState.x,
+              y: turtleCursorState.y,
+              angle: turtleCursorState.angle,
+              walkPhase: turtleWalkPhase,
+              isMoving: false,
+            });
+          }
+          window.requestAnimationFrame(drawFrame);
+          return;
+        }
+        lastFrameTime = timestamp;
 
         applyDrawCompositeOperation();
         let frameRemaining = pointsPerFrame;
@@ -1548,13 +1479,24 @@ export function bindUiEvents(): void {
           if (movedDistanceInFrame > 0) {
             turtleWalkPhase += movedDistanceInFrame * 0.18;
           }
-          drawTurtleCursor(lastPoint.x, lastPoint.y, lastPoint.angle ?? 0, turtleWalkPhase, movedDistanceInFrame > 0);
+          turtleCursorState = {
+            x: lastPoint.x,
+            y: lastPoint.y,
+            angle: lastPoint.angle ?? 0,
+          };
+          setHudTurtleCursor({
+            x: lastPoint.x,
+            y: lastPoint.y,
+            angle: lastPoint.angle ?? 0,
+            walkPhase: turtleWalkPhase,
+            isMoving: movedDistanceInFrame > 0,
+          });
+        } else if (!showCursor) {
+          setHudTurtleCursor(null);
         }
 
         if (finished) {
-          if (showCursor) {
-            clearTurtleCursor();
-          }
+          setHudTurtleCursor(null);
           if (!hasAnyPoint) {
             window.alert("びょうがする てんが ありません");
           }
@@ -1573,6 +1515,8 @@ export function bindUiEvents(): void {
       turtleAbortController = null;
     }
     turtleLastCursorPoint = null;
+    turtleCursorState = null;
+    setHudTurtleCursor(null);
   };
 
   const runTurtle = async () => {
@@ -1590,6 +1534,8 @@ export function bindUiEvents(): void {
     setTurtleRunning(true);
     turtleWalkPhase = 0;
     turtleLastCursorPoint = null;
+    turtleCursorState = null;
+    setHudTurtleCursor(null);
     turtleAbortController = new AbortController();
     const { signal } = turtleAbortController;
 
@@ -1599,6 +1545,7 @@ export function bindUiEvents(): void {
       const startY = app.height / 2;
       const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
       const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
+      const frameIntervalMs = speedValue === 1 ? 80 : speedValue === 2 ? 40 : 16;
       const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 29));
       const stepSize = 31 - densityValue;
       const traceIterator = iterateTurtleProgram(program, { startX, startY, stepSize });
@@ -1606,7 +1553,7 @@ export function bindUiEvents(): void {
       const showCursor = turtleShowCursor.checked;
 
       closeTurtleModal();
-      const didDraw = await animateTurtleTrace(traceIterator, pointsPerFrame, showCursor, signal);
+      const didDraw = await animateTurtleTrace(traceIterator, pointsPerFrame, frameIntervalMs, showCursor, signal);
       if (didDraw) {
         commitHistory();
       }
