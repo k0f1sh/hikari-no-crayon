@@ -1304,6 +1304,37 @@ export function bindUiEvents(): void {
         "]",
       ].join("\n");
     },
+    sierpinski: ({ min }) => {
+      const depth = 5;
+      const length = Math.max(120, Math.round(min * 0.58));
+      const offset = Math.max(80, Math.round(min * 0.26));
+      return [
+        "to tri [len] [",
+        "  repeat 3 [ fd len rt 120 ]",
+        "]",
+        "",
+        "to sier [n len] [",
+        "  if n [",
+        "    call sier [n-1 len/2]",
+        "    fd len/2",
+        "    call sier [n-1 len/2]",
+        "    bk len/2",
+        "    rt 60",
+        "    fd len/2",
+        "    lt 60",
+        "    call sier [n-1 len/2]",
+        "    rt 60",
+        "    bk len/2",
+        "    lt 60",
+        "  ] [",
+        "    call tri [len]",
+        "  ]",
+        "]",
+        "",
+        `pu bk ${offset} lt 90 fd ${Math.round(offset * 0.55)} rt 90 pd`,
+        `call sier [${depth} ${length}]`,
+      ].join("\n");
+    },
     tree: ({ min }) => {
       const trunk = Math.max(48, Math.round(min * 0.16));
       const offset = Math.max(40, Math.round(min * 0.24));
