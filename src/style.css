@@ -961,50 +961,50 @@ select {
 
 /* もどる: green */
 #dock_undo_button {
-  border-color: rgba(80, 210, 130, 0.5);
-  background: linear-gradient(140deg, rgba(60, 200, 120, 0.35), rgba(40, 160, 90, 0.18));
-  box-shadow: 0 0 10px rgba(80, 210, 130, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(80, 210, 130, 0.6);
+  background: linear-gradient(140deg, rgba(40, 150, 80, 0.85), rgba(30, 120, 65, 0.7));
+  box-shadow: 0 0 10px rgba(80, 210, 130, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 #dock_undo_button:hover {
-  border-color: rgba(80, 210, 130, 0.75);
-  background: linear-gradient(140deg, rgba(60, 200, 120, 0.5), rgba(40, 160, 90, 0.25));
-  box-shadow: 0 0 16px rgba(80, 210, 130, 0.35);
+  border-color: rgba(80, 210, 130, 0.85);
+  background: linear-gradient(140deg, rgba(40, 150, 80, 0.95), rgba(30, 120, 65, 0.8));
+  box-shadow: 0 0 16px rgba(80, 210, 130, 0.4);
 }
 
 /* すすむ: blue */
 #dock_redo_button {
-  border-color: rgba(90, 150, 255, 0.5);
-  background: linear-gradient(140deg, rgba(70, 140, 255, 0.35), rgba(50, 100, 220, 0.18));
-  box-shadow: 0 0 10px rgba(90, 150, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(90, 150, 255, 0.6);
+  background: linear-gradient(140deg, rgba(40, 90, 200, 0.85), rgba(30, 70, 170, 0.7));
+  box-shadow: 0 0 10px rgba(90, 150, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 #dock_redo_button:hover {
-  border-color: rgba(90, 150, 255, 0.75);
-  background: linear-gradient(140deg, rgba(70, 140, 255, 0.5), rgba(50, 100, 220, 0.25));
-  box-shadow: 0 0 16px rgba(90, 150, 255, 0.35);
+  border-color: rgba(90, 150, 255, 0.85);
+  background: linear-gradient(140deg, rgba(40, 90, 200, 0.95), rgba(30, 70, 170, 0.8));
+  box-shadow: 0 0 16px rgba(90, 150, 255, 0.4);
 }
 
 /* けす: red */
 .dock_quick_clear {
-  border-color: rgba(255, 90, 90, 0.5);
-  background: linear-gradient(140deg, rgba(255, 70, 70, 0.35), rgba(200, 40, 40, 0.18));
-  box-shadow: 0 0 10px rgba(255, 90, 90, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 90, 90, 0.6);
+  background: linear-gradient(140deg, rgba(190, 45, 45, 0.85), rgba(150, 30, 30, 0.7));
+  box-shadow: 0 0 10px rgba(255, 90, 90, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .dock_quick_clear:hover {
-  border-color: rgba(255, 90, 90, 0.75);
-  background: linear-gradient(140deg, rgba(255, 70, 70, 0.5), rgba(200, 40, 40, 0.25));
-  box-shadow: 0 0 16px rgba(255, 90, 90, 0.35);
+  border-color: rgba(255, 90, 90, 0.85);
+  background: linear-gradient(140deg, rgba(190, 45, 45, 0.95), rgba(150, 30, 30, 0.8));
+  box-shadow: 0 0 16px rgba(255, 90, 90, 0.4);
 }
 
 /* そのた: silver */
 .dock_btn[data-panel="etc"] {
-  border-color: rgba(190, 200, 220, 0.45);
-  background: linear-gradient(140deg, rgba(180, 195, 220, 0.3), rgba(150, 165, 190, 0.15));
-  box-shadow: 0 0 10px rgba(190, 200, 220, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(170, 180, 200, 0.55);
+  background: linear-gradient(140deg, rgba(100, 115, 140, 0.85), rgba(80, 95, 120, 0.7));
+  box-shadow: 0 0 10px rgba(190, 200, 220, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .dock_btn[data-panel="etc"]:hover {
-  border-color: rgba(190, 200, 220, 0.7);
-  background: linear-gradient(140deg, rgba(180, 195, 220, 0.45), rgba(150, 165, 190, 0.22));
-  box-shadow: 0 0 16px rgba(190, 200, 220, 0.3);
+  border-color: rgba(190, 200, 220, 0.8);
+  background: linear-gradient(140deg, rgba(100, 115, 140, 0.95), rgba(80, 95, 120, 0.8));
+  box-shadow: 0 0 16px rgba(190, 200, 220, 0.35);
 }
 
 .dock_mode_item .dock_sub,
@@ -1080,33 +1080,33 @@ select {
 
 /* Mode-specific default (OFF) styles */
 .dock_mode_item:has(> .dock_btn[data-panel="ml"]) {
-  border-color: rgba(255, 214, 117, 0.3);
-  background: linear-gradient(120deg, rgba(255, 107, 107, 0.12), rgba(255, 201, 90, 0.12) 22%, rgba(123, 214, 108, 0.12) 42%, rgba(99, 186, 255, 0.12) 62%, rgba(139, 122, 255, 0.12) 82%, rgba(255, 107, 203, 0.1));
-  box-shadow: 0 0 8px rgba(255, 196, 115, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 214, 117, 0.45);
+  background: linear-gradient(120deg, rgba(180, 60, 60, 0.55), rgba(180, 140, 50, 0.55) 22%, rgba(70, 150, 60, 0.55) 42%, rgba(50, 120, 200, 0.55) 62%, rgba(90, 70, 190, 0.55) 82%, rgba(180, 60, 140, 0.5));
+  box-shadow: 0 0 8px rgba(255, 196, 115, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 #dock_auto_toggle_button {
-  border-color: rgba(137, 236, 211, 0.3);
-  background: linear-gradient(145deg, rgba(56, 205, 169, 0.14), rgba(41, 123, 255, 0.1));
-  box-shadow: 0 0 8px rgba(95, 208, 185, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(137, 236, 211, 0.45);
+  background: linear-gradient(145deg, rgba(30, 140, 110, 0.7), rgba(25, 80, 180, 0.55));
+  box-shadow: 0 0 8px rgba(95, 208, 185, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 #dock_fade_toggle_button {
-  border-color: rgba(157, 208, 255, 0.3);
-  background: linear-gradient(180deg, rgba(168, 221, 255, 0.18) 0%, rgba(128, 188, 255, 0.1) 40%, rgba(57, 96, 150, 0.04) 100%);
-  box-shadow: 0 0 8px rgba(120, 188, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(157, 208, 255, 0.45);
+  background: linear-gradient(180deg, rgba(90, 155, 210, 0.65) 0%, rgba(70, 130, 200, 0.55) 40%, rgba(40, 70, 130, 0.45) 100%);
+  box-shadow: 0 0 8px rgba(120, 188, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="yh"]) {
-  border-color: rgba(255, 108, 108, 0.3);
-  background: linear-gradient(145deg, rgba(255, 72, 72, 0.14), rgba(76, 10, 10, 0.16));
-  box-shadow: 0 0 8px rgba(255, 94, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 108, 108, 0.45);
+  background: linear-gradient(145deg, rgba(180, 40, 40, 0.6), rgba(60, 8, 8, 0.65));
+  box-shadow: 0 0 8px rgba(255, 94, 94, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="sy"]) {
-  border-color: rgba(164, 188, 255, 0.3);
-  background: radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.18) 0%, rgba(129, 165, 255, 0.1) 30%, rgba(25, 39, 72, 0) 78%);
-  box-shadow: 0 0 8px rgba(126, 162, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(164, 188, 255, 0.45);
+  background: radial-gradient(circle at 50% 50%, rgba(100, 140, 220, 0.6) 0%, rgba(70, 110, 200, 0.5) 30%, rgba(25, 39, 72, 0.4) 78%);
+  box-shadow: 0 0 8px rgba(126, 162, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Mode-specific ON styles */
