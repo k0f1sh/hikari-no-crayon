@@ -1825,9 +1825,16 @@ select:focus-visible,
     font-size: 18px;
   }
 
+  #bottom_dock .dock_mode_item .dock_btn {
+    flex: 1 1 auto;
+  }
+
   #bottom_dock .dock_mode_menu_button {
+    min-width: 28px;
     min-height: 36px;
     height: 36px;
+    padding: 0 4px;
+    font-size: 16px;
   }
 
   /* --- Row 4: actions --- */
