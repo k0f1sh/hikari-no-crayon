@@ -477,7 +477,7 @@ select {
 }
 
 .dock_row_top .dock_btn_pen {
-  flex: 0 0 176px;
+  flex: 0 0 200px;
 }
 
 .dock_row_top .dock_btn_turtle {
@@ -554,11 +554,15 @@ select {
 
 .dock_size_inline {
   flex: 1 1 auto;
-  min-width: 100px;
+  min-width: 74px;
   aspect-ratio: auto;
   gap: 3px;
   border-color: rgba(127, 91, 255, 0.35);
   box-shadow: 0 0 14px rgba(127, 91, 255, 0.2), 0 0 28px rgba(86, 177, 255, 0.1);
+}
+
+.dock_size_inline .dock_main {
+  display: none;
 }
 
 .dock_size_inline input[type="range"] {
@@ -643,7 +647,7 @@ select {
 
 .dock_color_inline {
   flex: 1 1 0;
-  min-width: 80px;
+  min-width: 58px;
   justify-items: center;
   align-content: center;
   gap: 10px;
@@ -873,13 +877,15 @@ select {
 }
 
 .dock_row_top .dock_size_inline {
-  flex: 2 1 0;
+  flex: 1 1 0;
+  min-width: 74px;
   max-width: none;
 }
 
 .dock_row_top .dock_color_inline {
-  flex: 1 1 0;
-  max-width: none;
+  flex: 0 0 84px;
+  min-width: 84px;
+  max-width: 84px;
 }
 
 .dock_row_top #simple_settings_button {
@@ -893,39 +899,45 @@ select {
 }
 
 .dock_btn_pen {
-  width: 176px;
-  min-width: 176px;
-  grid-template-rows: auto auto;
-  align-content: center;
-  gap: 2px;
+  width: 200px;
+  min-width: 200px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  align-items: end;
+  justify-items: start;
+  gap: 6px;
+  padding: 4px 16px 2px 10px;
   border-color: rgba(255, 220, 100, 0.4);
   box-shadow: 0 0 14px rgba(255, 220, 100, 0.2), 0 0 28px rgba(255, 180, 60, 0.1);
 }
 
 .dock_btn_pen .dock_main {
-  white-space: nowrap;
+  white-space: normal;
   font-size: 12px;
+  line-height: 1.15;
+  text-align: left;
+  justify-self: stretch;
+  align-self: center;
+  margin-bottom: 0;
 }
 
 .dock_pen_label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   min-width: 0;
 }
 
 .dock_pen_icon_text {
-  width: 24px;
-  height: 24px;
-  display: block;
-  flex: 0 0 auto;
+  display: none;
 }
 
 .dock_pen_name_text {
+  display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 11px;
 }
 
 .dock_row_bottom > .dock_btn,
@@ -1194,10 +1206,12 @@ select {
 
 /* Brush icon for pen button */
 .dock_pen_brush_icon {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   display: block;
   flex: 0 0 auto;
+  justify-self: center;
+  align-self: end;
   filter: drop-shadow(0 0 4px rgba(255, 220, 100, 0.4));
 }
 
@@ -1238,8 +1252,7 @@ select {
 }
 
 #turtle_open_button .dock_main {
-  font-size: 13px;
-  font-weight: 800;
+  display: none;
 }
 
 .size_list,
@@ -1415,6 +1428,9 @@ select {
   background-image: url("../img/pen_icon.png");
   background-size: 470% auto;
   background-repeat: no-repeat;
+  clip-path: inset(0 2px 0 2px);
+  mix-blend-mode: screen;
+  filter: brightness(1.08) contrast(1.1);
 }
 
 .pen_name {
@@ -1809,20 +1825,24 @@ select:focus-visible,
   #bottom_dock .dock_btn_pen {
     flex: 0 0 auto;
     width: auto;
-    max-width: 100px;
+    max-width: 112px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 6px;
+    padding: 4px 16px 2px 6px;
   }
 
   #bottom_dock .dock_btn_pen .dock_pen_name_text {
     font-size: 9px;
   }
 
+
   #bottom_dock .dock_pen_icon_text {
     display: none;
   }
 
   #bottom_dock .dock_pen_brush_icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
 
   #bottom_dock .dock_size_inline {
