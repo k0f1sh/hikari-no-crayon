@@ -1659,81 +1659,120 @@ select:focus-visible,
   }
 
   #bottom_dock {
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100vw - 16px);
-    display: grid;
+    width: calc(100vw - 12px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 4px;
-    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
+    padding: 4px 4px calc(5px + env(safe-area-inset-bottom));
+    pointer-events: auto;
   }
 
   .dock_row {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
+    display: contents;
   }
 
-  .dock_row > .dock_size_inline {
-    grid-column: span 4;
-    max-width: none;
-    aspect-ratio: auto;
-  }
-
-  .dock_inline {
-    aspect-ratio: auto;
-  }
-
-  .dock_btn {
-    flex: none;
-    aspect-ratio: auto;
-  }
-
-  .dock_row > #simple_settings_button {
-    grid-column: span 2;
+  /* Reset base flex on all dock items */
+  #bottom_dock .dock_btn,
+  #bottom_dock .dock_inline {
+    flex: 0 0 auto;
     min-width: 0;
-    width: 100%;
+    aspect-ratio: auto;
   }
 
-  .dock_row_top #simple_settings_button {
-    grid-column: span 2;
+  /* --- Row 1: preset(emoji) + pen + size + color --- */
+  #bottom_dock #simple_settings_button {
+    flex: 0 0 auto;
+    gap: 0;
+    padding: 4px 10px;
   }
 
-  .dock_btn_pen {
+  #bottom_dock #simple_settings_button .dock_main {
+    display: none;
+  }
+
+  #bottom_dock .dock_btn_pen {
+    flex: 0 0 auto;
     width: auto;
-    min-width: 0;
+    max-width: 100px;
   }
 
+  #bottom_dock .dock_btn_pen .dock_pen_name_text {
+    font-size: 9px;
+  }
+
+  #bottom_dock .dock_pen_icon_text {
+    display: none;
+  }
+
+  #bottom_dock .dock_pen_brush_icon {
+    font-size: 18px;
+  }
+
+  #bottom_dock .dock_size_inline {
+    flex: 1 1 0;
+  }
+
+  #bottom_dock .dock_color_inline {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+  }
+
+  /* --- Row 2: turtle + rainbow + auto --- */
+  /* --- Row 3: fade + yami + symmetry --- */
+  #bottom_dock #turtle_open_button,
+  #bottom_dock .dock_mode_item,
+  #bottom_dock .dock_mode_toggle {
+    flex: 1 0 calc((100% - 8px) / 3);
+    height: 36px;
+    min-height: 36px;
+  }
+
+  #bottom_dock #turtle_open_button {
+    gap: 0;
+    flex-direction: row;
+  }
+
+  #bottom_dock #turtle_open_button .dock_turtle_emoji {
+    font-size: 18px;
+  }
+
+  #bottom_dock .dock_mode_menu_button {
+    min-height: 36px;
+    height: 36px;
+  }
+
+  /* --- Row 4: actions --- */
+  #bottom_dock .dock_quick_btn {
+    flex: 1 1 auto;
+    height: 34px;
+    min-height: 34px;
+  }
+
+  #bottom_dock .dock_btn[data-panel="etc"] {
+    flex: 1 1 auto;
+    height: 34px;
+    min-height: 34px;
+  }
+
+  #bottom_dock .dock_hide_fab {
+    flex: 0 0 auto;
+    height: 34px;
+    min-height: 34px;
+  }
+
+  /* Font sizes */
   #bottom_dock .dock_main {
-    font-size: 11px;
-  }
-
-  #bottom_dock .dock_sub {
-    font-size: 8px;
-  }
-
-  #bottom_dock .simple_settings_label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   #bottom_dock .dock_pen_name_text {
     font-size: 10px;
   }
 
-  #bottom_dock .dock_quick_btn {
-    font-size: 10px;
-  }
-
-  .dock_row_bottom .dock_btn,
-  .dock_row_bottom .dock_mode_item,
-  .dock_row_bottom .dock_mode_menu_button,
-  .dock_row_bottom .dock_action_tile {
-    min-height: 34px;
-    height: 34px;
-  }
-
-  .dock_action_tile {
-    flex: none;
-    aspect-ratio: auto;
+  /* Hidden element */
+  #bottom_dock .dock_icon_only_btn {
+    display: none;
   }
 
   #dock_show_button {
