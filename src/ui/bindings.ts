@@ -487,16 +487,16 @@ export function bindUiEvents(): void {
   };
 
   const updateModeDockValue = () => {
-    rainbowDockValue.textContent = app.isRainbowMode ? "🌈" : "◻";
+    rainbowDockValue.textContent = app.isRainbowMode ? "ON" : "OFF";
     modeDockButton?.classList.toggle("is-on-state", app.isRainbowMode);
-    fadeDockValue.textContent = app.isFadeMode ? "🌫️" : "◻";
+    fadeDockValue.textContent = app.isFadeMode ? "ON" : "OFF";
     dockFadeToggleButton.classList.toggle("is-on-state", app.isFadeMode);
-    autoDockValue.textContent = app.isAutoMode ? "🤖" : "◻";
+    autoDockValue.textContent = app.isAutoMode ? "ON" : "OFF";
     dockAutoToggleButton.classList.toggle("is-on-state", app.isAutoMode);
   };
 
   const updateYamiDockValue = () => {
-    yamiDockValue.textContent = app.isYamiMode ? "🌑" : "◻";
+    yamiDockValue.textContent = app.isYamiMode ? "ON" : "OFF";
     yamiDockButton?.classList.toggle("is-on-state", app.isYamiMode);
   };
 

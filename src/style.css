@@ -688,8 +688,8 @@ select {
 }
 
 .dock_mode_toggle .dock_main {
-  font-size: 15px;
-  letter-spacing: 0;
+  font-size: 11px;
+  letter-spacing: 0.02em;
 }
 
 .dock_btn.is-active {
@@ -1009,7 +1009,12 @@ select {
 
 .dock_mode_item .dock_sub,
 .dock_mode_toggle .dock_sub {
-  display: none;
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: rgba(230, 240, 255, 0.82);
 }
 
 .dock_mode_item {
@@ -1080,33 +1085,40 @@ select {
 
 /* Mode-specific default (OFF) styles */
 .dock_mode_item:has(> .dock_btn[data-panel="ml"]) {
-  border-color: rgba(255, 214, 117, 0.45);
-  background: linear-gradient(120deg, rgba(180, 60, 60, 0.55), rgba(180, 140, 50, 0.55) 22%, rgba(70, 150, 60, 0.55) 42%, rgba(50, 120, 200, 0.55) 62%, rgba(90, 70, 190, 0.55) 82%, rgba(180, 60, 140, 0.5));
-  box-shadow: 0 0 8px rgba(255, 196, 115, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(162, 193, 255, 0.35);
+  background: linear-gradient(145deg, rgba(42, 58, 86, 0.66), rgba(24, 34, 56, 0.64));
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 #dock_auto_toggle_button {
-  border-color: rgba(137, 236, 211, 0.45);
-  background: linear-gradient(145deg, rgba(30, 140, 110, 0.7), rgba(25, 80, 180, 0.55));
-  box-shadow: 0 0 8px rgba(95, 208, 185, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(162, 193, 255, 0.35);
+  background: linear-gradient(145deg, rgba(42, 58, 86, 0.66), rgba(24, 34, 56, 0.64));
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 #dock_fade_toggle_button {
-  border-color: rgba(157, 208, 255, 0.45);
-  background: linear-gradient(180deg, rgba(90, 155, 210, 0.65) 0%, rgba(70, 130, 200, 0.55) 40%, rgba(40, 70, 130, 0.45) 100%);
-  box-shadow: 0 0 8px rgba(120, 188, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(162, 193, 255, 0.35);
+  background: linear-gradient(145deg, rgba(42, 58, 86, 0.66), rgba(24, 34, 56, 0.64));
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="yh"]) {
-  border-color: rgba(255, 108, 108, 0.45);
-  background: linear-gradient(145deg, rgba(180, 40, 40, 0.6), rgba(60, 8, 8, 0.65));
-  box-shadow: 0 0 8px rgba(255, 94, 94, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(162, 193, 255, 0.35);
+  background: linear-gradient(145deg, rgba(42, 58, 86, 0.66), rgba(24, 34, 56, 0.64));
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="sy"]) {
-  border-color: rgba(164, 188, 255, 0.45);
-  background: radial-gradient(circle at 50% 50%, rgba(100, 140, 220, 0.6) 0%, rgba(70, 110, 200, 0.5) 30%, rgba(25, 39, 72, 0.4) 78%);
-  box-shadow: 0 0 8px rgba(126, 162, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(162, 193, 255, 0.35);
+  background: linear-gradient(145deg, rgba(42, 58, 86, 0.66), rgba(24, 34, 56, 0.64));
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#dock_auto_toggle_button:not(.is-on-state),
+#dock_fade_toggle_button:not(.is-on-state),
+.dock_mode_item:not(:has(.dock_btn.is-on-state)) .dock_btn .dock_main {
+  color: rgba(210, 225, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 /* Mode-specific ON styles */
