@@ -111,15 +111,45 @@ function setPointerPosition(event: PointerEvent): void {
 
 const PEN_CUSTOM_CONTROLS_ID = "pen_custom_controls";
 
+const SPRITE_POS: { posX: number; posY: number }[] = [
+    { posX: 0, posY: 5.583 },
+    { posX: 25, posY: 6.083 },
+    { posX: 50, posY: 5.583 },
+    { posX: 75, posY: 6.583 },
+    { posX: 100, posY: 5.083 },
+    { posX: 0, posY: 47.25 },
+    { posX: 25, posY: 47.25 },
+    { posX: 50, posY: 48.75 },
+    { posX: 75, posY: 48.75 },
+    { posX: 100, posY: 47.75 },
+    { posX: 0, posY: 89.417 },
+    { posX: 25, posY: 90.417 },
+    { posX: 50, posY: 88.917 },
+    { posX: 75, posY: 88.417 },
+    { posX: 100, posY: 89.417 },
+];
+
 function ensurePenOptions(): void {
   const penList = document.getElementById("pl");
   if (!penList) {
     return;
   }
 
-  for (const pen of PEN_CATALOG) {
+  for (let i = 0; i < PEN_CATALOG.length; i++) {
+    const pen = PEN_CATALOG[i];
+    const sp = SPRITE_POS[i];
+    const bgPos = sp ? `${sp.posX}% ${sp.posY}%` : "0% 0%";
+
     const existing = penList.querySelector<HTMLInputElement>(`input[name="pen"][value="${pen.value}"]`);
     if (existing) {
+      // Update existing icon to use sprite
+      const label = existing.closest("label");
+      const iconEl = label?.querySelector<HTMLElement>(".pen_icon");
+      if (iconEl) {
+        iconEl.textContent = "";
+        iconEl.classList.add("pen_icon_sprite");
+        iconEl.style.backgroundPosition = bgPos;
+      }
       continue;
     }
 
@@ -133,8 +163,8 @@ function ensurePenOptions(): void {
     input.value = pen.value;
 
     const icon = document.createElement("span");
-    icon.className = "pen_icon";
-    icon.textContent = pen.icon;
+    icon.className = "pen_icon pen_icon_sprite";
+    icon.style.backgroundPosition = bgPos;
 
     const name = document.createElement("span");
     name.className = "pen_name";
@@ -912,18 +942,22 @@ export function bindUiEvents(): void {
   });
 
   const renderPenDockValue = (value: string): void => {
+    const penIndex = PEN_CATALOG.findIndex((p) => p.value === value);
     const selectedPenInput = document.querySelector<HTMLInputElement>(`input[name=pen][value="${value}"]`);
     const label = selectedPenInput?.closest("label");
-    const icon = label?.querySelector<HTMLElement>(".pen_icon")?.textContent?.trim();
     const name = label?.querySelector<HTMLElement>(".pen_name")?.textContent?.trim() ?? value;
     penDockValue.classList.add("dock_pen_label");
     penDockValue.replaceChildren();
 
-    if (icon) {
-      const iconEl = document.createElement("span");
-      iconEl.className = "dock_pen_icon_text";
-      iconEl.textContent = icon;
-      penDockValue.appendChild(iconEl);
+    // Update brush icon to sprite image
+    const brushIcon = penDockValue.closest(".dock_btn_pen")?.querySelector(".dock_pen_brush_icon");
+    if (brushIcon instanceof HTMLElement && penIndex >= 0) {
+      brushIcon.textContent = "";
+      brushIcon.classList.add("pen_icon_sprite");
+      const sp = SPRITE_POS[penIndex];
+      if (sp) {
+        brushIcon.style.backgroundPosition = `${sp.posX}% ${sp.posY}%`;
+      }
     }
 
     const nameEl = document.createElement("span");

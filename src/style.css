@@ -881,15 +881,9 @@ select {
 }
 
 .dock_pen_icon_text {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(162, 193, 255, 0.6);
-  background: linear-gradient(140deg, rgba(86, 177, 255, 0.28), rgba(118, 246, 208, 0.1));
-  font-size: 12px;
-  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: block;
   flex: 0 0 auto;
 }
 
@@ -1154,8 +1148,10 @@ select {
 
 /* Brush icon for pen button */
 .dock_pen_brush_icon {
-  font-size: 26px;
-  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: block;
+  flex: 0 0 auto;
   filter: drop-shadow(0 0 4px rgba(255, 220, 100, 0.4));
 }
 
@@ -1363,15 +1359,16 @@ select {
 }
 
 .pen_icon {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(162, 193, 255, 0.6);
-  background: linear-gradient(140deg, rgba(86, 177, 255, 0.28), rgba(118, 246, 208, 0.1));
-  font-size: 16px;
-  line-height: 1;
+  width: 60px;
+  height: 60px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.pen_icon_sprite {
+  background-image: url("/img/pen_icon.png");
+  background-size: 470% auto;
+  background-repeat: no-repeat;
 }
 
 .pen_name {
@@ -1777,7 +1774,8 @@ select:focus-visible,
   }
 
   #bottom_dock .dock_pen_brush_icon {
-    font-size: 18px;
+    width: 24px;
+    height: 24px;
   }
 
   #bottom_dock .dock_size_inline {

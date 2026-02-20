@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Pen Sprite Debug Tool</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a2e; color: #eee; font-family: sans-serif; padding: 20px; }
+  h1 { margin-bottom: 16px; font-size: 18px; }
+  .controls { margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .controls label { font-size: 13px; }
+  .controls input[type="number"] { width: 70px; background: #2a2a4e; color: #fff; border: 1px solid #555; padding: 4px; border-radius: 4px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 16px; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .cell-name { font-size: 11px; color: #aaa; max-width: 80px; text-align: center; }
+  .preview {
+    border: 1px solid #555;
+    border-radius: 8px;
+    background-image: url("img/pen_icon.png");
+    background-repeat: no-repeat;
+    background-size: 470% auto;
+  }
+  .full-sprite {
+    margin-bottom: 20px;
+    border: 1px solid #555;
+    position: relative;
+  }
+  .full-sprite img { display: block; width: 100%; }
+  .sprite-grid-overlay {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    pointer-events: none;
+  }
+  .sprite-grid-cell {
+    border: 1px dashed rgba(255,255,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: rgba(255,255,0,0.6);
+  }
+  .output { margin-top: 20px; }
+  .output pre {
+    background: #111; padding: 12px; border-radius: 8px;
+    font-size: 12px; overflow-x: auto; white-space: pre-wrap;
+    max-height: 300px; overflow-y: auto;
+  }
+  button { background: #3a3a6e; color: #fff; border: 1px solid #666; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #4a4aae; }
+  .cell-controls { display: flex; flex-direction: column; gap: 2px; font-size: 10px; }
+  .cell-controls label { display: flex; align-items: center; gap: 4px; }
+  .cell-controls input[type="number"] { width: 60px; font-size: 10px; }
+  .section { margin-bottom: 24px; }
+  .section h2 { font-size: 14px; margin-bottom: 8px; color: #8af; }
+  .info { font-size: 12px; color: #888; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<h1>🖌️ Pen Sprite Debug Tool</h1>
+
+<div class="section">
+  <h2>Full Sprite Preview</h2>
+  <div class="controls">
+    <label>Cols: <input type="number" id="cols" value="5" min="1" max="10"></label>
+    <label>Rows: <input type="number" id="rows" value="3" min="1" max="10"></label>
+    <label>Icon Size (px): <input type="number" id="iconSize" value="60" min="16" max="200"></label>
+    <label>Sprite Width: <input type="number" id="spritePreviewWidth" value="500" min="100" max="1000"></label>
+  </div>
+  <div class="full-sprite" id="fullSprite" style="width: 500px;">
+    <img src="img/pen_icon.png" id="spriteImg">
+    <div class="sprite-grid-overlay" id="gridOverlay"></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Per-Icon Preview (square crop from center)</h2>
+  <div class="info">background-size: 500% auto — アスペクト比保持。正方形要素でセル中央を切り抜き。posX%, posY% で微調整可能。</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="section">
+  <h2>Export</h2>
+  <button id="exportBtn">Export CSS Values</button>
+  <button id="exportJsBtn">Export JS Array</button>
+  <div class="output"><pre id="output"></pre></div>
+</div>
+
+<script>
+const PENS = [
+  "ひかりのくれよん", "けっかんぺんしる", "ふぁーえんぴつ", "ゆきぱすてる", "ほしわいやー",
+  "らいふげーむぺん", "はねぺん", "なみふで", "すぷれーかん", "あわすぷれー",
+  "おーびっとぺん", "ふらくたるぶるーむ", "でじたるぺん", "しんみゃくぺん", "あめどろっぷ"
+];
+
+// Default positions: square crop centered in each cell
+// X: col / (cols-1) * 100
+// Y: (5*row+1) / 12 * 100  (centers a square within each cell of a 5x3 square sprite)
+function defaultPos(i) {
+  const cols = 5;
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  return {
+    posX: col / (cols - 1) * 100,
+    posY: (5 * row + 1) / 12 * 100 - 1.25,
+  };
+}
+
+const state = PENS.map((_, i) => defaultPos(i));
+
+function render() {
+  const cols = +document.getElementById("cols").value;
+  const rows = +document.getElementById("rows").value;
+  const iconSize = +document.getElementById("iconSize").value;
+  const spriteW = +document.getElementById("spritePreviewWidth").value;
+
+  // Grid overlay
+  const overlay = document.getElementById("gridOverlay");
+  overlay.style.setProperty("--cols", cols);
+  overlay.style.setProperty("--rows", rows);
+  overlay.innerHTML = "";
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      const cell = document.createElement("div");
+      cell.className = "sprite-grid-cell";
+      cell.textContent = idx < PENS.length ? idx : "";
+      overlay.appendChild(cell);
+    }
+  }
+  document.getElementById("fullSprite").style.width = spriteW + "px";
+
+  // Icon grid
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  for (let i = 0; i < PENS.length; i++) {
+    const s = state[i];
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const preview = document.createElement("div");
+    preview.className = "preview";
+    preview.style.width = iconSize + "px";
+    preview.style.height = iconSize + "px";
+    preview.style.backgroundPosition = `${s.posX}% ${s.posY}%`;
+
+    const name = document.createElement("div");
+    name.className = "cell-name";
+    name.textContent = `${i}: ${PENS[i]}`;
+
+    const controls = document.createElement("div");
+    controls.className = "cell-controls";
+    controls.innerHTML = `
+      <label>posX%: <input type="number" data-i="${i}" data-key="posX" value="${round(s.posX)}" step="0.5"></label>
+      <label>posY%: <input type="number" data-i="${i}" data-key="posY" value="${round(s.posY)}" step="0.5"></label>
+      <button data-reset="${i}" style="font-size:10px;padding:2px 6px;margin-top:2px;">Reset</button>
+    `;
+
+    cell.appendChild(preview);
+    cell.appendChild(name);
+    cell.appendChild(controls);
+    grid.appendChild(cell);
+  }
+}
+
+function round(v) {
+  return Math.round(v * 1000) / 1000;
+}
+
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.dataset && t.dataset.i !== undefined && t.dataset.key) {
+    state[+t.dataset.i][t.dataset.key] = +t.value;
+    const cell = t.closest(".cell");
+    const preview = cell.querySelector(".preview");
+    const s = state[+t.dataset.i];
+    const iconSize = +document.getElementById("iconSize").value;
+    preview.style.width = iconSize + "px";
+    preview.style.height = iconSize + "px";
+    preview.style.backgroundPosition = `${s.posX}% ${s.posY}%`;
+  } else if (["cols", "rows", "iconSize", "spritePreviewWidth"].includes(t.id)) {
+    render();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target.dataset.reset !== undefined) {
+    const i = +e.target.dataset.reset;
+    state[i] = defaultPos(i);
+    render();
+  }
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const lines = state.map((s, i) =>
+    `/* ${i}: ${PENS[i]} */ background-position: ${round(s.posX)}% ${round(s.posY)}%;`
+  );
+  document.getElementById("output").textContent =
+    `/* background-size: 500% auto; */\n` + lines.join("\n");
+});
+
+document.getElementById("exportJsBtn").addEventListener("click", () => {
+  const arr = state.map((s, i) =>
+    `  { /* ${i}: ${PENS[i]} */ posX: ${round(s.posX)}, posY: ${round(s.posY)} }`
+  );
+  document.getElementById("output").textContent =
+    `// background-size: 500% auto\nconst SPRITE_POSITIONS = [\n${arr.join(",\n")}\n];`;
+});
+
+render();
+</script>
+</body>
+</html>
