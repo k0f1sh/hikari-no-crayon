@@ -153,7 +153,7 @@ select {
   display: grid;
   place-items: center;
   border: 1px solid rgba(162, 193, 255, 0.4);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 0;
   color: var(--text);
   background: rgba(11, 19, 36, 0.36);
@@ -425,10 +425,10 @@ select {
 }
 
 .dock_btn.dock_hide_fab {
-  width: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  height: 38px;
+  width: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  height: 32px;
   aspect-ratio: 1 / 1;
   padding: 0;
   display: grid;
@@ -516,7 +516,8 @@ select {
 }
 
 .dock_row_bottom .dock_main {
-  font-size: 13px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .dock_inline {
@@ -526,9 +527,11 @@ select {
   min-height: 44px;
   min-width: 96px;
   padding: 4px 8px;
-  border: 1px solid rgba(162, 193, 255, 0.18);
-  background: rgba(11, 19, 36, 0.28);
+  border: 1.5px solid rgba(162, 193, 255, 0.32);
+  border-radius: 14px;
+  background: rgba(16, 24, 48, 0.55);
   backdrop-filter: blur(12px);
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   aspect-ratio: 2 / 1;
 }
@@ -538,6 +541,8 @@ select {
   min-width: 100px;
   aspect-ratio: auto;
   gap: 3px;
+  border-color: rgba(127, 91, 255, 0.35);
+  box-shadow: 0 0 14px rgba(127, 91, 255, 0.2), 0 0 28px rgba(86, 177, 255, 0.1);
 }
 
 .dock_size_inline input[type="range"] {
@@ -626,6 +631,8 @@ select {
   justify-items: center;
   align-content: center;
   gap: 10px;
+  border-color: rgba(255, 160, 60, 0.4);
+  box-shadow: 0 0 14px rgba(255, 160, 60, 0.2), 0 0 28px rgba(255, 120, 40, 0.1);
 }
 
 .dock_color_inline input[type="color"] {
@@ -643,12 +650,13 @@ select {
   flex: 0 1 96px;
   min-width: 96px;
   aspect-ratio: 2 / 1;
-  border: 1px solid rgba(162, 193, 255, 0.18);
-  border-radius: 0;
-  background: rgba(11, 19, 36, 0.28);
+  border: 1.5px solid rgba(162, 193, 255, 0.32);
+  border-radius: 14px;
+  background: rgba(16, 24, 48, 0.55);
   backdrop-filter: blur(12px);
   color: var(--text);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   min-height: 44px;
   font-size: 11px;
   letter-spacing: 0.02em;
@@ -669,19 +677,21 @@ select {
 }
 
 .dock_btn.is-active {
-  border-color: rgba(162, 193, 255, 0.65);
-  background: rgba(22, 48, 85, 0.38);
+  border-color: rgba(162, 193, 255, 0.8);
+  background: rgba(22, 48, 85, 0.6);
+  box-shadow: 0 0 16px rgba(86, 177, 255, 0.35), 0 0 32px rgba(86, 177, 255, 0.15);
 }
 
 .dock_btn.is-on-state {
-  border-color: rgba(162, 193, 255, 0.75);
-  background: rgba(22, 48, 85, 0.42);
-  box-shadow: 0 0 10px rgba(86, 177, 255, 0.22);
+  border-color: rgba(162, 193, 255, 0.9);
+  background: rgba(22, 48, 85, 0.65);
+  box-shadow: 0 0 18px rgba(86, 177, 255, 0.45), 0 0 36px rgba(86, 177, 255, 0.2);
 }
 
 .dock_btn:hover {
-  border-color: rgba(162, 193, 255, 0.45);
-  background: rgba(19, 32, 58, 0.38);
+  border-color: rgba(162, 193, 255, 0.55);
+  background: rgba(19, 32, 58, 0.55);
+  box-shadow: 0 0 12px rgba(86, 177, 255, 0.18);
 }
 
 .dock_action_tile {
@@ -823,7 +833,7 @@ select {
   min-width: 0;
   min-height: 44px;
   aspect-ratio: auto;
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 .dock_row_top .dock_size_inline {
@@ -838,11 +848,13 @@ select {
 
 .dock_row_top #simple_settings_button {
   min-width: 0;
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 #turtle_open_button {
-  border-radius: 10px;
+  border-radius: 14px;
+  border-color: rgba(120, 240, 190, 0.4);
+  box-shadow: 0 0 14px rgba(120, 240, 190, 0.2), 0 0 28px rgba(80, 220, 140, 0.1);
 }
 
 .dock_btn_pen {
@@ -851,6 +863,8 @@ select {
   grid-template-rows: auto auto;
   align-content: center;
   gap: 2px;
+  border-color: rgba(255, 220, 100, 0.4);
+  box-shadow: 0 0 14px rgba(255, 220, 100, 0.2), 0 0 28px rgba(255, 180, 60, 0.1);
 }
 
 .dock_btn_pen .dock_main {
@@ -887,7 +901,7 @@ select {
 
 .dock_row_bottom > .dock_btn,
 .dock_row_bottom .dock_action_tile {
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 .dock_row_bottom > .dock_btn.dock_hide_fab {
@@ -896,11 +910,12 @@ select {
 }
 
 .dock_quick_btn {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  min-width: 46px;
+  min-width: 0;
   width: auto;
-  padding: 0 8px;
+  padding: 0 6px;
+  white-space: nowrap;
 }
 
 #bottom_dock #turtle_open_button {
@@ -933,10 +948,11 @@ select {
   display: flex;
   align-items: stretch;
   min-height: 44px;
-  border: 1px solid rgba(162, 193, 255, 0.18);
-  border-radius: 10px;
-  background: rgba(11, 19, 36, 0.28);
+  border: 1.5px solid rgba(162, 193, 255, 0.32);
+  border-radius: 14px;
+  background: rgba(16, 24, 48, 0.55);
   backdrop-filter: blur(12px);
+  box-shadow: 0 0 8px rgba(86, 177, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   overflow: hidden;
 }
@@ -983,14 +999,15 @@ select {
 }
 
 .dock_mode_item:hover {
-  border-color: rgba(162, 193, 255, 0.45);
-  background: rgba(19, 32, 58, 0.38);
+  border-color: rgba(162, 193, 255, 0.55);
+  background: rgba(19, 32, 58, 0.55);
+  box-shadow: 0 0 12px rgba(86, 177, 255, 0.18);
 }
 
 .dock_mode_item:has(.dock_btn.is-on-state) {
-  border-color: rgba(162, 193, 255, 0.75);
-  background: rgba(22, 48, 85, 0.42);
-  box-shadow: 0 0 10px rgba(86, 177, 255, 0.22);
+  border-color: rgba(162, 193, 255, 0.9);
+  background: rgba(22, 48, 85, 0.65);
+  box-shadow: 0 0 18px rgba(86, 177, 255, 0.45), 0 0 36px rgba(86, 177, 255, 0.2);
 }
 
 /* Mode-specific ON styles */
@@ -1006,52 +1023,52 @@ select {
       rgba(139, 122, 255, 0.34) 82%,
       rgba(255, 107, 203, 0.32)
     );
-  box-shadow: 0 0 12px rgba(255, 196, 115, 0.28);
+  box-shadow: 0 0 20px rgba(255, 196, 115, 0.45), 0 0 40px rgba(255, 196, 115, 0.2);
 }
 
 #dock_auto_toggle_button.is-on-state {
-  border-color: rgba(137, 236, 211, 0.72);
+  border-color: rgba(137, 236, 211, 0.9);
   background:
-    linear-gradient(145deg, rgba(56, 205, 169, 0.26), rgba(41, 123, 255, 0.22)),
+    linear-gradient(145deg, rgba(56, 205, 169, 0.36), rgba(41, 123, 255, 0.3)),
     repeating-linear-gradient(
       90deg,
       rgba(137, 236, 211, 0.14) 0 6px,
       rgba(41, 123, 255, 0.1) 6px 12px
     );
-  box-shadow: 0 0 12px rgba(95, 208, 185, 0.24);
+  box-shadow: 0 0 20px rgba(95, 208, 185, 0.45), 0 0 40px rgba(95, 208, 185, 0.2);
 }
 
 #dock_fade_toggle_button.is-on-state {
-  border-color: rgba(157, 208, 255, 0.72);
+  border-color: rgba(157, 208, 255, 0.9);
   background:
     linear-gradient(
       180deg,
-      rgba(168, 221, 255, 0.46) 0%,
-      rgba(128, 188, 255, 0.2) 40%,
-      rgba(57, 96, 150, 0.06) 72%,
+      rgba(168, 221, 255, 0.56) 0%,
+      rgba(128, 188, 255, 0.3) 40%,
+      rgba(57, 96, 150, 0.1) 72%,
       rgba(57, 96, 150, 0) 100%
     );
-  box-shadow: 0 0 10px rgba(120, 188, 255, 0.26);
+  box-shadow: 0 0 20px rgba(120, 188, 255, 0.45), 0 0 40px rgba(120, 188, 255, 0.2);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="yh"].is-on-state) {
-  border-color: rgba(255, 108, 108, 0.72);
+  border-color: rgba(255, 108, 108, 0.9);
   background:
-    linear-gradient(145deg, rgba(255, 72, 72, 0.28), rgba(76, 10, 10, 0.38)),
-    radial-gradient(circle at 25% 30%, rgba(255, 134, 134, 0.18), rgba(0, 0, 0, 0) 60%);
-  box-shadow: 0 0 12px rgba(255, 94, 94, 0.2);
+    linear-gradient(145deg, rgba(255, 72, 72, 0.38), rgba(76, 10, 10, 0.48)),
+    radial-gradient(circle at 25% 30%, rgba(255, 134, 134, 0.28), rgba(0, 0, 0, 0) 60%);
+  box-shadow: 0 0 20px rgba(255, 94, 94, 0.45), 0 0 40px rgba(255, 94, 94, 0.2);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="sy"].is-on-state) {
-  border-color: rgba(164, 188, 255, 0.72);
+  border-color: rgba(164, 188, 255, 0.9);
   background:
-    radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.42) 0%, rgba(129, 165, 255, 0.22) 30%, rgba(70, 102, 181, 0.08) 58%, rgba(25, 39, 72, 0) 78%),
+    radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.52) 0%, rgba(129, 165, 255, 0.32) 30%, rgba(70, 102, 181, 0.12) 58%, rgba(25, 39, 72, 0) 78%),
     repeating-conic-gradient(
       from 0deg at 50% 50%,
       rgba(158, 188, 255, 0.24) 0deg 14deg,
       rgba(100, 126, 204, 0.08) 14deg 28deg
     );
-  box-shadow: 0 0 12px rgba(126, 162, 255, 0.24);
+  box-shadow: 0 0 20px rgba(126, 162, 255, 0.45), 0 0 40px rgba(126, 162, 255, 0.2);
 }
 
 .dock_main {
