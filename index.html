@@ -373,78 +373,74 @@
 
         <div id="bottom_dock">
           <div class="dock_row dock_row_top">
-            <div class="dock_group dock_group_tools" aria-label="ぺんせっていぐるーぷ">
-              <span class="dock_group_title">ぺん</span>
-              <button type="button" class="dock_btn" id="simple_settings_button">
-                <span class="simple_settings_icon" aria-hidden="true"></span>
-                <span class="simple_settings_label">ぷりせっと</span>
-              </button>
-              <button type="button" class="dock_btn" data-panel="pl">
-                <span class="dock_main dock_pen_label" id="pen_dock_value"><span class="dock_pen_icon_text">光</span><span class="dock_pen_name_text">ひかりのくれよん</span></span>
-              </button>
-              <button type="button" class="dock_btn dock_icon_only_btn" data-panel="pc">
-                <span class="dock_main">⚙</span>
-              </button>
-              <label class="dock_inline dock_size_inline">
-                <span class="dock_main">おおきさ</span>
-                <input type="range" id="dock_size_range" min="3" max="300" step="1" value="10" />
+            <button type="button" class="dock_btn" id="simple_settings_button">
+              <span class="simple_settings_icon" aria-hidden="true">😊</span>
+              <span class="simple_settings_label">ぷりせっと</span>
+            </button>
+            <button type="button" class="dock_btn dock_btn_pen" data-panel="pl">
+              <span class="dock_pen_brush_icon" aria-hidden="true">🖌️</span>
+              <span class="dock_main dock_pen_label" id="pen_dock_value"><span class="dock_pen_icon_text">光</span><span class="dock_pen_name_text">ひかりのくれよん</span></span>
+            </button>
+            <button type="button" class="dock_btn dock_icon_only_btn" data-panel="pc">
+              <span class="dock_main">⚙</span>
+            </button>
+            <label class="dock_inline dock_size_inline">
+              <span class="dock_main">おおきさ</span>
+              <input type="range" id="dock_size_range" min="3" max="300" step="1" value="10" />
+              <span class="dock_size_labels">
+                <span class="dock_size_label_min">😊<br>ちいさい</span>
                 <span class="dock_sub" id="size_dock_value">10px</span>
-              </label>
-              <label class="dock_inline dock_color_inline">
-                <span class="dock_main">いろ</span>
-                <input type="color" id="dock_color_picker" value="#56b1ff" />
-              </label>
-            </div>
-            <div class="dock_group dock_group_turtle" aria-label="かめぐるーぷ">
-              <span class="dock_group_title">かめ</span>
-              <button type="button" class="dock_btn" id="turtle_open_button">🐢</button>
-            </div>
+                <span class="dock_size_label_max">😊<br>おおきい</span>
+              </span>
+            </label>
+            <label class="dock_inline dock_color_inline">
+              <span class="dock_main">いろ</span>
+              <span class="dock_color_emoji" aria-hidden="true">🎨</span>
+              <input type="color" id="dock_color_picker" value="#56b1ff" />
+            </label>
+            <button type="button" class="dock_btn dock_btn_turtle" id="turtle_open_button">
+              <span class="dock_turtle_emoji">🐢</span>
+              <span class="dock_main">かめ</span>
+            </button>
           </div>
 
           <div class="dock_row dock_row_bottom">
-            <div class="dock_group dock_group_modes" aria-label="もーどぐるーぷ">
-              <span class="dock_group_title">もーど</span>
-              <div class="dock_mode_item">
-                <button type="button" class="dock_btn" data-panel="ml">
-                  <span class="dock_main">れいんぼー</span>
-                  <span class="dock_sub" id="rainbow_dock_value">OFF</span>
-                </button>
-                <button type="button" class="dock_mode_menu_button" id="rainbow_menu_button" aria-label="れいんぼーせっていをひらく">⚙</button>
-              </div>
-              <button type="button" class="dock_btn dock_mode_toggle" id="dock_auto_toggle_button">
-                <span class="dock_main">おーと</span>
-                <span class="dock_sub" id="auto_dock_value">OFF</span>
+            <div class="dock_mode_item">
+              <button type="button" class="dock_btn" data-panel="ml">
+                <span class="dock_main">れいんぼー</span>
+                <span class="dock_sub" id="rainbow_dock_value">OFF</span>
               </button>
-              <button type="button" class="dock_btn dock_mode_toggle" id="dock_fade_toggle_button">
-                <span class="dock_main">ふぇーど</span>
-                <span class="dock_sub" id="fade_dock_value">OFF</span>
-              </button>
-              <div class="dock_mode_item">
-                <button type="button" class="dock_btn" data-panel="yh">
-                  <span class="dock_main">やみ</span>
-                  <span class="dock_sub" id="yami_dock_value">OFF</span>
-                </button>
-                <button type="button" class="dock_mode_menu_button" id="yami_menu_button" aria-label="やみせっていをひらく">⚙</button>
-              </div>
-              <div class="dock_mode_item">
-                <button type="button" class="dock_btn" data-panel="sy">
-                  <span class="dock_main">たいしょう</span>
-                  <span class="dock_sub" id="symmetry_dock_value">OFF</span>
-                </button>
-                <button type="button" class="dock_mode_menu_button" id="symmetry_menu_button" aria-label="たいしょうせっていをひらく">⚙</button>
-              </div>
+              <button type="button" class="dock_mode_menu_button" id="rainbow_menu_button" aria-label="れいんぼーせっていをひらく">⚙</button>
             </div>
-            <div class="dock_group dock_group_actions" aria-label="そのたぐるーぷ">
-              <span class="dock_group_title">そのた</span>
-              <button type="button" class="dock_btn dock_quick_btn" id="dock_undo_button">もどる</button>
-              <button type="button" class="dock_btn dock_quick_btn" id="dock_redo_button">すすむ</button>
-              <button type="button" class="dock_btn dock_quick_btn dock_quick_clear" id="dock_clear_button">けす</button>
-              <button type="button" class="dock_btn" data-panel="etc">
-                <span class="dock_main">そのた</span>
-                <span class="dock_sub">ほぞん/ろくが</span>
+            <button type="button" class="dock_btn dock_mode_toggle" id="dock_auto_toggle_button">
+              <span class="dock_main">おーと</span>
+              <span class="dock_sub" id="auto_dock_value">OFF</span>
+            </button>
+            <button type="button" class="dock_btn dock_mode_toggle" id="dock_fade_toggle_button">
+              <span class="dock_main">ふぇーど</span>
+              <span class="dock_sub" id="fade_dock_value">OFF</span>
+            </button>
+            <div class="dock_mode_item">
+              <button type="button" class="dock_btn" data-panel="yh">
+                <span class="dock_main">やみ</span>
+                <span class="dock_sub" id="yami_dock_value">OFF</span>
               </button>
-              <button type="button" class="dock_btn dock_hide_fab" id="dock_hide_button" aria-label="めにゅーをかくす">⌄</button>
+              <button type="button" class="dock_mode_menu_button" id="yami_menu_button" aria-label="やみせっていをひらく">⚙</button>
             </div>
+            <div class="dock_mode_item">
+              <button type="button" class="dock_btn" data-panel="sy">
+                <span class="dock_main">たいしょう</span>
+                <span class="dock_sub" id="symmetry_dock_value">OFF</span>
+              </button>
+              <button type="button" class="dock_mode_menu_button" id="symmetry_menu_button" aria-label="たいしょうせっていをひらく">⚙</button>
+            </div>
+            <button type="button" class="dock_btn dock_quick_btn" id="dock_undo_button">もどる</button>
+            <button type="button" class="dock_btn dock_quick_btn" id="dock_redo_button">すすむ</button>
+            <button type="button" class="dock_btn dock_quick_btn dock_quick_clear" id="dock_clear_button">けす</button>
+            <button type="button" class="dock_btn dock_quick_btn" data-panel="etc">
+              <span class="dock_main">そのた</span>
+            </button>
+            <button type="button" class="dock_btn dock_hide_fab" id="dock_hide_button" aria-label="めにゅーをかくす">⌄</button>
           </div>
         </div>
       </div>
