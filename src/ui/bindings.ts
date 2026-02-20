@@ -845,6 +845,21 @@ export function bindUiEvents(): void {
     return panelId && panelId !== "ml" && panelId !== "yh" && panelId !== "sy";
   });
 
+  // Pen custom gear overlay: intercept click before parent button
+  const penCustomGear = dock.querySelector<HTMLElement>(".dock_pen_custom_gear");
+  if (penCustomGear) {
+    penCustomGear.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const panelId = penCustomGear.dataset.panel;
+      if (!panelId || !panels[panelId]) return;
+      if (activePanelId === panelId) {
+        closePanels();
+      } else {
+        setActivePanel(panelId);
+      }
+    });
+  }
+
   panelDockButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const panelId = button.dataset.panel;

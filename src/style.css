@@ -844,6 +844,26 @@ select {
   display: none;
 }
 
+.dock_btn_pen {
+  position: relative;
+}
+
+.dock_pen_custom_gear {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  z-index: 1;
+}
+
+.dock_pen_custom_gear:hover {
+  opacity: 1;
+}
+
 .dock_row_top .dock_inline,
 .dock_row_top .dock_btn {
   min-width: 0;
@@ -1865,7 +1885,6 @@ select:focus-visible,
     font-size: 10px;
   }
 
-  /* Hidden element */
   #bottom_dock .dock_icon_only_btn {
     display: none;
   }
