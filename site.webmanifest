@@ -1,0 +1,15 @@
+{
+  "name": "ひかりのくれよん",
+  "short_name": "ひかりのくれよん",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0f1a2a",
+  "background_color": "#0f1a2a",
+  "display": "standalone",
+  "start_url": "/"
+}
