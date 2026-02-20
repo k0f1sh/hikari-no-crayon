@@ -1380,7 +1380,7 @@ select {
 }
 
 .pen_icon_sprite {
-  background-image: url("/img/pen_icon.png");
+  background-image: url("../img/pen_icon.png");
   background-size: 470% auto;
   background-repeat: no-repeat;
 }
