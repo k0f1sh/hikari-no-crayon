@@ -1450,10 +1450,12 @@ export function bindUiEvents(): void {
     },
   };
 
+  const SAMPLE_PREFIX = "pen normal_pen\nsize 3\n\n";
+
   turtleSampleSelect.addEventListener("change", () => {
     const key = turtleSampleSelect.value;
     if (turtleSamples[key]) {
-      turtleCodeInput.value = turtleSamples[key](getTurtleSampleDimensions());
+      turtleCodeInput.value = SAMPLE_PREFIX + turtleSamples[key](getTurtleSampleDimensions());
     }
   });
 
@@ -1668,8 +1670,8 @@ export function bindUiEvents(): void {
       const speedValue = Number.parseInt(turtleSpeedInput.value, 10);
       const pointsPerFrame = [1, 2, 4, 8].includes(speedValue) ? speedValue : 2;
       const frameIntervalMs = speedValue === 1 ? 80 : speedValue === 2 ? 40 : 16;
-      const densityValue = Math.max(1, Math.min(30, Number(turtleDensity.value) || 10));
-      const stepSize = 31 - densityValue;
+      const densityValue = Math.max(1, Math.min(10, Number(turtleDensity.value) || 10));
+      const stepSize = 11 - densityValue;
       const traceIterator = iterateTurtleProgram(program, { startX, startY, stepSize });
 
       const showCursor = turtleShowCursor.checked;
