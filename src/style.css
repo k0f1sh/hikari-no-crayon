@@ -1050,65 +1050,96 @@ select {
   box-shadow: 0 0 18px rgba(86, 177, 255, 0.45), 0 0 36px rgba(86, 177, 255, 0.2);
 }
 
+/* Mode-specific default (OFF) styles */
+.dock_mode_item:has(> .dock_btn[data-panel="ml"]) {
+  border-color: rgba(255, 214, 117, 0.3);
+  background: linear-gradient(120deg, rgba(255, 107, 107, 0.12), rgba(255, 201, 90, 0.12) 22%, rgba(123, 214, 108, 0.12) 42%, rgba(99, 186, 255, 0.12) 62%, rgba(139, 122, 255, 0.12) 82%, rgba(255, 107, 203, 0.1));
+  box-shadow: 0 0 8px rgba(255, 196, 115, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#dock_auto_toggle_button {
+  border-color: rgba(137, 236, 211, 0.3);
+  background: linear-gradient(145deg, rgba(56, 205, 169, 0.14), rgba(41, 123, 255, 0.1));
+  box-shadow: 0 0 8px rgba(95, 208, 185, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#dock_fade_toggle_button {
+  border-color: rgba(157, 208, 255, 0.3);
+  background: linear-gradient(180deg, rgba(168, 221, 255, 0.18) 0%, rgba(128, 188, 255, 0.1) 40%, rgba(57, 96, 150, 0.04) 100%);
+  box-shadow: 0 0 8px rgba(120, 188, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.dock_mode_item:has(> .dock_btn[data-panel="yh"]) {
+  border-color: rgba(255, 108, 108, 0.3);
+  background: linear-gradient(145deg, rgba(255, 72, 72, 0.14), rgba(76, 10, 10, 0.16));
+  box-shadow: 0 0 8px rgba(255, 94, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.dock_mode_item:has(> .dock_btn[data-panel="sy"]) {
+  border-color: rgba(164, 188, 255, 0.3);
+  background: radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.18) 0%, rgba(129, 165, 255, 0.1) 30%, rgba(25, 39, 72, 0) 78%);
+  box-shadow: 0 0 8px rgba(126, 162, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
 /* Mode-specific ON styles */
 .dock_mode_item:has(> .dock_btn[data-panel="ml"].is-on-state) {
-  border-color: rgba(255, 214, 117, 0.75);
+  border-color: rgba(255, 214, 117, 0.85);
   background:
     linear-gradient(
       120deg,
-      rgba(255, 107, 107, 0.34),
-      rgba(255, 201, 90, 0.34) 22%,
-      rgba(123, 214, 108, 0.34) 42%,
-      rgba(99, 186, 255, 0.34) 62%,
-      rgba(139, 122, 255, 0.34) 82%,
-      rgba(255, 107, 203, 0.32)
+      rgba(255, 107, 107, 0.42),
+      rgba(255, 201, 90, 0.42) 22%,
+      rgba(123, 214, 108, 0.42) 42%,
+      rgba(99, 186, 255, 0.42) 62%,
+      rgba(139, 122, 255, 0.42) 82%,
+      rgba(255, 107, 203, 0.4)
     );
-  box-shadow: 0 0 20px rgba(255, 196, 115, 0.45), 0 0 40px rgba(255, 196, 115, 0.2);
+  box-shadow: 0 0 24px rgba(255, 196, 115, 0.55), 0 0 48px rgba(255, 196, 115, 0.25);
 }
 
 #dock_auto_toggle_button.is-on-state {
-  border-color: rgba(137, 236, 211, 0.9);
+  border-color: rgba(137, 236, 211, 0.95);
   background:
-    linear-gradient(145deg, rgba(56, 205, 169, 0.36), rgba(41, 123, 255, 0.3)),
+    linear-gradient(145deg, rgba(56, 205, 169, 0.45), rgba(41, 123, 255, 0.38)),
     repeating-linear-gradient(
       90deg,
-      rgba(137, 236, 211, 0.14) 0 6px,
-      rgba(41, 123, 255, 0.1) 6px 12px
+      rgba(137, 236, 211, 0.18) 0 6px,
+      rgba(41, 123, 255, 0.12) 6px 12px
     );
-  box-shadow: 0 0 20px rgba(95, 208, 185, 0.45), 0 0 40px rgba(95, 208, 185, 0.2);
+  box-shadow: 0 0 24px rgba(95, 208, 185, 0.55), 0 0 48px rgba(95, 208, 185, 0.25);
 }
 
 #dock_fade_toggle_button.is-on-state {
-  border-color: rgba(157, 208, 255, 0.9);
+  border-color: rgba(157, 208, 255, 0.95);
   background:
     linear-gradient(
       180deg,
-      rgba(168, 221, 255, 0.56) 0%,
-      rgba(128, 188, 255, 0.3) 40%,
-      rgba(57, 96, 150, 0.1) 72%,
+      rgba(168, 221, 255, 0.65) 0%,
+      rgba(128, 188, 255, 0.38) 40%,
+      rgba(57, 96, 150, 0.14) 72%,
       rgba(57, 96, 150, 0) 100%
     );
-  box-shadow: 0 0 20px rgba(120, 188, 255, 0.45), 0 0 40px rgba(120, 188, 255, 0.2);
+  box-shadow: 0 0 24px rgba(120, 188, 255, 0.55), 0 0 48px rgba(120, 188, 255, 0.25);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="yh"].is-on-state) {
-  border-color: rgba(255, 108, 108, 0.9);
+  border-color: rgba(255, 108, 108, 0.95);
   background:
-    linear-gradient(145deg, rgba(255, 72, 72, 0.38), rgba(76, 10, 10, 0.48)),
-    radial-gradient(circle at 25% 30%, rgba(255, 134, 134, 0.28), rgba(0, 0, 0, 0) 60%);
-  box-shadow: 0 0 20px rgba(255, 94, 94, 0.45), 0 0 40px rgba(255, 94, 94, 0.2);
+    linear-gradient(145deg, rgba(255, 72, 72, 0.48), rgba(76, 10, 10, 0.55)),
+    radial-gradient(circle at 25% 30%, rgba(255, 134, 134, 0.35), rgba(0, 0, 0, 0) 60%);
+  box-shadow: 0 0 24px rgba(255, 94, 94, 0.55), 0 0 48px rgba(255, 94, 94, 0.25);
 }
 
 .dock_mode_item:has(> .dock_btn[data-panel="sy"].is-on-state) {
-  border-color: rgba(164, 188, 255, 0.9);
+  border-color: rgba(164, 188, 255, 0.95);
   background:
-    radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.52) 0%, rgba(129, 165, 255, 0.32) 30%, rgba(70, 102, 181, 0.12) 58%, rgba(25, 39, 72, 0) 78%),
+    radial-gradient(circle at 50% 50%, rgba(186, 212, 255, 0.6) 0%, rgba(129, 165, 255, 0.4) 30%, rgba(70, 102, 181, 0.16) 58%, rgba(25, 39, 72, 0) 78%),
     repeating-conic-gradient(
       from 0deg at 50% 50%,
-      rgba(158, 188, 255, 0.24) 0deg 14deg,
-      rgba(100, 126, 204, 0.08) 14deg 28deg
+      rgba(158, 188, 255, 0.3) 0deg 14deg,
+      rgba(100, 126, 204, 0.1) 14deg 28deg
     );
-  box-shadow: 0 0 20px rgba(126, 162, 255, 0.45), 0 0 40px rgba(126, 162, 255, 0.2);
+  box-shadow: 0 0 24px rgba(126, 162, 255, 0.55), 0 0 48px rgba(126, 162, 255, 0.25);
 }
 
 .dock_main {
