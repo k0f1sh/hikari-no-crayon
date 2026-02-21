@@ -3,109 +3,178 @@ import { colorToString } from "../../core/color";
 import { requireMainContext } from "../../core/state";
 import { drawLineColor } from "../../core/draw";
 import type { Color, Effect, Point } from "../../types";
-import { isOutOfBounds } from "./utils";
+
+interface KochSegment {
+  from: Point;
+  to: Point;
+  level: number;
+}
+
+interface FractalBloomOptions {
+  mode?: "tree" | "koch";
+  depth?: number;
+  alpha?: number;
+  lineWidth?: number;
+  revealPerFrame?: number;
+}
 
 export class FractalBloomEffect implements Effect {
-  center: Point;
-  pos: Point;
-  prevPos: Point;
+  segments: KochSegment[];
+  renderedCount: number;
+  revealCursor: number;
+  revealPerFrame: number;
   alpha: number;
   delFlg: boolean;
   color: Color;
   age: number;
   maxAge: number;
-  phase: number;
-  phaseSpeed: number;
-  orbitScale: number;
-  driftX: number;
-  driftY: number;
-  branchChance: number;
-  branchDepth: number;
-  hasBranched: boolean;
+  maxDepth: number;
+  lineWidth: number;
+  head: Point;
+  mode: "tree" | "koch";
 
-  constructor(x: number, y: number, color: Color, branchDepth = 0) {
-    this.center = { x, y };
-    this.pos = { x, y };
-    this.prevPos = { x, y };
-    this.alpha = 0.3 - branchDepth * 0.08;
+  constructor(
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    color: Color,
+    options: FractalBloomOptions = {},
+  ) {
+    this.segments = [];
+    this.renderedCount = 0;
+    this.revealCursor = 0;
+    this.revealPerFrame = Math.max(3, options.revealPerFrame ?? 4 + app.penSize / 5);
+    this.alpha = Math.max(0.08, options.alpha ?? 0.26);
     this.delFlg = false;
     this.color = color;
     this.age = 0;
-    this.maxAge = Math.max(28, Math.floor(app.penSize * (0.85 + Math.random() * 1.15)));
-    this.phase = Math.random() * Math.PI * 2;
-    this.phaseSpeed = 0.05 + Math.random() * 0.07;
-    this.orbitScale = Math.max(6, app.penSize * (0.3 + Math.random() * 1.2));
-    this.driftX = (Math.random() - 0.5) * 0.75;
-    this.driftY = (Math.random() - 0.5) * 0.75;
-    this.branchChance = 0.007 - branchDepth * 0.003;
-    this.branchDepth = branchDepth;
-    this.hasBranched = false;
+    this.mode = options.mode ?? "tree";
+    this.maxDepth = Math.max(1, Math.min(5, Math.floor(options.depth ?? 3)));
+    this.lineWidth = Math.max(0.16, options.lineWidth ?? app.penSize / 22);
+    this.head = { x: fromX, y: fromY };
+
+    if (this.mode === "koch") {
+      const turnSign = Math.random() < 0.5 ? -1 : 1;
+      this.subdivideKoch(
+        { x: fromX, y: fromY },
+        { x: toX, y: toY },
+        0,
+        this.maxDepth,
+        turnSign,
+        this.segments,
+      );
+    } else {
+      const root = { x: toX, y: toY };
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const angle = Math.atan2(dy, dx);
+      const length = Math.max(10, Math.min(180, Math.hypot(dx, dy) * 0.95 + app.penSize * 0.8));
+      this.growTree(root, angle, length, 0, this.maxDepth, this.segments);
+    }
+
+    this.maxAge = Math.max(24, Math.ceil(this.segments.length / this.revealPerFrame) + 20);
   }
 
   move(): void {
     this.age += 1;
-    this.phase += this.phaseSpeed;
-    this.alpha *= 0.988;
-
-    this.center.x += this.driftX * 0.22 + (Math.random() - 0.5) * 0.12;
-    this.center.y += this.driftY * 0.22 + (Math.random() - 0.5) * 0.12;
-
-    const fx = Math.sin(this.phase * 2.0) + Math.sin(this.phase * 3.2) * 0.55;
-    const fy = Math.cos(this.phase * 2.8) + Math.cos(this.phase * 4.4) * 0.45;
-    this.prevPos.x = this.pos.x;
-    this.prevPos.y = this.pos.y;
-    this.pos.x = this.center.x + fx * this.orbitScale;
-    this.pos.y = this.center.y + fy * this.orbitScale;
-
-    if (
-      !this.hasBranched &&
-      this.branchDepth < 1 &&
-      this.alpha > 0.12 &&
-      this.age > 10 &&
-      Math.random() < Math.max(0, this.branchChance)
-    ) {
-      const child = new FractalBloomEffect(this.pos.x, this.pos.y, this.color, this.branchDepth + 1);
-      child.orbitScale = this.orbitScale * (0.58 + Math.random() * 0.2);
-      child.phase = this.phase + Math.random() * Math.PI;
-      child.maxAge = Math.max(16, Math.floor(this.maxAge * (0.52 + Math.random() * 0.12)));
-      child.alpha = this.alpha * 0.66;
-      app.effects.push(child);
-      this.hasBranched = true;
+    if (this.renderedCount < this.segments.length) {
+      this.revealCursor += this.revealPerFrame;
+    } else {
+      this.alpha *= 0.95;
     }
 
-    if (this.age > this.maxAge || isOutOfBounds(this.pos, this.alpha)) {
+    if (this.age > this.maxAge || this.alpha < 0.01) {
       this.delete();
     }
   }
 
   render(): void {
-    const lifeRatio = 1 - this.age / this.maxAge;
-    const trailAlpha = this.alpha * (0.3 + lifeRatio * 0.5);
-    const glowAlpha = Math.min(0.28, this.alpha * 0.9);
-    const lineWidth = Math.max(0.36, app.penSize / 66) * (1 + lifeRatio * 0.7);
-    const core = Math.max(1.1, app.penSize / 20);
-    const bloom = Math.max(8, app.penSize * 0.95) * (0.55 + lifeRatio * 0.6);
+    const target = Math.min(this.segments.length, Math.floor(this.revealCursor));
+    for (let i = this.renderedCount; i < target; i += 1) {
+      const seg = this.segments[i];
+      const depthScale = this.mode === "tree"
+        ? 1 - (seg.level / (this.maxDepth + 1)) * 0.6
+        : 1 - (seg.level / (this.maxDepth + 1)) * 0.45;
+      drawLineColor(seg.from, seg.to, this.color, this.alpha * depthScale, this.lineWidth * depthScale);
+      this.head = seg.to;
+    }
+    this.renderedCount = target;
 
-    drawLineColor(this.prevPos, this.pos, this.color, trailAlpha, lineWidth);
-    this.drawGlow(this.pos.x, this.pos.y, core, glowAlpha * 0.7);
-    this.drawGlow(this.pos.x, this.pos.y, bloom * 0.45, glowAlpha * 0.42);
-    this.drawGlow(this.pos.x, this.pos.y, bloom, glowAlpha * 0.18);
-
-    if (glowAlpha < 0.01) {
-      this.delete();
+    if (this.renderedCount > 0) {
+      this.drawHeadGlow(this.head.x, this.head.y, Math.max(1.4, this.lineWidth * 1.8), this.alpha * 0.2);
     }
   }
 
-  drawGlow(x: number, y: number, radius: number, alpha: number): void {
+  drawHeadGlow(x: number, y: number, radius: number, alpha: number): void {
     const c = requireMainContext();
     const grad = c.createRadialGradient(x, y, 0, x, y, radius);
     grad.addColorStop(0, colorToString(this.color, alpha));
-    grad.addColorStop(0.5, colorToString(this.color, alpha * 0.34));
+    grad.addColorStop(0.5, colorToString(this.color, alpha * 0.35));
     grad.addColorStop(1, "rgba(0, 0, 0, 0)");
     c.fillStyle = grad;
     c.beginPath();
     c.arc(x, y, radius, 0, Math.PI * 2, false);
     c.fill();
+  }
+
+  subdivideKoch(
+    a: Point,
+    b: Point,
+    level: number,
+    maxLevel: number,
+    turnSign: number,
+    out: KochSegment[],
+  ): void {
+    if (level >= maxLevel) {
+      out.push({ from: a, to: b, level });
+      return;
+    }
+
+    const dx = (b.x - a.x) / 3;
+    const dy = (b.y - a.y) / 3;
+    const p1: Point = { x: a.x + dx, y: a.y + dy };
+    const p3: Point = { x: a.x + dx * 2, y: a.y + dy * 2 };
+    const cos = Math.cos((Math.PI / 3) * turnSign);
+    const sin = Math.sin((Math.PI / 3) * turnSign);
+    const rx = dx * cos - dy * sin;
+    const ry = dx * sin + dy * cos;
+    const peak: Point = { x: p1.x + rx, y: p1.y + ry };
+
+    this.subdivideKoch(a, p1, level + 1, maxLevel, turnSign, out);
+    this.subdivideKoch(p1, peak, level + 1, maxLevel, turnSign, out);
+    this.subdivideKoch(peak, p3, level + 1, maxLevel, turnSign, out);
+    this.subdivideKoch(p3, b, level + 1, maxLevel, turnSign, out);
+  }
+
+  growTree(
+    start: Point,
+    angle: number,
+    length: number,
+    level: number,
+    maxLevel: number,
+    out: KochSegment[],
+  ): void {
+    const end: Point = {
+      x: start.x + Math.cos(angle) * length,
+      y: start.y + Math.sin(angle) * length,
+    };
+    out.push({ from: start, to: end, level });
+
+    if (level >= maxLevel) {
+      return;
+    }
+
+    const nextLength = length * (0.66 + (Math.random() - 0.5) * 0.1);
+    const spread = 0.35 + level * 0.03 + Math.random() * 0.18;
+    const jitter = (Math.random() - 0.5) * 0.14;
+
+    this.growTree(end, angle - spread + jitter, nextLength, level + 1, maxLevel, out);
+    this.growTree(end, angle + spread + jitter, nextLength, level + 1, maxLevel, out);
+
+    if (level <= 1 && Math.random() < 0.3) {
+      this.growTree(end, angle + jitter * 0.6, nextLength * 0.78, level + 1, maxLevel, out);
+    }
   }
 
   delete(): void {

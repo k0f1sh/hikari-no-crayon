@@ -124,7 +124,14 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
   spray_pen: [],
   bubble_pen: [],
   orbit_pen: [],
-  fractal_bloom_pen: [],
+  fractal_bloom_pen: [
+    {
+      key: "use_koch",
+      label: "こっほきょくせんもーど",
+      type: "boolean",
+      defaultValue: false,
+    },
+  ],
   degi_pen: [],
   shinmyaku_pen: [],
   amedrop_pen: [
