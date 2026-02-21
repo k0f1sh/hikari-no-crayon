@@ -14,7 +14,7 @@ export class SnowEffect implements Effect {
 
   constructor(x: number, y: number, color: Color, d: number) {
     this.pos = { x, y };
-    this.spd = app.penSize / 10;
+    this.spd = Math.max(0.18, app.penSize / 10);
     this.d = d;
     this.alpha = 0.2;
     this.delFlg = false;
@@ -34,18 +34,19 @@ export class SnowEffect implements Effect {
   render(): void {
     const x = this.pos.x;
     const y = this.pos.y;
-    const half = app.penSize / 2;
+    const spread = Math.max(1.6, app.penSize * 0.55);
+    const half = spread / 2;
     const pos1 = {
-      x: Math.floor(Math.random() * app.penSize) - half + x,
-      y: Math.floor(Math.random() * app.penSize) - half + y,
+      x: Math.random() * spread - half + x,
+      y: Math.random() * spread - half + y,
     };
     const pos2 = {
-      x: Math.floor(Math.random() * app.penSize) - half + x,
-      y: Math.floor(Math.random() * app.penSize) - half + y,
+      x: Math.random() * spread - half + x,
+      y: Math.random() * spread - half + y,
     };
     const pos3 = {
-      x: Math.floor(Math.random() * app.penSize) - half + x,
-      y: Math.floor(Math.random() * app.penSize) - half + y,
+      x: Math.random() * spread - half + x,
+      y: Math.random() * spread - half + y,
     };
 
     drawTriangle(pos1, pos2, pos3, this.color, this.alpha);

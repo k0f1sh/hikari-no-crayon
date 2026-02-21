@@ -343,7 +343,7 @@ export function bindUiEvents(): void {
     }
     const settings: PersistedSettings = {
       pen: app.selectedPenName,
-      size: app.penSize,
+      size: Number(sizeRange.value),
       colorHex: rgbToHex(app.penColor),
       rainbowMode: app.isRainbowMode,
       rainbowSaturation: app.rainbowSaturation,
@@ -529,10 +529,18 @@ export function bindUiEvents(): void {
     sizeRange.style.setProperty("--size-range-progress", `${progress}%`);
   };
 
+  const normalizePenSize = (value: number) => {
+    const clamped = Math.max(1, Math.min(300, value));
+    const uiSize = clamped <= 1.1 ? 1 : clamped;
+    const effectiveSize = uiSize === 1 ? 1.1 : uiSize;
+    return { uiSize, effectiveSize };
+  };
+
   const applySize = (value: number) => {
-    app.penSize = Math.max(3, Math.min(300, value));
-    sizeRange.value = String(app.penSize);
-    sizeDockValue.textContent = `${app.penSize}px`;
+    const { uiSize, effectiveSize } = normalizePenSize(value);
+    app.penSize = effectiveSize;
+    sizeRange.value = String(uiSize);
+    sizeDockValue.textContent = `${uiSize}px`;
     updateSizeRangeTrack();
     persist();
   };
@@ -1428,7 +1436,7 @@ export function bindUiEvents(): void {
       for (let i = 0; i < rowCount; i++) {
         const pen = pens[i % pens.length];
         const scale = sizeMultiplierByPen[pen] ?? 1;
-        const rowSize = Math.max(3, Math.min(300, Math.round(baseSize * scale * 100) / 100));
+        const rowSize = Math.max(1, Math.min(300, Math.round(baseSize * scale * 100) / 100));
         lines.push(`pen ${pen}`);
         lines.push(`size ${rowSize}`);
         lines.push(`fd ${rowWidth}`);
@@ -1578,10 +1586,10 @@ export function bindUiEvents(): void {
           hasAnyPoint = true;
           const event = next.value;
           if (event.kind === "set_size") {
-            const size = Math.max(3, Math.min(300, Number.isFinite(event.size) ? event.size : 30));
-            app.penSize = size;
-            sizeRange.value = String(Math.round(size));
-            sizeDockValue.textContent = `${Math.round(size)}px`;
+            const { uiSize, effectiveSize } = normalizePenSize(Number.isFinite(event.size) ? event.size : 30);
+            app.penSize = effectiveSize;
+            sizeRange.value = String(uiSize);
+            sizeDockValue.textContent = `${uiSize}px`;
             updateSizeRangeTrack();
             continue;
           }
