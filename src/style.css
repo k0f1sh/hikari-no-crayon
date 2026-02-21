@@ -1820,6 +1820,14 @@ select:focus-visible,
     display: contents;
   }
 
+  /* Keep row 1 and row 2 split consistently on mobile widths */
+  #bottom_dock::before {
+    content: "";
+    flex-basis: 100%;
+    width: 0;
+    order: 2;
+  }
+
   /* Reset base flex on all dock items */
   #bottom_dock .dock_btn,
   #bottom_dock .dock_inline {
@@ -1834,6 +1842,7 @@ select:focus-visible,
     min-width: 0;
     gap: 0;
     padding: 4px 10px;
+    order: 1;
   }
 
   #bottom_dock #simple_settings_button .dock_main {
@@ -1851,6 +1860,7 @@ select:focus-visible,
     align-items: center;
     justify-items: center;
     padding: 2px 14px 2px 6px;
+    order: 1;
   }
 
   #bottom_dock .dock_btn_pen .dock_pen_name_text {
@@ -1882,11 +1892,13 @@ select:focus-visible,
 
   #bottom_dock .dock_size_inline {
     flex: 1 1 40%;
+    order: 1;
   }
 
   #bottom_dock .dock_color_inline {
     flex: 0 0 auto;
     padding: 4px 10px;
+    order: 1;
   }
 
   /* --- Row 2: turtle + rainbow + auto --- */
@@ -1897,6 +1909,7 @@ select:focus-visible,
     flex: 1 0 calc((100% - 8px) / 3);
     height: 36px;
     min-height: 36px;
+    order: 3;
   }
 
   #bottom_dock #turtle_open_button {
@@ -1929,18 +1942,21 @@ select:focus-visible,
     flex: 1 1 auto;
     height: 34px;
     min-height: 34px;
+    order: 4;
   }
 
   #bottom_dock .dock_btn[data-panel="etc"] {
     flex: 1 1 auto;
     height: 34px;
     min-height: 34px;
+    order: 4;
   }
 
   #bottom_dock .dock_hide_fab {
     flex: 0 0 auto;
     height: 34px;
     min-height: 34px;
+    order: 4;
   }
 
   /* Font sizes */
