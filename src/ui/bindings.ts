@@ -981,12 +981,22 @@ export function bindUiEvents(): void {
     penDockValue.appendChild(nameEl);
   };
 
+  const resetPenStrokeState = () => {
+    if (!app.penTool || typeof app.penTool !== "object") {
+      return;
+    }
+    if ("lastPoint" in app.penTool) {
+      (app.penTool as { lastPoint: { x: number; y: number } | null }).lastPoint = null;
+    }
+  };
+
   const penGroup = setupRadioGroup("pen", (value) => {
     app.selectedPenName = value;
     app.penTool = app.penTools[value]
       ?? app.penTools[defaultPersistedSettings.pen]
       ?? Object.values(app.penTools)[0]
       ?? null;
+    resetPenStrokeState();
     renderPenCustomControls(value);
     renderPenDockValue(value);
     closePanels();
@@ -2193,6 +2203,7 @@ export function bindUiEvents(): void {
 
   const stopDrawing = () => {
     app.isDown = false;
+    resetPenStrokeState();
     if (app.didDrawInStroke) {
       commitHistory();
       app.didDrawInStroke = false;

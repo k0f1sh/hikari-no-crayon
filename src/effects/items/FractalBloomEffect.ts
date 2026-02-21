@@ -69,7 +69,7 @@ export class FractalBloomEffect implements Effect {
       const dx = toX - fromX;
       const dy = toY - fromY;
       const angle = Math.atan2(dy, dx);
-      const length = Math.max(10, Math.min(180, Math.hypot(dx, dy) * 0.95 + app.penSize * 0.8));
+      const length = Math.max(8, Math.min(140, Math.hypot(dx, dy) * 0.78 + app.penSize * 0.52));
       this.growTree(root, angle, length, 0, this.maxDepth, this.segments);
     }
 
@@ -101,7 +101,7 @@ export class FractalBloomEffect implements Effect {
     }
     this.renderedCount = target;
 
-    if (this.renderedCount > 0) {
+    if (this.renderedCount > 0 && this.mode !== "tree") {
       this.drawHeadGlow(this.head.x, this.head.y, Math.max(1.4, this.lineWidth * 1.8), this.alpha * 0.2);
     }
   }
