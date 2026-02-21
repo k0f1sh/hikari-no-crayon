@@ -5,7 +5,7 @@
 ブラウザでサクッと遊べて、描くだけで作品がパッと映えるのがポイントです。
 
 ## Demo
-- https://k0f1sh.github.io/hikari-no-crayon/index.html
+- https://k0f1sh.github.io/hikari-no-crayon/
 
 ## Screenshot
 ![Hikari-no-Crayon demo](./demo.png)
