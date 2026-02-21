@@ -21,7 +21,14 @@ export interface PenCustomNumberParamDefinition {
 export type PenCustomParamDefinition = PenCustomBooleanParamDefinition | PenCustomNumberParamDefinition;
 
 export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> = {
-  normal_pen: [],
+  normal_pen: [
+    {
+      key: "use_linear_interpolation",
+      label: "せんけいほかん",
+      type: "boolean",
+      defaultValue: true,
+    },
+  ],
   blood_pen: [],
   fur_pen: [
     {

@@ -2183,12 +2183,34 @@ export function bindUiEvents(): void {
     window.requestAnimationFrame(previewLoop);
   };
   window.requestAnimationFrame(previewLoop);
+  let lastStrokePoint: { x: number; y: number } | null = null;
 
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
     applyDrawCompositeOperation();
     if (app.isDown && app.penTool) {
-      drawWithSymmetry(event.pageX, event.pageY);
+      const currentX = event.pageX;
+      const currentY = event.pageY;
+      const shouldInterpolateNormalPen = app.selectedPenName === "normal_pen"
+        && app.penCustomParams.normal_pen?.use_linear_interpolation !== false;
+      if (shouldInterpolateNormalPen && lastStrokePoint) {
+        const dx = currentX - lastStrokePoint.x;
+        const dy = currentY - lastStrokePoint.y;
+        const dist = Math.hypot(dx, dy);
+        const interpolationStep = Math.max(2, app.penSize * 0.35);
+        const steps = Math.ceil(dist / interpolationStep);
+        if (steps > 1) {
+          for (let i = 1; i <= steps; i += 1) {
+            const t = i / steps;
+            drawWithSymmetry(lastStrokePoint.x + dx * t, lastStrokePoint.y + dy * t);
+          }
+        } else {
+          drawWithSymmetry(currentX, currentY);
+        }
+      } else {
+        drawWithSymmetry(currentX, currentY);
+      }
+      lastStrokePoint = { x: currentX, y: currentY };
       app.didDrawInStroke = true;
     }
   });
@@ -2198,11 +2220,13 @@ export function bindUiEvents(): void {
     app.didDrawInStroke = false;
     setPointerPosition(event);
     drawWithSymmetry(event.pageX, event.pageY);
+    lastStrokePoint = { x: event.pageX, y: event.pageY };
     app.didDrawInStroke = true;
   });
 
   const stopDrawing = () => {
     app.isDown = false;
+    lastStrokePoint = null;
     resetPenStrokeState();
     if (app.didDrawInStroke) {
       commitHistory();
