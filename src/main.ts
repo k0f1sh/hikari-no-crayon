@@ -90,6 +90,14 @@ function renderLoop(): void {
 
 function setupResize(): void {
   window.addEventListener("resize", () => {
+    const previousCanvas = document.createElement("canvas");
+    previousCanvas.width = app.canvas!.width;
+    previousCanvas.height = app.canvas!.height;
+    const previousContext = previousCanvas.getContext("2d");
+    if (previousContext) {
+      previousContext.drawImage(app.canvas!, 0, 0);
+    }
+
     app.width = window.innerWidth;
     app.height = window.innerHeight;
     app.canvas!.width = app.width;
@@ -97,6 +105,9 @@ function setupResize(): void {
     app.hudCanvas!.width = app.width;
     app.hudCanvas!.height = app.height;
     clear(app.c!);
+    if (previousContext) {
+      app.c!.drawImage(previousCanvas, 0, 0);
+    }
     app.effects = [];
     resetHistory();
     captureHistorySnapshot();
