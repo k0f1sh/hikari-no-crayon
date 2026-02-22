@@ -57,7 +57,7 @@ export class FractalBloomPen implements PenTool {
       : lastPoint;
     const depth = this.getDepth();
     const revealPerFrame = Math.max(4, 4 + app.penSize / 4.5);
-    const alpha = Math.min(0.42, 0.26 + app.penSize / 460);
+    const alpha = Math.min(0.58, 0.38 + app.penSize / 390);
     app.effects.push(
       new FractalBloomEffect(from.x, from.y, current.x, current.y, app.penColor, {
         mode,
