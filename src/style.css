@@ -1852,14 +1852,14 @@ select:focus-visible,
   #bottom_dock .dock_btn_pen {
     flex: 0 0 auto;
     width: auto;
-    max-width: 112px;
+    max-width: 128px;
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
     height: auto;
     min-height: 44px;
     align-items: center;
     justify-items: center;
-    padding: 2px 14px 2px 6px;
+    padding: 2px 22px 2px 6px;
     order: 1;
   }
 
@@ -1885,13 +1885,18 @@ select:focus-visible,
   }
 
   #bottom_dock .dock_pen_custom_gear {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
     font-size: 22px;
-    top: 1px;
-    right: 1px;
+    top: -1px;
+    right: -1px;
   }
 
   #bottom_dock .dock_size_inline {
-    flex: 1 1 40%;
+    flex: 1 1 30%;
+    min-width: 72px;
     order: 1;
   }
 

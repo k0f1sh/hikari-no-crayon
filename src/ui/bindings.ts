@@ -257,6 +257,16 @@ export function bindUiEvents(): void {
     }
   };
 
+  const resetPenCustomValuesToDefaults = (penName: string) => {
+    const definitions = penCustomParamCatalog[penName] ?? [];
+    if (!app.penCustomParams[penName] || typeof app.penCustomParams[penName] !== "object") {
+      app.penCustomParams[penName] = {};
+    }
+    definitions.forEach((definition) => {
+      app.penCustomParams[penName][definition.key] = definition.defaultValue;
+    });
+  };
+
   const formatNumberValue = (definition: PenCustomNumberParamDefinition, value: number): string => {
     if (!Number.isFinite(definition.step) || definition.step >= 1) {
       return String(Math.round(value));
@@ -275,6 +285,19 @@ export function bindUiEvents(): void {
       empty.textContent = "このぺんは かすたむせってい なし";
       penCustomControls.appendChild(empty);
       return;
+    }
+
+    if (penName === "nami_pen") {
+      const resetButton = document.createElement("button");
+      resetButton.type = "button";
+      resetButton.className = "mini_reset_button";
+      resetButton.textContent = "なみふで かすたむを しょきちにもどす";
+      resetButton.addEventListener("click", () => {
+        resetPenCustomValuesToDefaults("nami_pen");
+        renderPenCustomControls("nami_pen");
+        persist();
+      });
+      penCustomControls.appendChild(resetButton);
     }
 
     definitions.forEach((definition) => {
@@ -2194,20 +2217,35 @@ export function bindUiEvents(): void {
   const activePointerIds = new Set<number>();
   const lastStrokePoints = new Map<number, { x: number; y: number }>();
 
+  const shouldUseLinearInterpolationForCurrentPen = () => {
+    const penName = app.selectedPenName;
+    if (penName !== "normal_pen" && penName !== "nami_pen") {
+      return false;
+    }
+    return app.penCustomParams[penName]?.use_linear_interpolation !== false;
+  };
+
+  const getInterpolationStepForCurrentPen = () => {
+    if (app.selectedPenName === "nami_pen") {
+      // Effect-based pens need denser samples to visually connect strokes.
+      return Math.max(1, app.penSize * 0.12);
+    }
+    return Math.max(2, app.penSize * 0.35);
+  };
+
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
     applyDrawCompositeOperation();
     if (activePointerIds.has(event.pointerId) && app.penTool) {
       const currentX = event.pageX;
       const currentY = event.pageY;
-      const shouldInterpolateNormalPen = app.selectedPenName === "normal_pen"
-        && app.penCustomParams.normal_pen?.use_linear_interpolation !== false;
+      const shouldInterpolateStroke = shouldUseLinearInterpolationForCurrentPen();
       const lastStrokePoint = lastStrokePoints.get(event.pointerId) ?? null;
-      if (shouldInterpolateNormalPen && lastStrokePoint) {
+      if (shouldInterpolateStroke && lastStrokePoint) {
         const dx = currentX - lastStrokePoint.x;
         const dy = currentY - lastStrokePoint.y;
         const dist = Math.hypot(dx, dy);
-        const interpolationStep = Math.max(2, app.penSize * 0.35);
+        const interpolationStep = getInterpolationStepForCurrentPen();
         const steps = Math.ceil(dist / interpolationStep);
         if (steps > 1) {
           for (let i = 1; i <= steps; i += 1) {
