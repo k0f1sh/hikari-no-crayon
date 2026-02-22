@@ -635,7 +635,7 @@ export function bindUiEvents(): void {
     },
     mangekyo: {
       pen: "snow_pen",
-      size: 45,
+      size: 120,
       colorHex: "#56b1ff",
       rainbowMode: true,
       rainbowSaturation: 160,
@@ -727,7 +727,7 @@ export function bindUiEvents(): void {
     wafu: {
       pen: "nami_pen",
       size: 80,
-      colorHex: "#1e1e1e",
+      colorHex: "#2a2a2a",
       rainbowMode: false,
       rainbowSaturation: 0,
       rainbowBrightness: 30,
@@ -785,6 +785,8 @@ export function bindUiEvents(): void {
     }
 
     penGroup.selectByValue(preset.pen) || penGroup.selectByValue(defaultPersistedSettings.pen);
+    resetPenCustomValuesToDefaults(app.selectedPenName);
+    renderPenCustomControls(app.selectedPenName);
     applySize(preset.size);
     applyColor(preset.colorHex);
 
