@@ -423,6 +423,16 @@ export function bindUiEvents(): void {
     }
   };
 
+  const drawWithSymmetryForPointer = (pointerId: number | null, x: number, y: number) => {
+    const prevPointerId = app.activePointerId;
+    app.activePointerId = pointerId;
+    try {
+      drawWithSymmetry(x, y);
+    } finally {
+      app.activePointerId = prevPointerId;
+    }
+  };
+
   const refreshUndoRedoButtons = () => {
     const undoEnabled = canUndo();
     const redoEnabled = canRedo();
@@ -1018,8 +1028,21 @@ export function bindUiEvents(): void {
     if (!app.penTool || typeof app.penTool !== "object") {
       return;
     }
+    if ("clearStrokeState" in app.penTool && typeof app.penTool.clearStrokeState === "function") {
+      (app.penTool as { clearStrokeState: () => void }).clearStrokeState();
+      return;
+    }
     if ("lastPoint" in app.penTool) {
       (app.penTool as { lastPoint: { x: number; y: number } | null }).lastPoint = null;
+    }
+  };
+
+  const resetPenPointerStrokeState = (pointerId: number) => {
+    if (!app.penTool || typeof app.penTool !== "object") {
+      return;
+    }
+    if ("clearPointerState" in app.penTool && typeof app.penTool.clearPointerState === "function") {
+      (app.penTool as { clearPointerState: (id: number) => void }).clearPointerState(pointerId);
     }
   };
 
@@ -2252,13 +2275,17 @@ export function bindUiEvents(): void {
         if (steps > 1) {
           for (let i = 1; i <= steps; i += 1) {
             const t = i / steps;
-            drawWithSymmetry(lastStrokePoint.x + dx * t, lastStrokePoint.y + dy * t);
+            drawWithSymmetryForPointer(
+              event.pointerId,
+              lastStrokePoint.x + dx * t,
+              lastStrokePoint.y + dy * t,
+            );
           }
         } else {
-          drawWithSymmetry(currentX, currentY);
+          drawWithSymmetryForPointer(event.pointerId, currentX, currentY);
         }
       } else {
-        drawWithSymmetry(currentX, currentY);
+        drawWithSymmetryForPointer(event.pointerId, currentX, currentY);
       }
       lastStrokePoints.set(event.pointerId, { x: currentX, y: currentY });
       app.didDrawInStroke = true;
@@ -2276,7 +2303,7 @@ export function bindUiEvents(): void {
     if (canvas.setPointerCapture) {
       canvas.setPointerCapture(event.pointerId);
     }
-    drawWithSymmetry(event.pageX, event.pageY);
+    drawWithSymmetryForPointer(event.pointerId, event.pageX, event.pageY);
     lastStrokePoints.set(event.pointerId, { x: event.pageX, y: event.pageY });
     app.didDrawInStroke = true;
   });
@@ -2284,6 +2311,7 @@ export function bindUiEvents(): void {
   const stopDrawing = (event: PointerEvent) => {
     activePointerIds.delete(event.pointerId);
     lastStrokePoints.delete(event.pointerId);
+    resetPenPointerStrokeState(event.pointerId);
     if (canvas.hasPointerCapture?.(event.pointerId)) {
       canvas.releasePointerCapture(event.pointerId);
     }

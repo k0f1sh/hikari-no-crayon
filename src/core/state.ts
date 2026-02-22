@@ -36,6 +36,7 @@ export const app = {
   historyStack: [] as ImageData[],
   historyIndex: -1,
   didDrawInStroke: false,
+  activePointerId: null as number | null,
 };
 
 export function requireMainContext(): CanvasRenderingContext2D {

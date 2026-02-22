@@ -3,7 +3,19 @@ import { FractalBloomEffect } from "../../effects";
 import type { PenTool, Point } from "../../types";
 
 export class FractalBloomPen implements PenTool {
-  lastPoint: Point | null = null;
+  lastPoints = new Map<number | "default", Point>();
+
+  private getPointerKey(): number | "default" {
+    return typeof app.activePointerId === "number" ? app.activePointerId : "default";
+  }
+
+  clearPointerState(pointerId: number): void {
+    this.lastPoints.delete(pointerId);
+  }
+
+  clearStrokeState(): void {
+    this.lastPoints.clear();
+  }
 
   draw(x: number, y: number): void {
     if (!Number.isFinite(x) || !Number.isFinite(y)) {
@@ -11,20 +23,22 @@ export class FractalBloomPen implements PenTool {
     }
 
     const current: Point = { x, y };
+    const pointerKey = this.getPointerKey();
+    const lastPoint = this.lastPoints.get(pointerKey) ?? null;
     const jumpThreshold = Math.max(28, app.penSize * 8.5);
     const minDistance = Math.max(3, app.penSize * 0.22);
 
-    if (!this.lastPoint) {
-      this.lastPoint = current;
+    if (!lastPoint) {
+      this.lastPoints.set(pointerKey, current);
       return;
     }
 
-    const dx = current.x - this.lastPoint.x;
-    const dy = current.y - this.lastPoint.y;
+    const dx = current.x - lastPoint.x;
+    const dy = current.y - lastPoint.y;
     const dist = Math.hypot(dx, dy);
 
     if (dist > jumpThreshold) {
-      this.lastPoint = current;
+      this.lastPoints.set(pointerKey, current);
       return;
     }
 
@@ -40,7 +54,7 @@ export class FractalBloomPen implements PenTool {
       : Math.max(14, Math.min(140, app.penSize * 3.8));
     const from = dist > maxLength
       ? { x: current.x - unitX * maxLength, y: current.y - unitY * maxLength }
-      : this.lastPoint;
+      : lastPoint;
     const depth = this.getDepth();
     const revealPerFrame = Math.max(4, 4 + app.penSize / 4.5);
     const alpha = Math.min(0.42, 0.26 + app.penSize / 460);
@@ -53,7 +67,7 @@ export class FractalBloomPen implements PenTool {
         revealPerFrame,
       }),
     );
-    this.lastPoint = current;
+    this.lastPoints.set(pointerKey, current);
   }
 
   getDepth(): number {
