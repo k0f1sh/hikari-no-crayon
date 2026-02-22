@@ -114,12 +114,46 @@ function setupResize(): void {
   });
 }
 
+function setupMobileViewportGuards(): void {
+  const preventDefault = (event: Event) => {
+    event.preventDefault();
+  };
+
+  // iPad Safari pinch zoom gesture events.
+  document.addEventListener("gesturestart", preventDefault, { passive: false });
+  document.addEventListener("gesturechange", preventDefault, { passive: false });
+  document.addEventListener("gestureend", preventDefault, { passive: false });
+
+  // Prevent pinch zoom via multi-touch while keeping single-touch UI interactions working.
+  document.addEventListener(
+    "touchmove",
+    (event) => {
+      if (event.touches.length > 1) {
+        event.preventDefault();
+      }
+    },
+    { passive: false },
+  );
+
+  // Prevent browser zoom on trackpads / external input devices.
+  window.addEventListener(
+    "wheel",
+    (event) => {
+      if (event.ctrlKey) {
+        event.preventDefault();
+      }
+    },
+    { passive: false },
+  );
+}
+
 function init(): void {
   app.penColor = defaultPenColor;
   app.selectedPenName = defaultPenName;
   app.penTools = createPenTools();
   app.penTool = app.penTools[defaultPenName];
 
+  setupMobileViewportGuards();
   initCanvas();
   resetHistory();
   captureHistorySnapshot();
