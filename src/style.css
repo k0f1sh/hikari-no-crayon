@@ -391,8 +391,8 @@ select {
   background: linear-gradient(135deg, #0f172f, #2e3d62);
 }
 
-.simple_preset_button[data-simple-preset="yamispray"] .simple_preset_icon {
-  background: linear-gradient(135deg, #1b1f2b, #4f78ff);
+.simple_preset_button[data-simple-preset="wafu"] .simple_preset_icon {
+  background: linear-gradient(135deg, #4e2f2a, #b88a5a);
 }
 
 .simple_preset_button[data-simple-preset="yamikeshi"] .simple_preset_icon {

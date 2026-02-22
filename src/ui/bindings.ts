@@ -592,7 +592,7 @@ export function bindUiEvents(): void {
     | "futsu"
     | "bukimi"
     | "hane"
-    | "yamispray"
+    | "wafu"
     | "yamikeshi";
   type SimplePresetConfig = {
     pen: string;
@@ -724,15 +724,15 @@ export function bindUiEvents(): void {
       symmetryOriginX: 50,
       symmetryOriginY: 50,
     },
-    yamispray: {
-      pen: "spray_pen",
-      size: 72,
-      colorHex: "#38f7ff",
+    wafu: {
+      pen: "nami_pen",
+      size: 80,
+      colorHex: "#1e1e1e",
       rainbowMode: false,
-      rainbowSaturation: 200,
-      rainbowBrightness: 200,
-      fadeMode: true,
-      autoMode: true,
+      rainbowSaturation: 0,
+      rainbowBrightness: 30,
+      fadeMode: false,
+      autoMode: false,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -764,7 +764,7 @@ export function bindUiEvents(): void {
 
   const isSimplePresetKey = (value: string): value is SimplePresetKey =>
     value === "nijiiro" || value === "mangekyo" || value === "lifegame" || value === "futsu"
-    || value === "bukimi" || value === "hane" || value === "yamispray" || value === "yamikeshi";
+    || value === "bukimi" || value === "hane" || value === "wafu" || value === "yamikeshi";
 
   const closeSimpleSettingsModal = () => {
     simpleSettingsModal.classList.remove("is-open");
