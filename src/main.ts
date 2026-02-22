@@ -126,6 +126,7 @@ function init(): void {
   bindUiEvents();
   setupResize();
   renderLoop();
+  document.documentElement.classList.add("app-ready");
 }
 
 window.addEventListener("load", init);

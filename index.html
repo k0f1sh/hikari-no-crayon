@@ -7,6 +7,16 @@
     <link rel="icon" type="image/png" href="/icon.png" />
     <link rel="apple-touch-icon" href="/icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <style>
+      body {
+        margin: 0;
+        background: #050a16;
+      }
+
+      html:not(.app-ready) body > * {
+        visibility: hidden;
+      }
+    </style>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script type="module" src="/src/main.ts"></script>
   </head>
@@ -23,7 +33,7 @@
         </div>
 
         <button type="button" id="dock_show_button" aria-label="めにゅーをひょうじ">⌃</button>
-        <div id="menu">
+        <div id="menu" style="display: none">
           <h1 id="plh">ぺんのしゅるい</h1>
           <ul id="pl" class="pen_list">
             <li class="panel_close_row">
