@@ -2191,16 +2191,18 @@ export function bindUiEvents(): void {
     window.requestAnimationFrame(previewLoop);
   };
   window.requestAnimationFrame(previewLoop);
-  let lastStrokePoint: { x: number; y: number } | null = null;
+  const activePointerIds = new Set<number>();
+  const lastStrokePoints = new Map<number, { x: number; y: number }>();
 
   canvas.addEventListener("pointermove", (event) => {
     setPointerPosition(event);
     applyDrawCompositeOperation();
-    if (app.isDown && app.penTool) {
+    if (activePointerIds.has(event.pointerId) && app.penTool) {
       const currentX = event.pageX;
       const currentY = event.pageY;
       const shouldInterpolateNormalPen = app.selectedPenName === "normal_pen"
         && app.penCustomParams.normal_pen?.use_linear_interpolation !== false;
+      const lastStrokePoint = lastStrokePoints.get(event.pointerId) ?? null;
       if (shouldInterpolateNormalPen && lastStrokePoint) {
         const dx = currentX - lastStrokePoint.x;
         const dy = currentY - lastStrokePoint.y;
@@ -2218,23 +2220,37 @@ export function bindUiEvents(): void {
       } else {
         drawWithSymmetry(currentX, currentY);
       }
-      lastStrokePoint = { x: currentX, y: currentY };
+      lastStrokePoints.set(event.pointerId, { x: currentX, y: currentY });
       app.didDrawInStroke = true;
     }
   });
 
   canvas.addEventListener("pointerdown", (event) => {
+    const wasDrawing = activePointerIds.size > 0;
+    activePointerIds.add(event.pointerId);
     app.isDown = true;
-    app.didDrawInStroke = false;
+    if (!wasDrawing) {
+      app.didDrawInStroke = false;
+    }
     setPointerPosition(event);
+    if (canvas.setPointerCapture) {
+      canvas.setPointerCapture(event.pointerId);
+    }
     drawWithSymmetry(event.pageX, event.pageY);
-    lastStrokePoint = { x: event.pageX, y: event.pageY };
+    lastStrokePoints.set(event.pointerId, { x: event.pageX, y: event.pageY });
     app.didDrawInStroke = true;
   });
 
-  const stopDrawing = () => {
-    app.isDown = false;
-    lastStrokePoint = null;
+  const stopDrawing = (event: PointerEvent) => {
+    activePointerIds.delete(event.pointerId);
+    lastStrokePoints.delete(event.pointerId);
+    if (canvas.hasPointerCapture?.(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+    app.isDown = activePointerIds.size > 0;
+    if (activePointerIds.size > 0) {
+      return;
+    }
     resetPenStrokeState();
     if (app.didDrawInStroke) {
       commitHistory();
