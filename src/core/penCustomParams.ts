@@ -228,7 +228,7 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       key: "side_count",
       label: "そとせんのかず",
       type: "number",
-      defaultValue: 2,
+      defaultValue: 6,
       min: 0,
       max: 12,
       step: 1,
