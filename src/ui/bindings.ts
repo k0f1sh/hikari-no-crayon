@@ -622,6 +622,7 @@ export function bindUiEvents(): void {
     symmetryOriginX: number;
     symmetryOriginY: number;
     lifeSnapToGrid?: boolean;
+    normalUseCrayonTexture?: boolean;
   };
 
   const simplePresetConfigs: Record<SimplePresetKey, SimplePresetConfig> = {
@@ -697,6 +698,7 @@ export function bindUiEvents(): void {
       symmetryCount: 4,
       symmetryOriginX: 50,
       symmetryOriginY: 50,
+      normalUseCrayonTexture: false,
     },
     bukimi: {
       pen: "blood_pen",
@@ -832,6 +834,17 @@ export function bindUiEvents(): void {
       };
       if (app.selectedPenName === "life_pen") {
         renderPenCustomControls("life_pen");
+      }
+    }
+
+    if (typeof preset.normalUseCrayonTexture === "boolean") {
+      const normalPenParams = app.penCustomParams.normal_pen;
+      app.penCustomParams.normal_pen = {
+        ...(typeof normalPenParams === "object" && normalPenParams ? normalPenParams : {}),
+        use_crayon_texture: preset.normalUseCrayonTexture,
+      };
+      if (app.selectedPenName === "normal_pen") {
+        renderPenCustomControls("normal_pen");
       }
     }
 
