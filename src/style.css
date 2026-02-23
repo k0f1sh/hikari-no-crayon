@@ -1449,8 +1449,7 @@ select {
   background-size: 470% auto;
   background-repeat: no-repeat;
   clip-path: inset(0 2px 0 2px);
-  mix-blend-mode: screen;
-  filter: brightness(1.08) contrast(1.1);
+  filter: brightness(1.06) contrast(1.08);
 }
 
 .pen_name {
