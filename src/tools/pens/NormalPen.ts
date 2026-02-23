@@ -33,11 +33,18 @@ export class NormalPen implements PenTool {
     hasDirection: boolean,
     seedBucket: number,
   ): string {
-    const angleBucket = hasDirection ? Math.round((Math.atan2(dirY, dirX) / Math.PI) * 8) : 999;
+    const angleStepDeg = radius >= 80 ? 10 : 5;
+    const angleBucket = hasDirection
+      ? ((Math.round(((Math.atan2(dirY, dirX) * 180) / Math.PI) / angleStepDeg)
+        % Math.round(360 / angleStepDeg))
+        + Math.round(360 / angleStepDeg))
+        % Math.round(360 / angleStepDeg)
+      : 999;
     return [
       Math.round(radius * 10),
       Math.round(grainRatio * 100),
       Math.round(stretchRatio * 100),
+      angleStepDeg,
       angleBucket,
       seedBucket,
       app.penColor.r,
@@ -47,7 +54,7 @@ export class NormalPen implements PenTool {
   }
 
   private trimStampCache(): void {
-    const maxEntries = 36;
+    const maxEntries = 48;
     while (this.stampCache.size > maxEntries) {
       const firstKey = this.stampCache.keys().next().value;
       if (!firstKey) {
@@ -123,9 +130,12 @@ export class NormalPen implements PenTool {
     const { data } = image;
     const grainCell = 1.3 + grainRatio * 2.4;
     const holeStrength = grainRatio * 0.5;
+    const pixelStep = radius >= 110 ? 3 : radius >= 60 ? 2 : 1;
+    const reduceStretchDetail = radius >= 70;
+    const skipHeavyStretchPass = radius >= 110;
 
-    for (let py = 0; py < size; py += 1) {
-      for (let px = 0; px < size; px += 1) {
+    for (let py = 0; py < size; py += pixelStep) {
+      for (let px = 0; px < size; px += pixelStep) {
         const index = (py * size + px) * 4;
         const alpha = data[index + 3] / 255;
         if (alpha <= 0) {
@@ -155,9 +165,13 @@ export class NormalPen implements PenTool {
         if (hasDirection && stretchRatio > 0.01) {
           const along = (localX * dirX + localY * dirY) / Math.max(1, radius);
           const across = (localX * sideX + localY * sideY) / Math.max(1, radius);
+          const stretchAlongFreqLow = reduceStretchDetail ? 2 + stretchRatio * 4 : 4 + stretchRatio * 8;
+          const stretchAcrossFreqHigh = reduceStretchDetail
+            ? 14 + stretchRatio * 20
+            : 22 + stretchRatio * 34;
           const streak = this.hash2(
-            Math.floor((along + 1.6) * (4 + stretchRatio * 8)),
-            Math.floor((across + 1.6) * (22 + stretchRatio * 34)),
+            Math.floor((along + 1.6) * stretchAlongFreqLow),
+            Math.floor((across + 1.6) * stretchAcrossFreqHigh),
             seedBucket + 71,
           );
           const tail = Math.max(0, -along);
@@ -168,15 +182,17 @@ export class NormalPen implements PenTool {
             seedBucket + 113,
           );
           const scratch = this.hash2(
-            Math.floor((along + 1.8) * (3 + stretchRatio * 5)),
-            Math.floor((across + 1.8) * (26 + stretchRatio * 64)),
+            Math.floor((along + 1.8) * (reduceStretchDetail ? 2 + stretchRatio * 3 : 3 + stretchRatio * 5)),
+            Math.floor((across + 1.8) * (reduceStretchDetail ? 16 + stretchRatio * 34 : 26 + stretchRatio * 64)),
             seedBucket + 151,
           );
-          const scratch2 = this.hash2(
-            Math.floor((along + 1.8) * (2 + stretchRatio * 4)),
-            Math.floor((across + 1.8) * (14 + stretchRatio * 34)),
-            seedBucket + 173,
-          );
+          const scratch2 = skipHeavyStretchPass
+            ? 0.5
+            : this.hash2(
+              Math.floor((along + 1.8) * (reduceStretchDetail ? 2 + stretchRatio * 3 : 2 + stretchRatio * 4)),
+              Math.floor((across + 1.8) * (reduceStretchDetail ? 9 + stretchRatio * 18 : 14 + stretchRatio * 34)),
+              seedBucket + 173,
+            );
 
           alphaMul *= 0.88 + (streak - 0.5) * stretchRatio * 1.05;
           alphaMul *= 1 + tail * stretchRatio * 0.12;
@@ -190,11 +206,13 @@ export class NormalPen implements PenTool {
           if (scratch > 0.84 - stretchRatio * 0.2) {
             alphaMul *= 1 + centerBand * (0.06 + stretchRatio * 0.2);
           }
-          if (scratch2 < 0.2 + stretchRatio * 0.22) {
-            alphaMul *= 1 - scratchBand * (0.18 + stretchRatio * 0.46);
-          }
-          if (scratch2 > 0.88 - stretchRatio * 0.14) {
-            alphaMul *= 1 + scratchBand * (0.08 + stretchRatio * 0.18);
+          if (!skipHeavyStretchPass) {
+            if (scratch2 < 0.2 + stretchRatio * 0.22) {
+              alphaMul *= 1 - scratchBand * (0.18 + stretchRatio * 0.46);
+            }
+            if (scratch2 > 0.88 - stretchRatio * 0.14) {
+              alphaMul *= 1 + scratchBand * (0.08 + stretchRatio * 0.18);
+            }
           }
 
           if (tail > 0.08) {
@@ -202,10 +220,11 @@ export class NormalPen implements PenTool {
           }
         }
 
-        if (hasDirection && stretchRatio > 0.01) {
+        if (hasDirection && stretchRatio > 0.01 && !skipHeavyStretchPass) {
           const along = (localX * dirX + localY * dirY) / Math.max(1, radius);
           const across = (localX * sideX + localY * sideY) / Math.max(1, radius);
-          const rib = Math.sin((across * (10 + stretchRatio * 30) + along * 0.35) * Math.PI);
+          const ribFreq = reduceStretchDetail ? 7 + stretchRatio * 18 : 10 + stretchRatio * 30;
+          const rib = Math.sin((across * ribFreq + along * 0.35) * Math.PI);
           const ribBand = Math.max(0, 1 - Math.abs(across) * (1.2 + stretchRatio * 1.1));
           alphaMul *= 1 + rib * ribBand * stretchRatio * 0.22;
         }
@@ -214,8 +233,24 @@ export class NormalPen implements PenTool {
           alphaMul *= 0.94 + (1 - normR) * 0.18;
         }
 
-        const nextAlpha = Math.max(0, Math.min(255, Math.round(data[index + 3] * alphaMul)));
-        data[index + 3] = nextAlpha;
+        for (let oy = 0; oy < pixelStep; oy += 1) {
+          const yy = py + oy;
+          if (yy >= size) {
+            break;
+          }
+          for (let ox = 0; ox < pixelStep; ox += 1) {
+            const xx = px + ox;
+            if (xx >= size) {
+              break;
+            }
+            const blockIndex = (yy * size + xx) * 4;
+            if (data[blockIndex + 3] === 0) {
+              continue;
+            }
+            const nextAlpha = Math.max(0, Math.min(255, Math.round(data[blockIndex + 3] * alphaMul)));
+            data[blockIndex + 3] = nextAlpha;
+          }
+        }
       }
     }
 
@@ -267,7 +302,8 @@ export class NormalPen implements PenTool {
 
     const grainRatio = Math.min(1, grain / 100);
     const stretchRatio = Math.min(1, stretch / 100);
-    const seedBucket = (Math.floor(x * 0.17) + Math.floor(y * 0.11) + app.count) % 19;
+    const seedCell = Math.max(24, app.penSize * 0.85);
+    const seedBucket = ((Math.floor(x / seedCell) + Math.floor(y / seedCell)) % 4 + 4) % 4;
     const stamp = this.createCrayonStamp(
       app.penSize,
       grainRatio,
