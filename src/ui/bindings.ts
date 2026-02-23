@@ -628,7 +628,7 @@ export function bindUiEvents(): void {
   const simplePresetConfigs: Record<SimplePresetKey, SimplePresetConfig> = {
     nijiiro: {
       pen: "normal_pen",
-      size: 70,
+      size: 22,
       colorHex: "#56b1ff",
       rainbowMode: true,
       rainbowSaturation: 200,
@@ -646,7 +646,7 @@ export function bindUiEvents(): void {
     },
     mangekyo: {
       pen: "snow_pen",
-      size: 120,
+      size: 80,
       colorHex: "#56b1ff",
       rainbowMode: true,
       rainbowSaturation: 160,
@@ -664,7 +664,7 @@ export function bindUiEvents(): void {
     },
     lifegame: {
       pen: "life_pen",
-      size: 112,
+      size: 50,
       colorHex: "#56b1ff",
       rainbowMode: true,
       rainbowSaturation: 160,
@@ -719,9 +719,9 @@ export function bindUiEvents(): void {
       symmetryOriginY: 50,
     },
     hane: {
-      pen: "hane_pen",
-      size: 70,
-      colorHex: "#0f172f",
+      pen: "hoshi_pen",
+      size: 40,
+      colorHex: "#a88410",
       rainbowMode: false,
       rainbowSaturation: 200,
       rainbowBrightness: 200,
@@ -738,7 +738,7 @@ export function bindUiEvents(): void {
     },
     wafu: {
       pen: "nami_pen",
-      size: 80,
+      size: 20,
       colorHex: "#2a2a2a",
       rainbowMode: false,
       rainbowSaturation: 0,
@@ -756,7 +756,7 @@ export function bindUiEvents(): void {
     },
     yamikeshi: {
       pen: "normal_pen",
-      size: 80,
+      size: 40,
       colorHex: "#56b1ff",
       rainbowMode: false,
       rainbowSaturation: 200,
