@@ -1662,6 +1662,7 @@ export function bindUiEvents(): void {
           if (event.kind === "set_pen") {
             const name = event.penName.trim();
             if (name.toLowerCase() === "none") {
+              resetPenStrokeState();
               app.selectedPenName = "none";
               app.penTool = null;
               penDockValue.classList.add("dock_pen_label");
@@ -1671,6 +1672,7 @@ export function bindUiEvents(): void {
               if (!nextPen) {
                 throw new Error(`ぺんが みつかりません: ${name}`);
               }
+              resetPenStrokeState();
               app.selectedPenName = name;
               app.penTool = nextPen;
               renderPenDockValue(name);
@@ -1688,6 +1690,9 @@ export function bindUiEvents(): void {
           if (point.draw) {
             drawWithSymmetry(point.x, point.y);
             hasDrawnPoint = true;
+          } else {
+            // pen up/down や移動で線が途切れるので、状態を持つペンのストローク情報を切る
+            resetPenStrokeState();
           }
           lastPoint = point;
           frameRemaining -= 1;
