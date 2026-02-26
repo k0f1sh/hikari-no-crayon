@@ -306,6 +306,20 @@ export function bindUiEvents(): void {
       penCustomControls.appendChild(resetButton);
     }
 
+    const dependentLabels: { dependsOn: string; label: HTMLElement }[] = [];
+
+    const updateDependentStates = (booleanKey: string, enabled: boolean) => {
+      dependentLabels.forEach((entry) => {
+        if (entry.dependsOn === booleanKey) {
+          entry.label.classList.toggle("is-disabled", !enabled);
+          const input = entry.label.querySelector("input");
+          if (input) {
+            input.disabled = !enabled;
+          }
+        }
+      });
+    };
+
     definitions.forEach((definition) => {
       ensurePenCustomValue(penName, definition);
 
@@ -321,6 +335,7 @@ export function bindUiEvents(): void {
         input.checked = app.penCustomParams[penName][definition.key] === true;
         input.addEventListener("change", () => {
           app.penCustomParams[penName][definition.key] = input.checked;
+          updateDependentStates(definition.key, input.checked);
           persist();
         });
 
@@ -332,6 +347,14 @@ export function bindUiEvents(): void {
 
       const label = document.createElement("label");
       label.className = "range_label";
+
+      if (definition.dependsOn) {
+        const depEnabled = app.penCustomParams[penName][definition.dependsOn] === true;
+        if (!depEnabled) {
+          label.classList.add("is-disabled");
+        }
+        dependentLabels.push({ dependsOn: definition.dependsOn, label });
+      }
 
       const title = document.createElement("span");
       title.textContent = definition.label;
@@ -346,6 +369,10 @@ export function bindUiEvents(): void {
         ? Math.max(definition.min, Math.min(definition.max, currentValue))
         : definition.defaultValue;
       input.value = String(safeValue);
+
+      if (definition.dependsOn) {
+        input.disabled = app.penCustomParams[penName][definition.dependsOn] !== true;
+      }
 
       const valueText = document.createElement("strong");
       valueText.className = "pen_custom_value";

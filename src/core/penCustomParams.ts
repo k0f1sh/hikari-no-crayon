@@ -16,6 +16,7 @@ export interface PenCustomNumberParamDefinition {
   min: number;
   max: number;
   step: number;
+  dependsOn?: string;
 }
 
 export type PenCustomParamDefinition = PenCustomBooleanParamDefinition | PenCustomNumberParamDefinition;
@@ -42,6 +43,7 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       min: 0,
       max: 100,
       step: 1,
+      dependsOn: "use_crayon_texture",
     },
     {
       key: "crayon_stretch",
@@ -51,6 +53,7 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       min: 0,
       max: 100,
       step: 1,
+      dependsOn: "use_crayon_texture",
     },
   ],
   blood_pen: [],
