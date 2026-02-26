@@ -69,9 +69,9 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
     },
     {
       key: "scatter_radius",
-      label: "ちりばり",
+      label: "ちらばり",
       type: "number",
-      defaultValue: 10,
+      defaultValue: 30,
       min: 2,
       max: 60,
       step: 1,
