@@ -18,6 +18,8 @@ export const app = {
   isFadeMode: false,
   fadeStrength: 5,
   isAutoMode: false,
+  autoSpeed: 1,
+  autoDensity: 1,
   isYamiMode: false,
   yamiStrength: 100,
   isSymmetryMode: false,

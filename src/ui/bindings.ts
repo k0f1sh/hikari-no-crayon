@@ -186,6 +186,7 @@ export function bindUiEvents(): void {
   const simpleSettingsModal = byId<HTMLElement>("simple_settings_modal");
   const simpleSettingsCloseButton = byId<HTMLButtonElement>("simple_settings_close_button");
   const rainbowMenuButton = byId<HTMLButtonElement>("rainbow_menu_button");
+  const autoMenuButton = byId<HTMLButtonElement>("auto_menu_button");
   const fadeMenuButton = byId<HTMLButtonElement>("fade_menu_button");
   const yamiMenuButton = byId<HTMLButtonElement>("yami_menu_button");
   const symmetryMenuButton = byId<HTMLButtonElement>("symmetry_menu_button");
@@ -200,7 +201,10 @@ export function bindUiEvents(): void {
   const autoDockValue = byId<HTMLElement>("auto_dock_value");
   const yamiDockValue = byId<HTMLElement>("yami_dock_value");
   const symmetryDockValue = byId<HTMLElement>("symmetry_dock_value");
-  const dockAutoToggleButton = byId<HTMLButtonElement>("dock_auto_toggle_button");
+  const autoSpeed = byId<HTMLInputElement>("auto_speed");
+  const autoSpeedValue = byId<HTMLElement>("auto_speed_value");
+  const autoDensity = byId<HTMLInputElement>("auto_density");
+  const autoDensityValue = byId<HTMLElement>("auto_density_value");
   const colorPicker = byId<HTMLInputElement>("dock_color_picker");
   const undoButton = byId<HTMLElement>("undo_button");
   const redoButton = byId<HTMLElement>("redo_button");
@@ -376,6 +380,8 @@ export function bindUiEvents(): void {
       fadeMode: app.isFadeMode,
       fadeStrength: app.fadeStrength,
       autoMode: app.isAutoMode,
+      autoSpeed: app.autoSpeed,
+      autoDensity: app.autoDensity,
       yamiMode: app.isYamiMode,
       yamiStrength: app.yamiStrength,
       symmetryMode: app.isSymmetryMode,
@@ -483,6 +489,30 @@ export function bindUiEvents(): void {
     persist();
   };
 
+  const applyAutoSpeed = (value: number) => {
+    const clamped = Math.max(1, Math.min(10, Math.round(value)));
+    app.autoSpeed = clamped;
+    autoSpeed.value = String(clamped);
+    autoSpeedValue.textContent = String(clamped);
+    persist();
+  };
+
+  const applyAutoDensity = (value: number) => {
+    const clamped = Math.max(1, Math.min(20, Math.round(value)));
+    app.autoDensity = clamped;
+    autoDensity.value = String(clamped);
+    autoDensityValue.textContent = String(clamped);
+    persist();
+  };
+
+  const updateAutoControlsState = () => {
+    const disabled = !app.isAutoMode;
+    autoSpeed.disabled = disabled;
+    autoSpeed.closest("label")?.classList.toggle("is-disabled", disabled);
+    autoDensity.disabled = disabled;
+    autoDensity.closest("label")?.classList.toggle("is-disabled", disabled);
+  };
+
   const applyFadeStrength = (value: number) => {
     const clamped = Math.max(1, Math.min(20, Math.round(value)));
     app.fadeStrength = clamped;
@@ -540,8 +570,11 @@ export function bindUiEvents(): void {
   const updateModeDockValue = () => {
     rainbowDockValue.textContent = app.isRainbowMode ? "ON" : "OFF";
     modeDockButton?.classList.toggle("is-on-state", app.isRainbowMode);
+  };
+
+  const updateAutoDockValue = () => {
     autoDockValue.textContent = app.isAutoMode ? "ON" : "OFF";
-    dockAutoToggleButton.classList.toggle("is-on-state", app.isAutoMode);
+    autoDockButton?.classList.toggle("is-on-state", app.isAutoMode);
   };
 
   const updateFadeDockValue = () => {
@@ -635,6 +668,8 @@ export function bindUiEvents(): void {
     fadeMode: boolean;
     fadeStrength: number;
     autoMode: boolean;
+    autoSpeed: number;
+    autoDensity: number;
     yamiMode: boolean;
     yamiStrength: number;
     symmetryMode: boolean;
@@ -658,6 +693,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -677,6 +714,8 @@ export function bindUiEvents(): void {
       fadeMode: true,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: true,
@@ -696,6 +735,8 @@ export function bindUiEvents(): void {
       fadeMode: true,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -716,6 +757,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -736,6 +779,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: true,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -755,6 +800,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -774,6 +821,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: false,
       yamiStrength: 100,
       symmetryMode: false,
@@ -793,6 +842,8 @@ export function bindUiEvents(): void {
       fadeMode: false,
       fadeStrength: 5,
       autoMode: false,
+      autoSpeed: 1,
+      autoDensity: 1,
       yamiMode: true,
       yamiStrength: 100,
       symmetryMode: false,
@@ -841,6 +892,9 @@ export function bindUiEvents(): void {
     applyFadeStrength(preset.fadeStrength);
     updateFadeControlsState();
     app.isAutoMode = preset.autoMode;
+    applyAutoSpeed(preset.autoSpeed);
+    applyAutoDensity(preset.autoDensity);
+    updateAutoControlsState();
 
     app.isYamiMode = preset.yamiMode;
     applyYamiStrength(preset.yamiStrength);
@@ -882,6 +936,7 @@ export function bindUiEvents(): void {
 
     applyDrawCompositeOperation();
     updateModeDockValue();
+    updateAutoDockValue();
     updateFadeDockValue();
     updateYamiDockValue();
     updateSymmetryDockValue();
@@ -891,10 +946,11 @@ export function bindUiEvents(): void {
 
   const dockButtons = Array.from(dock.querySelectorAll<HTMLButtonElement>(".dock_btn"));
   const modeDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="ml"]');
+  const autoDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="at"]');
   const fadeDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="fd"]');
   const yamiDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="yh"]');
   const symmetryDockButton = dock.querySelector<HTMLButtonElement>('.dock_btn[data-panel="sy"]');
-  const panelIds = ["pl", "pc", "ml", "fd", "yh", "sy", "etc"];
+  const panelIds = ["pl", "pc", "ml", "at", "fd", "yh", "sy", "etc"];
   const panels = panelIds.reduce<Record<string, HTMLElement>>((acc, id) => {
     acc[id] = byId<HTMLElement>(id);
     return acc;
@@ -1158,10 +1214,31 @@ export function bindUiEvents(): void {
     setActivePanel("fd");
   });
 
-  dockAutoToggleButton.addEventListener("click", () => {
+  autoDockButton?.addEventListener("click", () => {
     app.isAutoMode = !app.isAutoMode;
-    updateModeDockValue();
+    updateAutoControlsState();
+    updateAutoDockValue();
+    if (!app.isAutoMode && activePanelId === "at") {
+      closePanels();
+    }
     persist();
+  });
+
+  autoSpeed.addEventListener("input", (event) => {
+    applyAutoSpeed(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  autoDensity.addEventListener("input", (event) => {
+    applyAutoDensity(Number((event.currentTarget as HTMLInputElement).value));
+  });
+
+  autoMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (activePanelId === "at") {
+      closePanels();
+      return;
+    }
+    setActivePanel("at");
   });
 
   rainbowMenuButton.addEventListener("click", (event) => {
@@ -2422,6 +2499,9 @@ export function bindUiEvents(): void {
       applyFadeStrength(settings.fadeStrength);
       updateFadeControlsState();
       app.isAutoMode = settings.autoMode;
+      applyAutoSpeed(settings.autoSpeed);
+      applyAutoDensity(settings.autoDensity);
+      updateAutoControlsState();
 
       app.isYamiMode = settings.yamiMode;
       applyYamiStrength(settings.yamiStrength);
