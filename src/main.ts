@@ -44,7 +44,7 @@ function renderLoop(): void {
   }
   app.c!.globalCompositeOperation = getDrawCompositeOperation();
 
-  if (app.isAutoMode && app.penTool && app.count % app.autoSpeed === 0) {
+  if (app.isAutoMode && app.penTool && app.count % (11 - app.autoSpeed) === 0) {
     for (let d = 0; d < app.autoDensity; d += 1) {
       const x = Math.floor(Math.random() * app.width);
       const y = Math.floor(Math.random() * app.height);
