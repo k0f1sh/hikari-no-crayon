@@ -516,8 +516,8 @@ export function bindUiEvents(): void {
     persist();
   };
 
-  const getAutoSpeedMax = () => (app.isAutoMode && app.isFadeMode ? 5 : 10);
-  const getAutoDensityMax = () => (app.isAutoMode && app.isFadeMode ? 10 : 20);
+  const getAutoSpeedMax = () => (app.isAutoMode && app.isFadeMode ? 1 : 10);
+  const getAutoDensityMax = () => (app.isAutoMode && app.isFadeMode ? 1 : 20);
 
   const applyAutoSpeed = (value: number) => {
     const max = getAutoSpeedMax();
