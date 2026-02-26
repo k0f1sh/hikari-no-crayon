@@ -516,20 +516,32 @@ export function bindUiEvents(): void {
     persist();
   };
 
+  const getAutoSpeedMax = () => (app.isAutoMode && app.isFadeMode ? 5 : 10);
+  const getAutoDensityMax = () => (app.isAutoMode && app.isFadeMode ? 10 : 20);
+
   const applyAutoSpeed = (value: number) => {
-    const clamped = Math.max(1, Math.min(10, Math.round(value)));
+    const max = getAutoSpeedMax();
+    const clamped = Math.max(1, Math.min(max, Math.round(value)));
     app.autoSpeed = clamped;
+    autoSpeed.max = String(max);
     autoSpeed.value = String(clamped);
     autoSpeedValue.textContent = String(clamped);
     persist();
   };
 
   const applyAutoDensity = (value: number) => {
-    const clamped = Math.max(1, Math.min(20, Math.round(value)));
+    const max = getAutoDensityMax();
+    const clamped = Math.max(1, Math.min(max, Math.round(value)));
     app.autoDensity = clamped;
+    autoDensity.max = String(max);
     autoDensity.value = String(clamped);
     autoDensityValue.textContent = String(clamped);
     persist();
+  };
+
+  const enforceAutoLimits = () => {
+    applyAutoSpeed(app.autoSpeed);
+    applyAutoDensity(app.autoDensity);
   };
 
   const updateAutoControlsState = () => {
@@ -538,6 +550,7 @@ export function bindUiEvents(): void {
     autoSpeed.closest("label")?.classList.toggle("is-disabled", disabled);
     autoDensity.disabled = disabled;
     autoDensity.closest("label")?.classList.toggle("is-disabled", disabled);
+    enforceAutoLimits();
   };
 
   const applyFadeStrength = (value: number) => {
@@ -1222,6 +1235,7 @@ export function bindUiEvents(): void {
     app.isFadeMode = !app.isFadeMode;
     updateFadeControlsState();
     updateFadeDockValue();
+    enforceAutoLimits();
     if (!app.isFadeMode && activePanelId === "fd") {
       closePanels();
     }
