@@ -23,7 +23,7 @@
    - `npm run typecheck`
 
 ## Modernization Notes
-- Legacy source is kept in `hc.js` and `hc.css` for reference.
+- Legacy source files (`hc.js`, `hc.css`) were removed after modernization cleanup.
 - Current runtime entry is `index.html` + `src/main.ts`.
 - `jQuery` and `underscore` dependencies were removed from runtime code.
 - Source is split into:
