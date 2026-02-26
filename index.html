@@ -106,6 +106,18 @@
             </div>
           </div>
 
+          <h1 id="fdh">ふぇーど</h1>
+          <div id="fd">
+            <div class="panel_close_row">
+              <button type="button" class="panel_close" aria-label="とじる">×</button>
+            </div>
+            <label class="range_label">
+              <span>ふぇーどのつよさ</span>
+              <input type="range" id="fade_strength" min="1" max="20" step="1" value="5" />
+              <strong id="fade_strength_value">5</strong>
+            </label>
+          </div>
+
           <h1 id="yhh">やみのくれよん</h1>
           <div id="yh">
             <div class="panel_close_row">
@@ -430,10 +442,13 @@
               <span class="dock_main">おーと</span>
               <span class="dock_sub" id="auto_dock_value">OFF</span>
             </button>
-            <button type="button" class="dock_btn dock_mode_toggle" id="dock_fade_toggle_button">
-              <span class="dock_main">ふぇーど</span>
-              <span class="dock_sub" id="fade_dock_value">OFF</span>
-            </button>
+            <div class="dock_mode_item">
+              <button type="button" class="dock_btn" data-panel="fd" id="dock_fade_toggle_button">
+                <span class="dock_main">ふぇーど</span>
+                <span class="dock_sub" id="fade_dock_value">OFF</span>
+              </button>
+              <button type="button" class="dock_mode_menu_button" id="fade_menu_button" aria-label="ふぇーどせっていをひらく">⚙</button>
+            </div>
             <div class="dock_mode_item">
               <button type="button" class="dock_btn" data-panel="yh">
                 <span class="dock_main">やみ</span>

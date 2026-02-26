@@ -16,6 +16,7 @@ export interface PersistedSettings {
   rainbowSaturation: number;
   rainbowBrightness: number;
   fadeMode: boolean;
+  fadeStrength: number;
   autoMode: boolean;
   yamiMode: boolean;
   yamiStrength: number;
@@ -41,6 +42,7 @@ export const defaultPersistedSettings: PersistedSettings = {
   rainbowSaturation: 200,
   rainbowBrightness: 200,
   fadeMode: false,
+  fadeStrength: 5,
   autoMode: false,
   yamiMode: false,
   yamiStrength: 100,
@@ -72,6 +74,7 @@ export function loadSettings(): PersistedSettings {
       size: Number(parsed.size ?? defaultPersistedSettings.size),
       rainbowSaturation: Number(parsed.rainbowSaturation ?? defaultPersistedSettings.rainbowSaturation),
       rainbowBrightness: Number(parsed.rainbowBrightness ?? defaultPersistedSettings.rainbowBrightness),
+      fadeStrength: Number(parsed.fadeStrength ?? defaultPersistedSettings.fadeStrength),
       yamiStrength: Number(parsed.yamiStrength ?? defaultPersistedSettings.yamiStrength),
       symmetryCount: Number(parsed.symmetryCount ?? defaultPersistedSettings.symmetryCount),
       symmetryOriginX: Number(parsed.symmetryOriginX ?? defaultPersistedSettings.symmetryOriginX),

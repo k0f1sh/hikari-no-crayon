@@ -39,7 +39,7 @@ function renderLoop(): void {
 
   if (app.isFadeMode) {
     app.c!.globalCompositeOperation = "source-over";
-    app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, 0.05);
+    app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, app.fadeStrength / 100);
     app.c!.fillRect(0, 0, app.width, app.height);
   }
   app.c!.globalCompositeOperation = getDrawCompositeOperation();

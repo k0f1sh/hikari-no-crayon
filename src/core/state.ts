@@ -16,6 +16,7 @@ export const app = {
   rainbowSaturation: 200,
   rainbowBrightness: 200,
   isFadeMode: false,
+  fadeStrength: 5,
   isAutoMode: false,
   isYamiMode: false,
   yamiStrength: 100,
