@@ -541,7 +541,7 @@ export function bindUiEvents(): void {
   };
 
   const applyFadeStrength = (value: number) => {
-    const clamped = Math.max(1, Math.min(20, Math.round(value)));
+    const clamped = Math.max(1, Math.min(10, Math.round(value)));
     app.fadeStrength = clamped;
     fadeStrength.value = String(clamped);
     fadeStrengthValue.textContent = String(clamped);

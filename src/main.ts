@@ -38,8 +38,12 @@ function renderLoop(): void {
   app.count += 1;
 
   if (app.isFadeMode) {
+    let effectiveFade = app.fadeStrength / 100;
+    if (app.isAutoMode) {
+      effectiveFade = Math.min(effectiveFade, 0.04);
+    }
     app.c!.globalCompositeOperation = "source-over";
-    app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, app.fadeStrength / 100);
+    app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, effectiveFade);
     app.c!.fillRect(0, 0, app.width, app.height);
   }
   app.c!.globalCompositeOperation = getDrawCompositeOperation();
