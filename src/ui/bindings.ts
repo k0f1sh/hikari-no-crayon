@@ -743,6 +743,7 @@ export function bindUiEvents(): void {
       symmetryCount: 4,
       symmetryOriginX: 50,
       symmetryOriginY: 50,
+      normalUseCrayonTexture: false,
     },
     mangekyo: {
       pen: "snow_pen",
@@ -807,7 +808,7 @@ export function bindUiEvents(): void {
       symmetryCount: 4,
       symmetryOriginX: 50,
       symmetryOriginY: 50,
-      normalUseCrayonTexture: false,
+      normalUseCrayonTexture: true,
     },
     bukimi: {
       pen: "blood_pen",

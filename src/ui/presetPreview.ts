@@ -22,6 +22,7 @@ export type SimplePresetConfig = {
   symmetryOriginX: number;
   symmetryOriginY: number;
   lifeSnapToGrid?: boolean;
+  normalUseCrayonTexture?: boolean;
 };
 
 interface PreviewState {
@@ -167,6 +168,16 @@ function renderPreviewFrame(
       app.penCustomParams = {
         ...snapshot.penCustomParams,
         life_pen: { ...snapshot.penCustomParams.life_pen, snap_to_grid: config.lifeSnapToGrid },
+      };
+    }
+
+    if (typeof config.normalUseCrayonTexture === "boolean") {
+      app.penCustomParams = {
+        ...app.penCustomParams,
+        normal_pen: {
+          ...app.penCustomParams.normal_pen,
+          use_crayon_texture: config.normalUseCrayonTexture,
+        },
       };
     }
 
