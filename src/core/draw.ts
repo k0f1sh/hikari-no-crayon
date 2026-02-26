@@ -5,7 +5,14 @@ import type { Color, Point } from "../types";
 
 export function clear(context: CanvasRenderingContext2D): void {
   context.globalCompositeOperation = "source-over";
-  context.fillStyle = "#000000";
+  const gradient = context.createRadialGradient(
+    app.width * 0.3, app.height * 0.3, 0,
+    app.width * 0.5, app.height * 0.5, Math.max(app.width, app.height) * 0.8,
+  );
+  gradient.addColorStop(0, "#0c1630");
+  gradient.addColorStop(0.5, "#080e20");
+  gradient.addColorStop(1, "#030508");
+  context.fillStyle = gradient;
   context.fillRect(0, 0, app.width, app.height);
   if (context === app.c) {
     context.globalCompositeOperation = getDrawCompositeOperation();

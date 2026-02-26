@@ -43,7 +43,7 @@ function renderLoop(): void {
       effectiveFade = Math.min(effectiveFade, 0.04);
     }
     app.c!.globalCompositeOperation = "source-over";
-    app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, effectiveFade);
+    app.c!.fillStyle = colorToString({ r: 3, g: 5, b: 8 }, effectiveFade);
     app.c!.fillRect(0, 0, app.width, app.height);
   }
   app.c!.globalCompositeOperation = getDrawCompositeOperation();
