@@ -33,7 +33,7 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
       key: "use_crayon_texture",
       label: "くれよんかん",
       type: "boolean",
-      defaultValue: true,
+      defaultValue: false,
     },
     {
       key: "crayon_grain",
