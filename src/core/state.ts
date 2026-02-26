@@ -12,7 +12,7 @@ export const app = {
   mouse: { x: null, y: null } as MouseState,
   effects: [] as Effect[],
   isDown: false,
-  isRainbowMode: false,
+  isRainbowMode: true,
   rainbowSaturation: 200,
   rainbowBrightness: 200,
   isFadeMode: false,
