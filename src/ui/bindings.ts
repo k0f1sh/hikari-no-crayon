@@ -657,7 +657,7 @@ export function bindUiEvents(): void {
   };
 
   const normalizePenSize = (value: number) => {
-    const clamped = Math.max(1, Math.min(300, value));
+    const clamped = Math.max(1, Math.min(200, value));
     const uiSize = clamped <= 1.1 ? 1 : clamped;
     const effectiveSize = uiSize === 1 ? 1.1 : uiSize;
     return { uiSize, effectiveSize };
@@ -1666,7 +1666,7 @@ export function bindUiEvents(): void {
       for (let i = 0; i < rowCount; i++) {
         const pen = pens[i % pens.length];
         const scale = sizeMultiplierByPen[pen] ?? 1;
-        const rowSize = Math.max(1, Math.min(300, Math.round(baseSize * scale * 100) / 100));
+        const rowSize = Math.max(1, Math.min(200, Math.round(baseSize * scale * 100) / 100));
         lines.push(`pen ${pen}`);
         lines.push(`size ${rowSize}`);
         lines.push(`fd ${rowWidth}`);
