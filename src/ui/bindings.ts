@@ -1642,7 +1642,7 @@ export function bindUiEvents(): void {
       const baseGap = Math.max(18, Math.round(min * 0.045));
       const fitGap = Math.max(14, Math.floor((height * 0.72) / Math.max(1, rowCount - 1)));
       const rowGap = Math.min(baseGap, fitGap);
-      const baseSize = 24;
+      const baseSize = 16;
       const sizeMultiplierByPen: Record<string, number> = {
         blood_pen: 0.5,      // けっかん
         degi_pen: 0.5,       // でじたる
