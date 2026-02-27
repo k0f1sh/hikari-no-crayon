@@ -10,3 +10,4 @@ export { ShinmyakuEffect } from "./items/ShinmyakuEffect";
 export { FractalBloomEffect } from "./items/FractalBloomEffect";
 export { LifeGameEffect } from "./items/LifeGameEffect";
 export { AmedropEffect } from "./items/AmedropEffect";
+export { BubbleBurstEffect } from "./items/BubbleBurstEffect";
