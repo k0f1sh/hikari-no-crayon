@@ -1,21 +1,14 @@
 import { app } from "../../core/state";
 import { d2r } from "../../core/math";
-import { drawCircle, drawLineColor } from "../../core/draw";
+import { drawLineColor } from "../../core/draw";
 import type { Color, Effect, Point } from "../../types";
-import { isOutOfBounds } from "./utils";
+import { isOutOfBounds, tail } from "./utils";
 
 interface AmedropEffectOptions {
   lifetime?: number;
 }
 
 export class AmedropEffect implements Effect {
-  static readonly MAX_ACTIVE = 900;
-  static activeCount = 0;
-
-  static getRemainingCapacity(): number {
-    return Math.max(0, AmedropEffect.MAX_ACTIVE - AmedropEffect.activeCount);
-  }
-
   pos: Point;
   prevPos: Point;
   color: Color;
@@ -37,6 +30,7 @@ export class AmedropEffect implements Effect {
   age: number;
   maxAge: number;
   released: boolean;
+  trail: Point[];
 
   constructor(
     x: number,
@@ -46,12 +40,6 @@ export class AmedropEffect implements Effect {
     gravityDirectionDeg: number,
     options: AmedropEffectOptions = {},
   ) {
-    const spawnAngle = Math.random() * Math.PI * 2;
-    // 円周寄りに偏ると軌跡に穴が空きやすいので、円内一様分布で発生させる
-    const spawnRadius = radius * Math.sqrt(Math.random());
-    const spawnX = x + Math.cos(spawnAngle) * spawnRadius;
-    const spawnY = y + Math.sin(spawnAngle) * spawnRadius;
-
     const gravityRadians = d2r(gravityDirectionDeg);
     const gravityX = Math.cos(gravityRadians);
     const gravityY = Math.sin(gravityRadians);
@@ -61,8 +49,8 @@ export class AmedropEffect implements Effect {
     const baseAlong = 0.5 + Math.random() * 1.2;
     const sideJitter = (Math.random() - 0.5) * 1.2;
 
-    this.pos = { x: spawnX, y: spawnY };
-    this.prevPos = { x: spawnX, y: spawnY };
+    this.pos = { x, y };
+    this.prevPos = { x, y };
     this.color = color;
     this.alpha = 0.38;
     this.delFlg = false;
@@ -82,12 +70,11 @@ export class AmedropEffect implements Effect {
     // 一時的にバウンス挙動を無効化
     this.maxBounces = 0;
     this.age = 0;
+    this.trail = [{ x, y }];
     const configuredLifetime = Number(options.lifetime);
     this.maxAge = Number.isFinite(configuredLifetime)
       ? Math.max(30, Math.min(600, Math.round(configuredLifetime)))
       : Math.max(90, Math.min(320, Math.round(app.penSize * 2.8)));
-
-    AmedropEffect.activeCount += 1;
   }
 
   move(): void {
@@ -101,6 +88,8 @@ export class AmedropEffect implements Effect {
 
     this.pos.x += this.velocityX;
     this.pos.y += this.velocityY;
+    this.trail.push({ x: this.pos.x, y: this.pos.y });
+    this.trail = tail(this.trail, 9);
 
     const moveX = this.pos.x - this.prevPos.x;
     const moveY = this.pos.y - this.prevPos.y;
@@ -140,14 +129,20 @@ export class AmedropEffect implements Effect {
       return;
     }
 
-    drawLineColor(
-      this.prevPos,
-      this.pos,
-      this.color,
-      Math.min(0.4, this.alpha * 0.7),
-      Math.max(0.35, this.size * 0.35),
-    );
-    drawCircle(this.pos.x, this.pos.y, this.size, this.color, 0.14, 1.0);
+    if (this.trail.length < 2) {
+      return;
+    }
+
+    const segmentCount = this.trail.length - 1;
+    const baseWidth = Math.max(0.6, this.size * 0.9);
+    for (let i = 1; i < this.trail.length; i += 1) {
+      const from = this.trail[i - 1];
+      const to = this.trail[i];
+      const t = i / segmentCount;
+      const width = Math.max(0.2, baseWidth * (1 - t * 0.75));
+      const alpha = Math.min(0.42, this.alpha * (0.25 + t * 0.55));
+      drawLineColor(from, to, this.color, alpha, width);
+    }
   }
 
   delete(): void {
@@ -155,7 +150,6 @@ export class AmedropEffect implements Effect {
       return;
     }
     this.released = true;
-    AmedropEffect.activeCount = Math.max(0, AmedropEffect.activeCount - 1);
     this.delFlg = true;
   }
 }
