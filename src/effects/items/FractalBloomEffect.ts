@@ -10,12 +10,28 @@ interface KochSegment {
   level: number;
 }
 
+interface TreeNode {
+  start: Point;
+  angle: number;
+  length: number;
+  level: number;
+}
+
 interface FractalBloomOptions {
-  mode?: "tree" | "koch";
+  mode?: "tree" | "koch" | "fern";
   depth?: number;
   alpha?: number;
   lineWidth?: number;
   revealPerFrame?: number;
+  treeSpreadDeg?: number;
+  treeBranchDecay?: number;
+  treeJitterDeg?: number;
+  treeExtraBranchChance?: number;
+  fernStemTiltDeg?: number;
+  fernSpreadDeg?: number;
+  fernLeafScale?: number;
+  fernStemDecay?: number;
+  fernJitterDeg?: number;
 }
 
 export class FractalBloomEffect implements Effect {
@@ -31,7 +47,16 @@ export class FractalBloomEffect implements Effect {
   maxDepth: number;
   lineWidth: number;
   head: Point;
-  mode: "tree" | "koch";
+  mode: "tree" | "koch" | "fern";
+  treeSpreadRad: number;
+  treeBranchDecay: number;
+  treeJitterRad: number;
+  treeExtraBranchChance: number;
+  fernStemTiltRad: number;
+  fernSpreadRad: number;
+  fernLeafScale: number;
+  fernStemDecay: number;
+  fernJitterRad: number;
 
   constructor(
     fromX: number,
@@ -50,9 +75,18 @@ export class FractalBloomEffect implements Effect {
     this.color = color;
     this.age = 0;
     this.mode = options.mode ?? "tree";
-    this.maxDepth = Math.max(1, Math.min(5, Math.floor(options.depth ?? 3)));
+    this.maxDepth = Math.max(1, Math.min(8, Math.floor(options.depth ?? 6)));
     this.lineWidth = Math.max(0.16, options.lineWidth ?? app.penSize / 22);
     this.head = { x: fromX, y: fromY };
+    this.treeSpreadRad = (Math.PI / 180) * this.clamp(options.treeSpreadDeg ?? 22, 4, 85);
+    this.treeBranchDecay = this.clamp(options.treeBranchDecay ?? 0.66, 0.4, 0.95);
+    this.treeJitterRad = (Math.PI / 180) * this.clamp(options.treeJitterDeg ?? 8, 0, 45);
+    this.treeExtraBranchChance = this.clamp(options.treeExtraBranchChance ?? 0.3, 0, 1);
+    this.fernStemTiltRad = (Math.PI / 180) * this.clamp(options.fernStemTiltDeg ?? 4, -45, 45);
+    this.fernSpreadRad = (Math.PI / 180) * this.clamp(options.fernSpreadDeg ?? 24, 6, 85);
+    this.fernLeafScale = this.clamp(options.fernLeafScale ?? 0.36, 0.12, 0.9);
+    this.fernStemDecay = this.clamp(options.fernStemDecay ?? 0.74, 0.5, 0.95);
+    this.fernJitterRad = (Math.PI / 180) * this.clamp(options.fernJitterDeg ?? 6, 0, 35);
 
     if (this.mode === "koch") {
       const turnSign = Math.random() < 0.5 ? -1 : 1;
@@ -64,13 +98,20 @@ export class FractalBloomEffect implements Effect {
         turnSign,
         this.segments,
       );
+    } else if (this.mode === "fern") {
+      const root = { x: toX, y: toY };
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const angle = Math.atan2(dy, dx);
+      const length = Math.max(10, Math.min(146, Math.hypot(dx, dy) * 0.82 + app.penSize * 0.5));
+      this.growFern(root, angle, length, 0, this.maxDepth, this.segments);
     } else {
       const root = { x: toX, y: toY };
       const dx = toX - fromX;
       const dy = toY - fromY;
       const angle = Math.atan2(dy, dx);
       const length = Math.max(8, Math.min(140, Math.hypot(dx, dy) * 0.78 + app.penSize * 0.52));
-      this.growTree(root, angle, length, 0, this.maxDepth, this.segments);
+      this.growTreeBreadthFirst(root, angle, length, this.maxDepth, this.segments);
     }
 
     this.maxAge = Math.max(24, Math.ceil(this.segments.length / this.revealPerFrame) + 20);
@@ -95,7 +136,9 @@ export class FractalBloomEffect implements Effect {
       const seg = this.segments[i];
       const depthScale = this.mode === "tree"
         ? 1 - (seg.level / (this.maxDepth + 1)) * 0.6
-        : 1 - (seg.level / (this.maxDepth + 1)) * 0.45;
+        : this.mode === "koch"
+          ? 1 - (seg.level / (this.maxDepth + 1)) * 0.45
+          : 1 - (seg.level / (this.maxDepth + 1)) * 0.52;
       drawLineColor(seg.from, seg.to, this.color, this.alpha * depthScale, this.lineWidth * depthScale);
       this.head = seg.to;
     }
@@ -147,7 +190,53 @@ export class FractalBloomEffect implements Effect {
     this.subdivideKoch(p3, b, level + 1, maxLevel, turnSign, out);
   }
 
-  growTree(
+  growTreeBreadthFirst(
+    root: Point,
+    rootAngle: number,
+    rootLength: number,
+    maxLevel: number,
+    out: KochSegment[],
+  ): void {
+    const queue: TreeNode[] = [{ start: root, angle: rootAngle, length: rootLength, level: 0 }];
+    let cursor = 0;
+
+    while (cursor < queue.length) {
+      const node = queue[cursor];
+      cursor += 1;
+
+      const end: Point = {
+        x: node.start.x + Math.cos(node.angle) * node.length,
+        y: node.start.y + Math.sin(node.angle) * node.length,
+      };
+      out.push({ from: node.start, to: end, level: node.level });
+
+      if (node.level >= maxLevel) {
+        continue;
+      }
+
+      const nextLevel = node.level + 1;
+      const nextLength = node.length * this.treeBranchDecay * (0.92 + Math.random() * 0.15);
+      const spread = this.treeSpreadRad * (0.84 + node.level * 0.13)
+        + (Math.random() - 0.5) * this.treeJitterRad * 0.5;
+      const jitter = (Math.random() - 0.5) * this.treeJitterRad;
+
+      queue.push(
+        { start: end, angle: node.angle - spread + jitter, length: nextLength, level: nextLevel },
+        { start: end, angle: node.angle + spread + jitter, length: nextLength, level: nextLevel },
+      );
+
+      if (node.level <= 1 && Math.random() < this.treeExtraBranchChance) {
+        queue.push({
+          start: end,
+          angle: node.angle + jitter * 0.6,
+          length: nextLength * 0.78,
+          level: nextLevel,
+        });
+      }
+    }
+  }
+
+  growFern(
     start: Point,
     angle: number,
     length: number,
@@ -165,16 +254,51 @@ export class FractalBloomEffect implements Effect {
       return;
     }
 
-    const nextLength = length * (0.66 + (Math.random() - 0.5) * 0.1);
-    const spread = 0.35 + level * 0.03 + Math.random() * 0.18;
-    const jitter = (Math.random() - 0.5) * 0.14;
+    const levelTilt = this.fernStemTiltRad * (1 - level / (maxLevel + 1));
+    const stemJitter = (Math.random() - 0.5) * this.fernJitterRad * 0.9;
+    const nextStemLength = length * this.fernStemDecay * (0.95 + Math.random() * 0.08);
+    const nextStemAngle = angle + levelTilt + stemJitter * 0.35;
+    this.growFern(end, nextStemAngle, nextStemLength, level + 1, maxLevel, out);
 
-    this.growTree(end, angle - spread + jitter, nextLength, level + 1, maxLevel, out);
-    this.growTree(end, angle + spread + jitter, nextLength, level + 1, maxLevel, out);
+    const branchPairs = level <= 1 ? 3 : 2;
+    const baseSpread = this.fernSpreadRad * (0.72 + level * 0.1);
+    for (let i = 1; i <= branchPairs; i += 1) {
+      const t = i / (branchPairs + 1);
+      const node: Point = {
+        x: start.x + (end.x - start.x) * t,
+        y: start.y + (end.y - start.y) * t,
+      };
 
-    if (level <= 1 && Math.random() < 0.3) {
-      this.growTree(end, angle + jitter * 0.6, nextLength * 0.78, level + 1, maxLevel, out);
+      const sideLength = length
+        * this.fernLeafScale
+        * (1 - level * 0.08)
+        * (1 - t * 0.2);
+      if (sideLength <= 1) {
+        continue;
+      }
+
+      const spread = baseSpread * (0.82 + t * 0.35) + (Math.random() - 0.5) * this.fernJitterRad;
+      const leftTip: Point = {
+        x: node.x + Math.cos(angle - spread) * sideLength,
+        y: node.y + Math.sin(angle - spread) * sideLength,
+      };
+      const rightTip: Point = {
+        x: node.x + Math.cos(angle + spread) * sideLength,
+        y: node.y + Math.sin(angle + spread) * sideLength,
+      };
+      out.push({ from: node, to: leftTip, level: level + 1 });
+      out.push({ from: node, to: rightTip, level: level + 1 });
+
+      if (level + 2 <= maxLevel) {
+        const childLength = sideLength * this.fernStemDecay * (0.95 + Math.random() * 0.08);
+        this.growFern(leftTip, angle - spread * 0.6, childLength, level + 2, maxLevel, out);
+        this.growFern(rightTip, angle + spread * 0.6, childLength, level + 2, maxLevel, out);
+      }
     }
+  }
+
+  clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
   }
 
   delete(): void {

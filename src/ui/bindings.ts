@@ -273,6 +273,18 @@ export function bindUiEvents(): void {
     });
   };
 
+  const resetPenCustomValuesWithFilter = (penName: string, shouldReset: (key: string) => boolean) => {
+    const definitions = penCustomParamCatalog[penName] ?? [];
+    if (!app.penCustomParams[penName] || typeof app.penCustomParams[penName] !== "object") {
+      app.penCustomParams[penName] = {};
+    }
+    definitions.forEach((definition) => {
+      if (shouldReset(definition.key)) {
+        app.penCustomParams[penName][definition.key] = definition.defaultValue;
+      }
+    });
+  };
+
   const formatNumberValue = (definition: PenCustomNumberParamDefinition, value: number): string => {
     if (!Number.isFinite(definition.step) || definition.step >= 1) {
       return String(Math.round(value));
@@ -306,13 +318,44 @@ export function bindUiEvents(): void {
       penCustomControls.appendChild(resetButton);
     }
 
+    if (penName === "fractal_bloom_pen") {
+      const resetButton = document.createElement("button");
+      resetButton.type = "button";
+      resetButton.className = "mini_reset_button";
+      resetButton.textContent = "かすたむを しょきちにもどす";
+      resetButton.addEventListener("click", () => {
+        resetPenCustomValuesWithFilter("fractal_bloom_pen", (key) => key !== "mode");
+        renderPenCustomControls("fractal_bloom_pen");
+        persist();
+      });
+      penCustomControls.appendChild(resetButton);
+    }
+
     const dependentLabels: { dependsOn: string; label: HTMLElement }[] = [];
+    const getDependencyExpectedValue = (
+      definition: PenCustomParamDefinition,
+    ): boolean | number | string | Array<boolean | number | string> => {
+      if ("dependsOnValue" in definition && definition.dependsOnValue !== undefined) {
+        return definition.dependsOnValue;
+      }
+      return true;
+    };
+
+    const matchesDependencyValue = (
+      currentValue: unknown,
+      expectedValue: boolean | number | string | Array<boolean | number | string>,
+    ): boolean => {
+      if (Array.isArray(expectedValue)) {
+        return expectedValue.includes(currentValue as boolean | number | string);
+      }
+      return currentValue === expectedValue;
+    };
 
     const updateDependentStates = (booleanKey: string, enabled: boolean) => {
       dependentLabels.forEach((entry) => {
         if (entry.dependsOn === booleanKey) {
           entry.label.classList.toggle("is-disabled", !enabled);
-          const input = entry.label.querySelector("input");
+          const input = entry.label.querySelector<HTMLInputElement | HTMLSelectElement>("input, select");
           if (input) {
             input.disabled = !enabled;
           }
@@ -322,6 +365,15 @@ export function bindUiEvents(): void {
 
     definitions.forEach((definition) => {
       ensurePenCustomValue(penName, definition);
+      const hasDependency = "dependsOn" in definition && typeof definition.dependsOn === "string";
+      const dependencyKey = hasDependency ? definition.dependsOn : null;
+      const expectedDependencyValue = hasDependency ? getDependencyExpectedValue(definition) : true;
+      const isDependencySatisfied = !dependencyKey
+        || matchesDependencyValue(app.penCustomParams[penName][dependencyKey], expectedDependencyValue);
+
+      if (!isDependencySatisfied && (Array.isArray(expectedDependencyValue) || typeof expectedDependencyValue !== "boolean")) {
+        return;
+      }
 
       if (definition.type === "boolean") {
         const label = document.createElement("label");
@@ -345,11 +397,62 @@ export function bindUiEvents(): void {
         return;
       }
 
+      if (definition.type === "select") {
+        const label = document.createElement("label");
+        label.className = "range_label";
+
+        if (definition.dependsOn) {
+          const expectedValue = getDependencyExpectedValue(definition);
+          const depEnabled = matchesDependencyValue(app.penCustomParams[penName][definition.dependsOn], expectedValue);
+          if (!depEnabled) {
+            label.classList.add("is-disabled");
+          }
+          dependentLabels.push({ dependsOn: definition.dependsOn, label });
+        }
+
+        const title = document.createElement("span");
+        title.textContent = definition.label;
+
+        const select = document.createElement("select");
+        select.className = "pen_custom_select";
+        definition.options.forEach((option) => {
+          const optionEl = document.createElement("option");
+          optionEl.value = option.value;
+          optionEl.textContent = option.label;
+          select.appendChild(optionEl);
+        });
+
+        const currentValue = app.penCustomParams[penName][definition.key];
+        const optionValues = definition.options.map((option) => option.value);
+        const safeValue = typeof currentValue === "string" && optionValues.includes(currentValue)
+          ? currentValue
+          : definition.defaultValue;
+        select.value = safeValue;
+
+        if (definition.dependsOn) {
+          const expectedValue = getDependencyExpectedValue(definition);
+          select.disabled = !matchesDependencyValue(app.penCustomParams[penName][definition.dependsOn], expectedValue);
+        }
+
+        select.addEventListener("change", () => {
+          const nextValue = optionValues.includes(select.value) ? select.value : definition.defaultValue;
+          app.penCustomParams[penName][definition.key] = nextValue;
+          renderPenCustomControls(penName);
+          persist();
+        });
+
+        label.appendChild(title);
+        label.appendChild(select);
+        penCustomControls.appendChild(label);
+        return;
+      }
+
       const label = document.createElement("label");
       label.className = "range_label";
 
       if (definition.dependsOn) {
-        const depEnabled = app.penCustomParams[penName][definition.dependsOn] === true;
+        const expectedValue = getDependencyExpectedValue(definition);
+        const depEnabled = matchesDependencyValue(app.penCustomParams[penName][definition.dependsOn], expectedValue);
         if (!depEnabled) {
           label.classList.add("is-disabled");
         }
@@ -371,7 +474,8 @@ export function bindUiEvents(): void {
       input.value = String(safeValue);
 
       if (definition.dependsOn) {
-        input.disabled = app.penCustomParams[penName][definition.dependsOn] !== true;
+        const expectedValue = getDependencyExpectedValue(definition);
+        input.disabled = !matchesDependencyValue(app.penCustomParams[penName][definition.dependsOn], expectedValue);
       }
 
       const valueText = document.createElement("strong");

@@ -1,4 +1,4 @@
-export type PenCustomParamValue = boolean | number;
+export type PenCustomParamValue = boolean | number | string;
 export type PenCustomParamsState = Record<string, Record<string, PenCustomParamValue>>;
 
 export interface PenCustomBooleanParamDefinition {
@@ -17,9 +17,28 @@ export interface PenCustomNumberParamDefinition {
   max: number;
   step: number;
   dependsOn?: string;
+  dependsOnValue?: PenCustomParamValue | PenCustomParamValue[];
 }
 
-export type PenCustomParamDefinition = PenCustomBooleanParamDefinition | PenCustomNumberParamDefinition;
+export interface PenCustomSelectParamOption {
+  value: string;
+  label: string;
+}
+
+export interface PenCustomSelectParamDefinition {
+  key: string;
+  label: string;
+  type: "select";
+  defaultValue: string;
+  options: PenCustomSelectParamOption[];
+  dependsOn?: string;
+  dependsOnValue?: PenCustomParamValue | PenCustomParamValue[];
+}
+
+export type PenCustomParamDefinition =
+  | PenCustomBooleanParamDefinition
+  | PenCustomNumberParamDefinition
+  | PenCustomSelectParamDefinition;
 
 export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> = {
   normal_pen: [
@@ -293,10 +312,112 @@ export const penCustomParamCatalog: Record<string, PenCustomParamDefinition[]> =
   orbit_pen: [],
   fractal_bloom_pen: [
     {
-      key: "use_koch",
-      label: "こっほきょくせんもーど",
-      type: "boolean",
-      defaultValue: false,
+      key: "mode",
+      label: "かたち",
+      type: "select",
+      defaultValue: "tree",
+      options: [
+        { value: "tree", label: "つりー" },
+        { value: "koch", label: "こっほきょくせん" },
+        { value: "fern", label: "しだ" },
+      ],
+    },
+    {
+      key: "depth",
+      label: "さいきかいすう",
+      type: "number",
+      defaultValue: 6,
+      min: 1,
+      max: 8,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: ["tree", "fern"],
+    },
+    {
+      key: "koch_depth",
+      label: "こっほさいきかいすう",
+      type: "number",
+      defaultValue: 4,
+      min: 1,
+      max: 4,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: "koch",
+    },
+    {
+      key: "growth_speed",
+      label: "のびるはやさ",
+      type: "number",
+      defaultValue: 0.65,
+      min: 0.2,
+      max: 2,
+      step: 0.01,
+    },
+    {
+      key: "tree_spread_deg",
+      label: "つりーひろがり(ど)",
+      type: "number",
+      defaultValue: 22,
+      min: 4,
+      max: 85,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: "tree",
+    },
+    {
+      key: "fern_stem_tilt_deg",
+      label: "しだくきかたむき(ど)",
+      type: "number",
+      defaultValue: 4,
+      min: -45,
+      max: 45,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: "fern",
+    },
+    {
+      key: "fern_spread_deg",
+      label: "しだはっぱひろがり(ど)",
+      type: "number",
+      defaultValue: 24,
+      min: 6,
+      max: 85,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: "fern",
+    },
+    {
+      key: "fern_leaf_scale",
+      label: "しだはっぱながさ",
+      type: "number",
+      defaultValue: 0.36,
+      min: 0.12,
+      max: 0.9,
+      step: 0.01,
+      dependsOn: "mode",
+      dependsOnValue: "fern",
+    },
+    {
+      key: "fern_stem_decay",
+      label: "しだくきしゅくみ",
+      type: "number",
+      defaultValue: 0.74,
+      min: 0.5,
+      max: 0.95,
+      step: 0.01,
+      dependsOn: "mode",
+      dependsOnValue: "fern",
+    },
+    {
+      key: "fern_jitter_deg",
+      label: "しだゆらぎ(ど)",
+      type: "number",
+      defaultValue: 6,
+      min: 0,
+      max: 35,
+      step: 1,
+      dependsOn: "mode",
+      dependsOnValue: "fern",
     },
   ],
   degi_pen: [],
@@ -368,6 +489,21 @@ export function normalizePenCustomParams(input: unknown): PenCustomParamsState {
       const rawValue = rawPenMap[definition.key];
       if (definition.type === "boolean") {
         normalized[penName][definition.key] = rawValue === true;
+        return;
+      }
+
+      if (definition.type === "select") {
+        const optionValues = definition.options.map((option) => option.value);
+        if (typeof rawValue === "string" && optionValues.includes(rawValue)) {
+          normalized[penName][definition.key] = rawValue;
+          return;
+        }
+        // Backward compatibility for older fractal_bloom setting key.
+        if (definition.key === "mode" && rawPenMap.use_koch === true && optionValues.includes("koch")) {
+          normalized[penName][definition.key] = "koch";
+          return;
+        }
+        normalized[penName][definition.key] = definition.defaultValue;
         return;
       }
 

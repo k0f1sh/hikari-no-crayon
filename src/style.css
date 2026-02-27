@@ -1622,7 +1622,8 @@ select {
 }
 
 #symmetry_type:disabled,
-#symmetry_count:disabled {
+#symmetry_count:disabled,
+.pen_custom_select:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
@@ -1665,7 +1666,8 @@ select {
 #record_resolution,
 #record_quality,
 #turtle_sample,
-#turtle_speed {
+#turtle_speed,
+.pen_custom_select {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -1692,7 +1694,8 @@ select {
 #record_resolution:hover,
 #record_quality:hover,
 #turtle_sample:hover,
-#turtle_speed:hover {
+#turtle_speed:hover,
+.pen_custom_select:hover {
   border-color: rgba(162, 193, 255, 0.68);
   box-shadow:
     inset 0 1px 0 rgba(200, 228, 255, 0.14),
@@ -1713,7 +1716,8 @@ select {
 #symmetry_count option,
 #svg_path_speed option,
 #turtle_sample option,
-#turtle_speed option {
+#turtle_speed option,
+.pen_custom_select option {
   color: #0b1224;
   background: #f2f7ff;
 }
