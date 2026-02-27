@@ -5,8 +5,6 @@ import type { Color, Effect, Point } from "../../types";
 import { isOutOfBounds, tail } from "./utils";
 
 export class DegiEffect implements Effect {
-  static readonly TURN_GRID = 28;
-
   pos: Point;
   spd: number;
   d: number;
@@ -17,10 +15,12 @@ export class DegiEffect implements Effect {
   decAlphaP: number;
   historyNum: number;
   lastTurnNodeKey: string | null;
+  turnGrid: number;
 
   constructor(x: number, y: number, color: Color) {
     this.pos = { x, y };
     this.spd = app.penSize / 10;
+    this.turnGrid = Math.max(12, Math.min(84, Math.round(app.penSize * 0.7)));
     this.d = sample([0, 90, 180, 270]);
     this.alpha = 0.3;
     this.delFlg = false;
@@ -38,7 +38,7 @@ export class DegiEffect implements Effect {
 
   getTurnNodeKey(): string | null {
     const tolerance = Math.max(0.8, this.spd * 0.52);
-    const gx = DegiEffect.TURN_GRID;
+    const gx = this.turnGrid;
     const nearX = this.wrappedModDistance(this.pos.x, gx) <= tolerance;
     const nearY = this.wrappedModDistance(this.pos.y, gx) <= tolerance;
 
