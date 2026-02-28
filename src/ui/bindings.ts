@@ -241,6 +241,7 @@ export function bindUiEvents(): void {
   const svgPathSpeedInput = byId<HTMLSelectElement>("svg_path_speed");
   const svgPathDrawButton = byId<HTMLButtonElement>("svg_path_draw_button");
   const resetSettingsButton = byId<HTMLElement>("reset_settings_button");
+  const fullscreenButton = byId<HTMLButtonElement>("fullscreen_button");
   const recordStatus = byId<HTMLElement>("record_status");
   const recordFrameHud = byId<HTMLElement>("record_frame_hud");
   const recordFrameHudLabel = byId<HTMLElement>("record_frame_hud_label");
@@ -1504,6 +1505,83 @@ export function bindUiEvents(): void {
       scale: 1,
     });
   });
+
+  type FullscreenDocument = Document & {
+    webkitExitFullscreen?: () => Promise<void> | void;
+    webkitFullscreenElement?: Element | null;
+    webkitFullscreenEnabled?: boolean;
+  };
+  type FullscreenHtmlElement = HTMLElement & {
+    webkitRequestFullscreen?: () => Promise<void> | void;
+  };
+
+  const fullscreenDocument = document as FullscreenDocument;
+  const fullscreenTarget = document.documentElement as FullscreenHtmlElement;
+
+  const getFullscreenElement = () =>
+    document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? null;
+
+  const isFullscreenSupported = () => {
+    if (typeof document.fullscreenEnabled === "boolean") {
+      return document.fullscreenEnabled;
+    }
+    if (typeof fullscreenDocument.webkitFullscreenEnabled === "boolean") {
+      return fullscreenDocument.webkitFullscreenEnabled;
+    }
+    return typeof fullscreenTarget.requestFullscreen === "function"
+      || typeof fullscreenTarget.webkitRequestFullscreen === "function";
+  };
+
+  const requestFullscreenMode = async () => {
+    if (typeof fullscreenTarget.requestFullscreen === "function") {
+      await fullscreenTarget.requestFullscreen();
+      return;
+    }
+    if (typeof fullscreenTarget.webkitRequestFullscreen === "function") {
+      await fullscreenTarget.webkitRequestFullscreen();
+      return;
+    }
+    throw new Error("Fullscreen API is not supported.");
+  };
+
+  const exitFullscreenMode = async () => {
+    if (typeof document.exitFullscreen === "function") {
+      await document.exitFullscreen();
+      return;
+    }
+    if (typeof fullscreenDocument.webkitExitFullscreen === "function") {
+      await fullscreenDocument.webkitExitFullscreen();
+      return;
+    }
+    throw new Error("Fullscreen API is not supported.");
+  };
+
+  const updateFullscreenButtonState = () => {
+    const isSupported = isFullscreenSupported();
+    fullscreenButton.disabled = !isSupported;
+    fullscreenButton.classList.toggle("is-disabled", !isSupported);
+    fullscreenButton.setAttribute("aria-disabled", String(!isSupported));
+    if (!isSupported) {
+      fullscreenButton.textContent = "ぜんがめんふか";
+      return;
+    }
+    fullscreenButton.textContent = getFullscreenElement() ? "ぜんがめんおわる" : "ぜんがめん";
+  };
+
+  fullscreenButton.addEventListener("click", () => {
+    if (fullscreenButton.disabled) {
+      return;
+    }
+    const action = getFullscreenElement() ? exitFullscreenMode : requestFullscreenMode;
+    void action().catch(() => {
+      updateFullscreenButtonState();
+      window.alert("ぜんがめんにできませんでした。");
+    });
+  });
+
+  document.addEventListener("fullscreenchange", updateFullscreenButtonState);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButtonState as EventListener);
+  updateFullscreenButtonState();
 
   const animateSvgTrace = (
     groups: Array<Array<{ x: number; y: number }>>,

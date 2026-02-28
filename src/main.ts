@@ -112,8 +112,10 @@ function setupResize(): void {
     app.hudCanvas!.height = app.height;
     clear(app.c!);
     if (previousContext) {
+      app.c!.globalCompositeOperation = "source-over";
       app.c!.drawImage(previousCanvas, 0, 0);
     }
+    applyDrawCompositeOperation();
     app.effects = [];
     resetHistory();
     captureHistorySnapshot();
