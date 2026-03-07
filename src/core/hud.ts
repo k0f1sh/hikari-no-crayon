@@ -26,28 +26,34 @@ function drawSymmetryAxes(): void {
   const centerX = app.width * app.symmetryOriginX;
   const centerY = app.height * app.symmetryOriginY;
   const radius = Math.sqrt(centerX * centerX + centerY * centerY);
-  const transforms = getSymmetryTransforms(app.symmetryCount);
 
   hud.save();
   hud.strokeStyle = "rgba(118, 246, 208, 0.45)";
   hud.lineWidth = 1;
   hud.setLineDash([8, 8]);
 
-  for (const { cos, sin } of transforms) {
-    const dx = cos * radius;
-    const dy = sin * radius;
+  if (app.symmetryType === "mirror") {
+    for (let i = 0; i < app.symmetryCount; i += 1) {
+      // Mirror copies are generated from reflection axes at half-angle steps.
+      const angle = (Math.PI * i) / app.symmetryCount;
+      const dx = Math.cos(angle) * radius;
+      const dy = Math.sin(angle) * radius;
 
-    hud.beginPath();
-    hud.moveTo(centerX - dx, centerY - dy);
-    hud.lineTo(centerX + dx, centerY + dy);
-    hud.stroke();
-
-    if (app.symmetryType === "mirror") {
-      const mdx = -sin * radius;
-      const mdy = cos * radius;
       hud.beginPath();
-      hud.moveTo(centerX - mdx, centerY - mdy);
-      hud.lineTo(centerX + mdx, centerY + mdy);
+      hud.moveTo(centerX - dx, centerY - dy);
+      hud.lineTo(centerX + dx, centerY + dy);
+      hud.stroke();
+    }
+  } else {
+    const transforms = getSymmetryTransforms(app.symmetryCount);
+
+    for (const { cos, sin } of transforms) {
+      const dx = cos * radius;
+      const dy = sin * radius;
+
+      hud.beginPath();
+      hud.moveTo(centerX, centerY);
+      hud.lineTo(centerX + dx, centerY + dy);
       hud.stroke();
     }
   }

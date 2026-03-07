@@ -111,6 +111,7 @@ function setPointerPosition(event: PointerEvent): void {
 }
 
 const PEN_CUSTOM_CONTROLS_ID = "pen_custom_controls";
+const VALID_SYMMETRY_COUNTS = [2, 3, 4, 5, 6, 8, 16, 32] as const;
 
 const SPRITE_POS: { posX: number; posY: number }[] = [
     { posX: 0, posY: 5.583 },
@@ -1068,7 +1069,9 @@ export function bindUiEvents(): void {
     symmetryType.value = preset.symmetryType;
     app.symmetryType = preset.symmetryType;
     symmetryCount.value = String(preset.symmetryCount);
-    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(preset.symmetryCount) ? preset.symmetryCount : 4;
+    app.symmetryCount = VALID_SYMMETRY_COUNTS.includes(preset.symmetryCount as (typeof VALID_SYMMETRY_COUNTS)[number])
+      ? preset.symmetryCount
+      : 4;
     applySymmetryOriginX(preset.symmetryOriginX);
     applySymmetryOriginY(preset.symmetryOriginY);
     updateSymmetryControlsState();
@@ -1479,7 +1482,9 @@ export function bindUiEvents(): void {
 
   symmetryCount.addEventListener("change", (event) => {
     const value = Number((event.currentTarget as HTMLSelectElement).value);
-    app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(value) ? value : 4;
+    app.symmetryCount = VALID_SYMMETRY_COUNTS.includes(value as (typeof VALID_SYMMETRY_COUNTS)[number])
+      ? value
+      : 4;
     updateSymmetryDockValue();
     persist();
   });
@@ -2752,7 +2757,9 @@ export function bindUiEvents(): void {
       symmetryType.value = settings.symmetryType;
       app.symmetryType = settings.symmetryType;
       symmetryCount.value = String(settings.symmetryCount);
-      app.symmetryCount = [2, 4, 6, 8, 16, 32].includes(settings.symmetryCount)
+      app.symmetryCount = VALID_SYMMETRY_COUNTS.includes(
+        settings.symmetryCount as (typeof VALID_SYMMETRY_COUNTS)[number],
+      )
         ? settings.symmetryCount
         : 4;
       applySymmetryOriginX(settings.symmetryOriginX);
