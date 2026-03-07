@@ -2,11 +2,11 @@ import type { Color } from "../types";
 import { app } from "./state";
 
 export function colorToString(color: Color, a: number): string {
-  const applied = applyYamiColor(color);
+  const applied = getRenderedColor(color);
   return `rgba(${Math.floor(applied.r)},${Math.floor(applied.g)},${Math.floor(applied.b)},${a})`;
 }
 
-function applyYamiColor(color: Color): Color {
+export function getRenderedColor(color: Color): Color {
   if (!app.isYamiMode) {
     return color;
   }
@@ -18,6 +18,11 @@ function applyYamiColor(color: Color): Color {
     g: color.g * keepRatio,
     b: color.b * keepRatio,
   };
+}
+
+export function colorToOpaqueString(color: Color): string {
+  const applied = getRenderedColor(color);
+  return `rgb(${Math.floor(applied.r)},${Math.floor(applied.g)},${Math.floor(applied.b)})`;
 }
 
 export function hsvToRgb(h: number, s: number, v: number): Color {

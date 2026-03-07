@@ -50,7 +50,6 @@ export function drawPoint(x: number, y: number, color: Color, a: number): void {
   const c = requireMainContext();
   c.fillStyle = colorToString(color, a);
   c.fillRect(x, y, 1, 1);
-  c.closePath();
 }
 
 export function drawLineColor(spos: Point, epos: Point, color: Color, a: number, size: number): void {
@@ -68,9 +67,19 @@ export function drawLines(posList: Point[], color: Color, a: number, size: numbe
     return;
   }
 
+  const c = requireMainContext();
+  c.strokeStyle = colorToString(color, a);
+  c.lineWidth = size;
+  c.beginPath();
+
   for (let i = 1; i < posList.length; i += 1) {
-    drawLineColor(posList[i - 1], posList[i], color, a, size);
+    const from = posList[i - 1];
+    const to = posList[i];
+    c.moveTo(from.x, from.y);
+    c.lineTo(to.x, to.y);
   }
+
+  c.stroke();
 }
 
 export function reverseImage(): void {

@@ -1,10 +1,11 @@
-import { colorToString } from "../../core/color";
+import { colorToOpaqueString } from "../../core/color";
 import { app, requireMainContext } from "../../core/state";
 import { drawCircle } from "../../core/draw";
 import type { PenTool, Point } from "../../types";
 
 export class NormalPen implements PenTool {
   lastPoints = new Map<number | "default", Point>();
+  maskCache = new Map<string, HTMLCanvasElement>();
   stampCache = new Map<string, HTMLCanvasElement>();
 
   private getPointerKey(): number | "default" {
@@ -24,7 +25,7 @@ export class NormalPen implements PenTool {
     return s - Math.floor(s);
   }
 
-  private getStampKey(
+  private getMaskKey(
     radius: number,
     grainRatio: number,
     stretchRatio: number,
@@ -47,24 +48,20 @@ export class NormalPen implements PenTool {
       angleStepDeg,
       angleBucket,
       seedBucket,
-      app.penColor.r,
-      app.penColor.g,
-      app.penColor.b,
     ].join(":");
   }
 
-  private trimStampCache(): void {
-    const maxEntries = 48;
-    while (this.stampCache.size > maxEntries) {
-      const firstKey = this.stampCache.keys().next().value;
+  private trimCache(cache: Map<string, HTMLCanvasElement>, maxEntries: number): void {
+    while (cache.size > maxEntries) {
+      const firstKey = cache.keys().next().value;
       if (!firstKey) {
         break;
       }
-      this.stampCache.delete(firstKey);
+      cache.delete(firstKey);
     }
   }
 
-  private createCrayonStamp(
+  private createCrayonMask(
     radius: number,
     grainRatio: number,
     stretchRatio: number,
@@ -73,11 +70,11 @@ export class NormalPen implements PenTool {
     hasDirection: boolean,
     seedBucket: number,
   ): HTMLCanvasElement {
-    const key = this.getStampKey(radius, grainRatio, stretchRatio, dirX, dirY, hasDirection, seedBucket);
-    const cached = this.stampCache.get(key);
+    const key = this.getMaskKey(radius, grainRatio, stretchRatio, dirX, dirY, hasDirection, seedBucket);
+    const cached = this.maskCache.get(key);
     if (cached) {
-      this.stampCache.delete(key);
-      this.stampCache.set(key, cached);
+      this.maskCache.delete(key);
+      this.maskCache.set(key, cached);
       return cached;
     }
 
@@ -95,7 +92,7 @@ export class NormalPen implements PenTool {
 
     const drawGlow = (cx: number, cy: number, r: number, alpha: number) => {
       const grad = c.createRadialGradient(cx, cy, 1, cx, cy, r);
-      grad.addColorStop(0.1, colorToString(app.penColor, alpha));
+      grad.addColorStop(0.1, `rgba(255,255,255,${alpha})`);
       grad.addColorStop(1, "rgba(0, 0, 0, 0)");
       c.fillStyle = grad;
       c.beginPath();
@@ -255,8 +252,36 @@ export class NormalPen implements PenTool {
     }
 
     c.putImageData(image, 0, 0);
-    this.stampCache.set(key, canvas);
-    this.trimStampCache();
+    this.maskCache.set(key, canvas);
+    this.trimCache(this.maskCache, 48);
+    return canvas;
+  }
+
+  private createColoredStamp(mask: HTMLCanvasElement, maskKey: string): HTMLCanvasElement {
+    const colorKey = `${maskKey}:${colorToOpaqueString(app.penColor)}`;
+    const cached = this.stampCache.get(colorKey);
+    if (cached) {
+      this.stampCache.delete(colorKey);
+      this.stampCache.set(colorKey, cached);
+      return cached;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = mask.width;
+    canvas.height = mask.height;
+    const c = canvas.getContext("2d");
+    if (!c) {
+      return canvas;
+    }
+
+    c.drawImage(mask, 0, 0);
+    c.globalCompositeOperation = "source-in";
+    c.fillStyle = colorToOpaqueString(app.penColor);
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    c.globalCompositeOperation = "source-over";
+
+    this.stampCache.set(colorKey, canvas);
+    this.trimCache(this.stampCache, 96);
     return canvas;
   }
 
@@ -291,9 +316,10 @@ export class NormalPen implements PenTool {
     if (previous) {
       const dx = x - previous.x;
       const dy = y - previous.y;
-      const dist = Math.hypot(dx, dy);
+      const distSq = dx * dx + dy * dy;
       const jumpThreshold = Math.max(28, app.penSize * 10);
-      if (dist > 0.001 && dist < jumpThreshold) {
+      if (distSq > 0.000001 && distSq < jumpThreshold * jumpThreshold) {
+        const dist = Math.sqrt(distSq);
         dirX = dx / dist;
         dirY = dy / dist;
         hasDirection = true;
@@ -304,7 +330,7 @@ export class NormalPen implements PenTool {
     const stretchRatio = Math.min(1, stretch / 100);
     const seedCell = Math.max(24, app.penSize * 0.85);
     const seedBucket = ((Math.floor(x / seedCell) + Math.floor(y / seedCell)) % 4 + 4) % 4;
-    const stamp = this.createCrayonStamp(
+    const maskKey = this.getMaskKey(
       app.penSize,
       grainRatio,
       stretchRatio,
@@ -313,6 +339,16 @@ export class NormalPen implements PenTool {
       hasDirection,
       seedBucket,
     );
+    const mask = this.createCrayonMask(
+      app.penSize,
+      grainRatio,
+      stretchRatio,
+      dirX,
+      dirY,
+      hasDirection,
+      seedBucket,
+    );
+    const stamp = this.createColoredStamp(mask, maskKey);
     const c = requireMainContext();
     c.drawImage(stamp, x - stamp.width / 2, y - stamp.height / 2);
 

@@ -12,5 +12,8 @@ export function isOutOfBounds(pos: Point, alpha: number): boolean {
 }
 
 export function tail<T>(items: T[], count: number): T[] {
-  return items.length <= count ? items : items.slice(items.length - count);
+  if (items.length > count) {
+    items.splice(0, items.length - count);
+  }
+  return items;
 }

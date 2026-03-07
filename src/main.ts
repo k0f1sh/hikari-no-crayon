@@ -6,6 +6,8 @@ import { createPenTools, defaultPenName, defaultPenColor } from "./tools";
 import { bindUiEvents } from "./ui/bindings";
 import { captureHistorySnapshot, resetHistory } from "./core/history";
 import { renderHud } from "./core/hud";
+import { stepEffectsInPlace } from "./core/effects";
+import { forEachSymmetryPoint } from "./core/symmetry";
 
 function initCanvas(): void {
   app.width = window.innerWidth;
@@ -58,24 +60,9 @@ function renderLoop(): void {
       } else {
         const centerX = app.width * app.symmetryOriginX;
         const centerY = app.height * app.symmetryOriginY;
-        const dx = x - centerX;
-        const dy = y - centerY;
-        const count = Math.max(1, app.symmetryCount);
-
-        for (let i = 0; i < count; i += 1) {
-          const angle = (Math.PI * 2 * i) / count;
-          const cos = Math.cos(angle);
-          const sin = Math.sin(angle);
-          const rx = dx * cos - dy * sin;
-          const ry = dx * sin + dy * cos;
-          app.penTool.draw(centerX + rx, centerY + ry);
-
-          if (app.symmetryType === "mirror") {
-            const mx = dx * cos + dy * sin;
-            const my = dx * sin - dy * cos;
-            app.penTool.draw(centerX + mx, centerY + my);
-          }
-        }
+        forEachSymmetryPoint(x, y, centerX, centerY, app.symmetryCount, app.symmetryType, (px, py) => {
+          app.penTool?.draw(px, py);
+        });
       }
     }
   }
@@ -84,11 +71,7 @@ function renderLoop(): void {
     app.penColor = hsvToRgb((app.count % 60) * 6, app.rainbowSaturation, app.rainbowBrightness);
   }
 
-  app.effects.forEach((effect) => {
-    effect.move();
-    effect.render();
-  });
-  app.effects = app.effects.filter((effect) => !effect.delFlg);
+  stepEffectsInPlace(app.effects);
 
   renderHud();
   window.requestAnimationFrame(renderLoop);

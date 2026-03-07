@@ -1,4 +1,5 @@
 import { app, requireHudContext } from "./state";
+import { getSymmetryTransforms } from "./symmetry";
 
 type TurtleCursorState = {
   x: number;
@@ -9,6 +10,7 @@ type TurtleCursorState = {
 };
 
 let turtleCursorState: TurtleCursorState | null = null;
+let lastHudSignature: string | null = null;
 
 export function setHudTurtleCursor(state: TurtleCursorState | null): void {
   turtleCursorState = state;
@@ -24,17 +26,16 @@ function drawSymmetryAxes(): void {
   const centerX = app.width * app.symmetryOriginX;
   const centerY = app.height * app.symmetryOriginY;
   const radius = Math.sqrt(centerX * centerX + centerY * centerY);
-  const count = Math.max(1, app.symmetryCount);
+  const transforms = getSymmetryTransforms(app.symmetryCount);
 
   hud.save();
   hud.strokeStyle = "rgba(118, 246, 208, 0.45)";
   hud.lineWidth = 1;
   hud.setLineDash([8, 8]);
 
-  for (let i = 0; i < count; i += 1) {
-    const angle = (Math.PI * 2 * i) / count;
-    const dx = Math.cos(angle) * radius;
-    const dy = Math.sin(angle) * radius;
+  for (const { cos, sin } of transforms) {
+    const dx = cos * radius;
+    const dy = sin * radius;
 
     hud.beginPath();
     hud.moveTo(centerX - dx, centerY - dy);
@@ -42,9 +43,8 @@ function drawSymmetryAxes(): void {
     hud.stroke();
 
     if (app.symmetryType === "mirror") {
-      const mAngle = angle + Math.PI / 2;
-      const mdx = Math.cos(mAngle) * radius;
-      const mdy = Math.sin(mAngle) * radius;
+      const mdx = -sin * radius;
+      const mdy = cos * radius;
       hud.beginPath();
       hud.moveTo(centerX - mdx, centerY - mdy);
       hud.lineTo(centerX + mdx, centerY + mdy);
@@ -134,7 +134,39 @@ function drawTurtleCursor(): void {
   hud.restore();
 }
 
+function getHudSignature(): string | null {
+  const showSymmetry = app.isSymmetryMode && app.isSymmetryHudVisible;
+  const showTurtle = turtleCursorState !== null;
+  if (!showSymmetry && !showTurtle) {
+    return null;
+  }
+
+  const parts = [`${app.width}:${app.height}`];
+  if (showSymmetry) {
+    parts.push(`s:${app.symmetryType}:${app.symmetryCount}:${app.symmetryOriginX}:${app.symmetryOriginY}`);
+  }
+  if (turtleCursorState) {
+    parts.push(
+      `t:${turtleCursorState.x}:${turtleCursorState.y}:${turtleCursorState.angle}:${turtleCursorState.walkPhase}:${turtleCursorState.isMoving ? 1 : 0}`,
+    );
+  }
+  return parts.join("|");
+}
+
 export function renderHud(): void {
+  const signature = getHudSignature();
+  if (signature === lastHudSignature) {
+    return;
+  }
+
+  if (!signature) {
+    if (lastHudSignature !== null) {
+      clearHud();
+      lastHudSignature = null;
+    }
+    return;
+  }
+
   clearHud();
 
   if (app.isSymmetryMode && app.isSymmetryHudVisible) {
@@ -142,4 +174,5 @@ export function renderHud(): void {
   }
 
   drawTurtleCursor();
+  lastHudSignature = signature;
 }

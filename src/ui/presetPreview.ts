@@ -1,6 +1,8 @@
 import { app } from "../core/state";
 import { hexToRgb, hsvToRgb, colorToString } from "../core/color";
 import { getDrawCompositeOperation } from "../core/draw";
+import { stepEffectsInPlace } from "../core/effects";
+import { forEachSymmetryPoint } from "../core/symmetry";
 import { sampleSvgPathPoints, fitPointsToCanvas } from "../core/svgPathTrace";
 import type { Color, Effect, Point, PenTool } from "../types";
 
@@ -28,11 +30,21 @@ export type SimplePresetConfig = {
 interface PreviewState {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  config: PreparedPreviewConfig;
   effects: Effect[];
   count: number;
   pathPoints: Point[] | null;
   pathIndex: number;
 }
+
+type PreparedPreviewConfig = {
+  source: SimplePresetConfig;
+  penTool: PenTool | null;
+  penColor: Color;
+  centerX: number;
+  centerY: number;
+  margin: number;
+};
 
 type AppSnapshot = {
   canvas: HTMLCanvasElement | null;
@@ -132,11 +144,12 @@ function getPathPoints(): Point[] {
   return cachedPathPoints;
 }
 
-function renderPreviewFrame(
-  config: SimplePresetConfig,
-  preview: PreviewState,
-): void {
+function renderPreviewFrame(preview: PreviewState): void {
+  const { config } = preview;
   const snapshot = saveAppState();
+  const originalLifeSnapToGrid = snapshot.penCustomParams.life_pen?.snap_to_grid;
+  const originalNormalUseCrayonTexture = snapshot.penCustomParams.normal_pen?.use_crayon_texture;
+
   try {
     const scale = PREVIEW_SIZE / REFERENCE_SIZE;
 
@@ -144,57 +157,48 @@ function renderPreviewFrame(
     app.c = preview.ctx;
     app.width = PREVIEW_SIZE;
     app.height = PREVIEW_SIZE;
-    app.penSize = Math.max(1, config.size * scale);
-    app.penColor = hexToRgb(config.colorHex);
-    app.penTool = app.penTools[config.pen] ?? null;
-    app.selectedPenName = config.pen;
+    app.penSize = Math.max(1, config.source.size * scale);
+    app.penColor = config.penColor;
+    app.penTool = config.penTool;
+    app.selectedPenName = config.source.pen;
     app.effects = preview.effects;
     app.count = preview.count;
-    app.isRainbowMode = config.rainbowMode;
-    app.rainbowSaturation = config.rainbowSaturation;
-    app.rainbowBrightness = config.rainbowBrightness;
-    app.isFadeMode = config.fadeMode;
+    app.isRainbowMode = config.source.rainbowMode;
+    app.rainbowSaturation = config.source.rainbowSaturation;
+    app.rainbowBrightness = config.source.rainbowBrightness;
+    app.isFadeMode = config.source.fadeMode;
     app.isAutoMode = true;
-    app.isYamiMode = config.yamiMode;
-    app.yamiStrength = config.yamiStrength;
-    app.isSymmetryMode = config.symmetryMode;
-    app.symmetryType = config.symmetryType;
-    app.symmetryCount = config.symmetryCount;
-    app.symmetryOriginX = config.symmetryOriginX / 100;
-    app.symmetryOriginY = config.symmetryOriginY / 100;
-    app.margin = Math.max(2, 40 * scale);
+    app.isYamiMode = config.source.yamiMode;
+    app.yamiStrength = config.source.yamiStrength;
+    app.isSymmetryMode = config.source.symmetryMode;
+    app.symmetryType = config.source.symmetryType;
+    app.symmetryCount = config.source.symmetryCount;
+    app.symmetryOriginX = config.source.symmetryOriginX / 100;
+    app.symmetryOriginY = config.source.symmetryOriginY / 100;
+    app.margin = config.margin;
 
-    if (typeof config.lifeSnapToGrid === "boolean") {
-      app.penCustomParams = {
-        ...snapshot.penCustomParams,
-        life_pen: { ...snapshot.penCustomParams.life_pen, snap_to_grid: config.lifeSnapToGrid },
-      };
+    if (typeof config.source.lifeSnapToGrid === "boolean" && app.penCustomParams.life_pen) {
+      app.penCustomParams.life_pen.snap_to_grid = config.source.lifeSnapToGrid;
     }
 
-    if (typeof config.normalUseCrayonTexture === "boolean") {
-      app.penCustomParams = {
-        ...app.penCustomParams,
-        normal_pen: {
-          ...app.penCustomParams.normal_pen,
-          use_crayon_texture: config.normalUseCrayonTexture,
-        },
-      };
+    if (typeof config.source.normalUseCrayonTexture === "boolean" && app.penCustomParams.normal_pen) {
+      app.penCustomParams.normal_pen.use_crayon_texture = config.source.normalUseCrayonTexture;
     }
 
     preview.count += 1;
     app.count = preview.count;
 
     // Rainbow color cycling
-    if (config.rainbowMode) {
+    if (config.source.rainbowMode) {
       app.penColor = hsvToRgb(
         (preview.count % 60) * 6,
-        config.rainbowSaturation,
-        config.rainbowBrightness,
+        config.source.rainbowSaturation,
+        config.source.rainbowBrightness,
       );
     }
 
     // Fade mode
-    if (config.fadeMode) {
+    if (config.source.fadeMode) {
       app.c!.globalCompositeOperation = "source-over";
       app.c!.fillStyle = colorToString({ r: 0, g: 0, b: 0 }, 0.05);
       app.c!.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
@@ -208,12 +212,10 @@ function renderPreviewFrame(
       let x: number;
       let y: number;
 
-      if (config.autoMode && preview.pathPoints) {
-        // Auto-mode presets: random positions
+      if (config.source.autoMode) {
         x = Math.floor(Math.random() * PREVIEW_SIZE);
         y = Math.floor(Math.random() * PREVIEW_SIZE);
       } else if (preview.pathPoints) {
-        // Non-auto presets: trace S-curve path, shift x each loop
         const len = preview.pathPoints.length;
         const loop = Math.floor(preview.pathIndex / len);
         const pt = preview.pathPoints[preview.pathIndex % len];
@@ -226,44 +228,37 @@ function renderPreviewFrame(
         y = Math.floor(Math.random() * PREVIEW_SIZE);
       }
 
-      if (!config.symmetryMode) {
+      if (!config.source.symmetryMode) {
         app.penTool.draw(x, y);
       } else {
-        const centerX = PREVIEW_SIZE * (config.symmetryOriginX / 100);
-        const centerY = PREVIEW_SIZE * (config.symmetryOriginY / 100);
-        const dx = x - centerX;
-        const dy = y - centerY;
-        const count = Math.max(1, config.symmetryCount);
-
-        for (let i = 0; i < count; i += 1) {
-          const angle = (Math.PI * 2 * i) / count;
-          const cos = Math.cos(angle);
-          const sin = Math.sin(angle);
-          app.penTool.draw(centerX + dx * cos - dy * sin, centerY + dx * sin + dy * cos);
-
-          if (config.symmetryType === "mirror") {
-            app.penTool.draw(centerX + dx * cos + dy * sin, centerY + dx * sin - dy * cos);
-          }
-        }
+        forEachSymmetryPoint(
+          x,
+          y,
+          config.centerX,
+          config.centerY,
+          config.source.symmetryCount,
+          config.source.symmetryType,
+          (px, py) => {
+            app.penTool?.draw(px, py);
+          },
+        );
       }
     }
 
-    // Process effects
-    preview.effects.forEach((effect) => {
-      effect.move();
-      effect.render();
-    });
-    preview.effects = preview.effects.filter((e) => !e.delFlg);
-    if (preview.effects.length > MAX_EFFECTS) {
-      preview.effects = preview.effects.slice(-MAX_EFFECTS);
-    }
+    stepEffectsInPlace(preview.effects, MAX_EFFECTS);
     app.effects = preview.effects;
   } finally {
+    if (originalLifeSnapToGrid !== undefined && snapshot.penCustomParams.life_pen) {
+      snapshot.penCustomParams.life_pen.snap_to_grid = originalLifeSnapToGrid;
+    }
+    if (originalNormalUseCrayonTexture !== undefined && snapshot.penCustomParams.normal_pen) {
+      snapshot.penCustomParams.normal_pen.use_crayon_texture = originalNormalUseCrayonTexture;
+    }
     restoreAppState(snapshot);
   }
 }
 
-let previewAnimId: number | null = null;
+let previewTimerId: number | null = null;
 let previewStates: Map<string, PreviewState> | null = null;
 
 export function startPreviewAnimations(
@@ -297,6 +292,14 @@ export function startPreviewAnimations(
     previewStates.set(key, {
       canvas,
       ctx,
+      config: {
+        source: config,
+        penTool: app.penTools[config.pen] ?? null,
+        penColor: hexToRgb(config.colorHex),
+        centerX: PREVIEW_SIZE * (config.symmetryOriginX / 100),
+        centerY: PREVIEW_SIZE * (config.symmetryOriginY / 100),
+        margin: Math.max(2, 40 * (PREVIEW_SIZE / REFERENCE_SIZE)),
+      },
       effects: [],
       count: 0,
       pathPoints: config.autoMode ? null : getPathPoints(),
@@ -304,26 +307,20 @@ export function startPreviewAnimations(
     });
   }
 
-  let frameSkip = 0;
-  function tick() {
-    frameSkip += 1;
-    if (frameSkip % 4 === 0 && previewStates) {
-      for (const [key, preview] of previewStates) {
-        const config = configs[key];
-        if (config) {
-          renderPreviewFrame(config, preview);
-        }
-      }
+  previewTimerId = window.setInterval(() => {
+    if (!previewStates) {
+      return;
     }
-    previewAnimId = requestAnimationFrame(tick);
-  }
-  previewAnimId = requestAnimationFrame(tick);
+    for (const preview of previewStates.values()) {
+      renderPreviewFrame(preview);
+    }
+  }, Math.round(1000 / 15));
 }
 
 export function stopPreviewAnimations(): void {
-  if (previewAnimId !== null) {
-    cancelAnimationFrame(previewAnimId);
-    previewAnimId = null;
+  if (previewTimerId !== null) {
+    window.clearInterval(previewTimerId);
+    previewTimerId = null;
   }
   if (previewStates) {
     for (const preview of previewStates.values()) {

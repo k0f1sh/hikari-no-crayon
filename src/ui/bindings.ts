@@ -32,6 +32,7 @@ import { exportPng } from "../core/export";
 import { PEN_CATALOG } from "../tools/penCatalog";
 import { startPreviewAnimations, stopPreviewAnimations } from "./presetPreview";
 import { setHudTurtleCursor } from "../core/hud";
+import { forEachSymmetryPoint } from "../core/symmetry";
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id) as T | null;
@@ -544,24 +545,9 @@ export function bindUiEvents(): void {
 
     const centerX = app.width * app.symmetryOriginX;
     const centerY = app.height * app.symmetryOriginY;
-    const dx = x - centerX;
-    const dy = y - centerY;
-    const count = Math.max(1, app.symmetryCount);
-
-    for (let i = 0; i < count; i += 1) {
-      const angle = (Math.PI * 2 * i) / count;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      const rx = dx * cos - dy * sin;
-      const ry = dx * sin + dy * cos;
-      app.penTool.draw(centerX + rx, centerY + ry);
-
-      if (app.symmetryType === "mirror") {
-        const mx = dx * cos + dy * sin;
-        const my = dx * sin - dy * cos;
-        app.penTool.draw(centerX + mx, centerY + my);
-      }
-    }
+    forEachSymmetryPoint(x, y, centerX, centerY, app.symmetryCount, app.symmetryType, (px, py) => {
+      app.penTool?.draw(px, py);
+    });
   };
 
   const drawWithSymmetryForPointer = (pointerId: number | null, x: number, y: number) => {
@@ -792,6 +778,34 @@ export function bindUiEvents(): void {
     if (colorPicker.value !== currentHex) {
       colorPicker.value = currentHex;
     }
+  };
+  let dockColorPreviewFrameId: number | null = null;
+  const stopDockColorPreviewSync = () => {
+    if (dockColorPreviewFrameId !== null) {
+      window.cancelAnimationFrame(dockColorPreviewFrameId);
+      dockColorPreviewFrameId = null;
+    }
+  };
+  const startDockColorPreviewSync = () => {
+    if (!app.isRainbowMode) {
+      stopDockColorPreviewSync();
+      return;
+    }
+    if (dockColorPreviewFrameId !== null) {
+      return;
+    }
+
+    const tick = () => {
+      dockColorPreviewFrameId = null;
+      if (!app.isRainbowMode) {
+        return;
+      }
+      syncDockColorPreview();
+      dockColorPreviewFrameId = window.requestAnimationFrame(tick);
+    };
+
+    syncDockColorPreview();
+    dockColorPreviewFrameId = window.requestAnimationFrame(tick);
   };
 
   type SimplePresetKey =
@@ -1033,6 +1047,7 @@ export function bindUiEvents(): void {
     applyRainbowSaturation(preset.rainbowSaturation);
     applyRainbowBrightness(preset.rainbowBrightness);
     updateRainbowControlsState();
+    startDockColorPreviewSync();
 
     app.isFadeMode = preset.fadeMode;
     applyFadeStrength(preset.fadeStrength);
@@ -1331,6 +1346,7 @@ export function bindUiEvents(): void {
     app.isRainbowMode = !app.isRainbowMode;
     updateRainbowControlsState();
     updateModeDockValue();
+    startDockColorPreviewSync();
     if (!app.isRainbowMode && activePanelId === "ml") {
       closePanels();
     }
@@ -1997,7 +2013,7 @@ export function bindUiEvents(): void {
             break;
           }
           hasAnyPoint = true;
-          const event = next.value;
+          const event = next.value as TurtleTraceEvent;
           if (event.kind === "set_size") {
             const { uiSize, effectiveSize } = normalizePenSize(Number.isFinite(event.size) ? event.size : 30);
             app.penSize = effectiveSize;
@@ -2604,11 +2620,7 @@ export function bindUiEvents(): void {
   canvas.style.touchAction = "none";
   window.addEventListener("resize", updateRecordFrameHud);
 
-  const previewLoop = () => {
-    syncDockColorPreview();
-    window.requestAnimationFrame(previewLoop);
-  };
-  window.requestAnimationFrame(previewLoop);
+  startDockColorPreviewSync();
   const activePointerIds = new Set<number>();
   const lastStrokePoints = new Map<number, { x: number; y: number }>();
 
@@ -2718,6 +2730,7 @@ export function bindUiEvents(): void {
       applyRainbowSaturation(settings.rainbowSaturation);
       applyRainbowBrightness(settings.rainbowBrightness);
       updateRainbowControlsState();
+      startDockColorPreviewSync();
 
       app.isFadeMode = settings.fadeMode;
       applyFadeStrength(settings.fadeStrength);
